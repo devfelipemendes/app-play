@@ -1,17 +1,17 @@
-import React, { useContext, useEffect } from "react";
-import { VStack } from "@/components/ui/vstack";
-import DaysCard from "@/components/screens/weather/days-card";
-import Animated, { FadeInDown } from "react-native-reanimated";
-import { DailyForecastData } from "@/data/screens/weather/days-tab";
-import { WeatherTabContext } from "@/contexts/weather-screen-context";
+import React, { useContext, useEffect } from 'react'
+import { VStack } from '@/components/ui/vstack'
+import DaysCard from '@/components/screens/weather/days-card'
+import Animated, { FadeInDown } from 'react-native-reanimated'
+import { DailyForecastData } from '@/data/screens/weather/days-tab'
+import { WeatherTabContext } from '@/contexts/weather-screen-context'
 
 const Days = () => {
-  const { hasDaysTabAnimated }: any = useContext(WeatherTabContext);
-  const AnimatedVStack = Animated.createAnimatedComponent(VStack);
+  const { hasDaysTabAnimated }: any = useContext(WeatherTabContext)
+  const AnimatedVStack = Animated.createAnimatedComponent(VStack)
 
   useEffect(() => {
-    hasDaysTabAnimated.current = true;
-  }, []);
+    hasDaysTabAnimated.current = true
+  }, [])
 
   return (
     <AnimatedVStack space="md" className="px-5 pb-5">
@@ -35,10 +35,10 @@ const Days = () => {
               imgUrl={day.imgUrl}
             />
           </Animated.View>
-        );
+        )
       })}
     </AnimatedVStack>
-  );
-};
+  )
+}
 
-export default Days;
+export default Days
