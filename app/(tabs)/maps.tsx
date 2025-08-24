@@ -2,8 +2,9 @@ import React, { useState } from 'react'
 
 import { ListFilter, Search } from 'lucide-react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import Map from '@/components/screens/maps/current-location-map/index'
-import { VStack } from '@/components/ui/vstack'
+import Map from '../../components/screens/maps/current-location-map/index'
+
+import { VStack } from '../../components/ui/vstack/index'
 import { HStack } from '@/components/ui/hstack'
 import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input'
 import { Pressable } from '@/components/ui/pressable'
