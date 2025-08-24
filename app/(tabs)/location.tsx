@@ -1,14 +1,13 @@
-import React, { useState } from 'react'
-
-import LocationCard from '@/components/screens/location/location-card'
-import { ScrollView } from '@/components/ui/scroll-view'
-import Animated, { FadeInUp } from 'react-native-reanimated'
-import { CitiesWeatherData } from '@/data/screens/location'
-import CustomHeader from '@/components/shared/custom-header'
-import { VStack } from '@/components/ui/vstack'
+import React, { useState } from "react";
+import { VStack } from "@/components/ui/vstack";
+import LocationCard from "@/components/screens/location/location-card";
+import { ScrollView } from "@/components/ui/scroll-view";
+import Animated, { FadeInUp } from "react-native-reanimated";
+import { CitiesWeatherData } from "@/data/screens/location";
+import CustomHeader from "@/components/shared/custom-header";
 
 const Location = () => {
-  const [selectedCard, setSelectedCard] = useState<number>(1)
+  const [selectedCard, setSelectedCard] = useState<number>(1);
 
   return (
     <VStack space="md" className="flex-1 bg-background-0">
@@ -43,11 +42,11 @@ const Location = () => {
                 setSelectedCard={setSelectedCard}
               />
             </Animated.View>
-          )
+          );
         })}
       </ScrollView>
     </VStack>
-  )
-}
+  );
+};
 
-export default Location
+export default Location;

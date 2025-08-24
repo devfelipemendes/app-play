@@ -1,16 +1,16 @@
-import { Box } from '@/components/ui/box'
-import { Heading } from '@/components/ui/heading'
-import { Image } from '@/components/ui/image'
-import { Link, LinkText } from '@/components/ui/link'
-import { Text } from '@/components/ui/text'
-import { Stack } from 'expo-router'
-import React from 'react'
-import { ScrollView } from 'react-native'
+import React from "react";
+import { ScrollView } from "react-native";
+import { Stack } from "expo-router";
+import { Box } from "@/components/ui/box";
+import { Heading } from "@/components/ui/heading";
+import { Image } from "@/components/ui/image";
+import { Link, LinkText } from "@/components/ui/link";
+import { Text } from "@/components/ui/text";
 
 export default function NotFoundScreen() {
   return (
     <>
-      <Stack.Screen options={{ title: 'Oops!' }} />
+      <Stack.Screen options={{ title: "Oops!" }} />
       <ScrollView
         contentContainerStyle={{
           flexGrow: 1,
@@ -19,7 +19,7 @@ export default function NotFoundScreen() {
       >
         <Box className="px-4 pt-8 pb-4 md:pt-10 md:pb-8 md:rounded-sm md:px-[140px] bg-background-0 flex-1 items-center">
           <Image
-            source={require('@/assets/images/404.png')}
+            source={require("assets/images/404.png")}
             alt="404 page"
             className="h-96 w-[422px] md:mt-16"
           />
@@ -38,5 +38,5 @@ export default function NotFoundScreen() {
         </Box>
       </ScrollView>
     </>
-  )
+  );
 }
