@@ -1,33 +1,33 @@
-import React, { useContext, useEffect } from "react";
-import { VStack } from "@/components/ui/vstack";
-import { CloudRain } from "lucide-react-native";
-import { ClockIcon, Icon } from "@/components/ui/icon";
-import { HStack } from "@/components/ui/hstack";
-import HourlyCard from "@/components/screens/weather/hourly-card";
-import { Box } from "@/components/ui/box";
-import { Text } from "@/components/ui/text";
-import ForeCastCard from "@/components/screens/weather/forecast-card";
-import RainCard from "@/components/screens/weather/rain-card";
-import Chart from "@/components/screens/weather/chart";
-import { ScrollView } from "@/components/ui/scroll-view";
-import { WeatherTabContext } from "@/contexts/weather-screen-context";
+import React, { useContext, useEffect } from 'react'
+import { VStack } from '@/components/ui/vstack'
+import { CloudRain } from 'lucide-react-native'
+import { ClockIcon, Icon } from '@/components/ui/icon'
+import { HStack } from '@/components/ui/hstack'
+import HourlyCard from '@/components/screens/weather/hourly-card'
+import { Box } from '@/components/ui/box'
+import { Text } from '@/components/ui/text'
+import ForeCastCard from '@/components/screens/weather/forecast-card'
+import RainCard from '@/components/screens/weather/rain-card'
+import Chart from '@/components/screens/weather/chart'
+import { ScrollView } from '@/components/ui/scroll-view'
+import { WeatherTabContext } from '@/contexts/weather-screen-context'
 import {
   WindAndPrecipitationData,
   PressureAndUVIndexData,
   HourlyForecastData,
   RainPredictionData,
   SunriseAndSunsetData,
-} from "@/data/screens/weather/hourly-tab";
-import Animated, { FadeInDown } from "react-native-reanimated";
+} from '@/data/screens/weather/hourly-tab'
+import Animated, { FadeInDown } from 'react-native-reanimated'
 
 const Hourly = () => {
   const { childRefs, hasHourlyTabChild1Animated }: any =
-    useContext(WeatherTabContext);
-  const AnimatedVStack = Animated.createAnimatedComponent(VStack);
+    useContext(WeatherTabContext)
+  const AnimatedVStack = Animated.createAnimatedComponent(VStack)
 
   useEffect(() => {
-    hasHourlyTabChild1Animated.current = true;
-  }, []);
+    hasHourlyTabChild1Animated.current = true
+  }, [])
 
   return (
     <VStack space="md" className="px-4 pb-5 bg-background-0">
@@ -53,7 +53,7 @@ const Hourly = () => {
                   arrowDownIcon={card.arrowDownIcon}
                   arrowUpIcon={card.arrowUpIcon}
                 />
-              );
+              )
             })}
           </HStack>
         </Animated.View>
@@ -79,7 +79,7 @@ const Hourly = () => {
                   arrowDownIcon={card.arrowDownIcon}
                   arrowUpIcon={card.arrowUpIcon}
                 />
-              );
+              )
             })}
           </HStack>
         </Animated.View>
@@ -92,7 +92,7 @@ const Hourly = () => {
             <Icon as={ClockIcon} className="text-typography-400" size="sm" />
           </Box>
           <Text className="font-dm-sans-regular text-typography-400">
-            Hourly forecast
+            Consumo diário
           </Text>
         </HStack>
 
@@ -110,7 +110,7 @@ const Hourly = () => {
                 imgUrl={card.imgUrl}
                 temperature={card.temperature}
               />
-            );
+            )
           })}
         </ScrollView>
       </VStack>
@@ -120,7 +120,7 @@ const Hourly = () => {
       <Chart chartRef={childRefs[0].ref} />
 
       {/* ---------------------------- Chance of rain ---------------------------- */}
-      <VStack
+      {/* <VStack
         className="p-3 rounded-2xl bg-background-100 gap-3"
         ref={childRefs[1].ref}
       >
@@ -137,12 +137,12 @@ const Hourly = () => {
           {RainPredictionData.map((card: any) => {
             return (
               <RainCard key={card.id} time={card.time} value={card.value} />
-            );
+            )
           })}
         </VStack>
-      </VStack>
+      </VStack> */}
 
-      <HStack space="md">
+      {/* <HStack space="md">
         {SunriseAndSunsetData.map((card: any) => {
           return (
             <HourlyCard
@@ -152,11 +152,11 @@ const Hourly = () => {
               currentUpdate={card.currentUpdate}
               lastUpdate={card.lastUpdate}
             />
-          );
+          )
         })}
-      </HStack>
+      </HStack> */}
     </VStack>
-  );
-};
+  )
+}
 
-export default Hourly;
+export default Hourly

@@ -1,13 +1,13 @@
-import React from "react";
-import { Box } from "@/components/ui/box";
-import { VStack } from "@/components/ui/vstack";
-import { Text } from "@/components/ui/text";
-import { Image } from "@/components/ui/image";
+import React from 'react'
+import { Box } from '@/components/ui/box'
+import { VStack } from '@/components/ui/vstack'
+import { Text } from '@/components/ui/text'
+import { Image } from '@/components/ui/image'
 
 interface IForeCastCard {
-  time: string;
-  imgUrl: any;
-  temperature: number;
+  time: string
+  imgUrl: any
+  temperature: number
 }
 
 const ForeCastCard = ({ time, imgUrl, temperature }: IForeCastCard) => {
@@ -24,9 +24,11 @@ const ForeCastCard = ({ time, imgUrl, temperature }: IForeCastCard) => {
           contentFit="contain"
         />
       </Box>
-      <Text className="text-typography-900 font-dm-sans-regular">{temperature}°</Text>
+      <Text className="text-typography-900 font-dm-sans-regular">
+        {temperature}MB
+      </Text>
     </VStack>
-  );
-};
+  )
+}
 
-export default ForeCastCard;
+export default ForeCastCard

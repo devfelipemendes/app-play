@@ -1,18 +1,18 @@
-import React from "react";
-import { HStack } from "@/components/ui/hstack";
-import { VStack } from "@/components/ui/vstack";
-import { Text } from "@/components/ui/text";
-import { Divider } from "@/components/ui/divider";
-import { Box } from "@/components/ui/box";
-import { Image } from "@/components/ui/image";
-import { ChevronDownIcon, Icon } from "@/components/ui/icon";
+import React from 'react'
+import { HStack } from '@/components/ui/hstack'
+import { VStack } from '@/components/ui/vstack'
+import { Text } from '@/components/ui/text'
+import { Divider } from '@/components/ui/divider'
+import { Box } from '@/components/ui/box'
+import { Image } from '@/components/ui/image'
+import { ChevronDownIcon, Icon } from '@/components/ui/icon'
 
 interface IDaysCard {
-  name: string;
-  weather: string;
-  highest: number;
-  lowest: number;
-  imgUrl: any;
+  name: string
+  weather: string
+  highest: number
+  lowest: number
+  imgUrl: any
 }
 
 const DaysCard = ({ name, weather, highest, lowest, imgUrl }: IDaysCard) => {
@@ -28,10 +28,10 @@ const DaysCard = ({ name, weather, highest, lowest, imgUrl }: IDaysCard) => {
       <HStack space="sm" className="items-center">
         <VStack>
           <Text className="text-typography-700 text-right font-dm-sans-regular">
-            {highest}°
+            {highest}
           </Text>
           <Text className="text-typography-700 font-dm-sans-regular">
-            {lowest}°
+            R$ {lowest}
           </Text>
         </VStack>
         <Divider orientation="vertical" className="bg-outline-200" />
@@ -52,7 +52,7 @@ const DaysCard = ({ name, weather, highest, lowest, imgUrl }: IDaysCard) => {
         </Box>
       </HStack>
     </HStack>
-  );
-};
+  )
+}
 
-export default DaysCard;
+export default DaysCard
