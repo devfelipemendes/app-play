@@ -1,6 +1,7 @@
 import React, { useEffect, ReactNode } from 'react'
 import * as SplashScreen from 'expo-splash-screen'
-import { useAuth } from '../hooks/useAuth'
+import { useAppSelector, useAppDispatch } from '../hooks'
+import { setLoadingSystem } from '../slices/authSlice'
 
 // ✅ Previne o splash screen de ser escondido automaticamente
 SplashScreen.preventAutoHideAsync()
@@ -9,27 +10,26 @@ interface AuthProviderProps {
   children: ReactNode
 }
 
-// ✅ Provider que replica a lógica de inicialização do Context original
+// ✅ Provider simplificado - vamos implementar step-by-step
 export default function AuthProvider({ children }: AuthProviderProps) {
-  const { loadingSystem, getCompanyInfo } = useAuth()
+  const dispatch = useAppDispatch()
+  const { loadingSystem } = useAppSelector((state) => state.auth)
 
-  // ✅ Carrega todas as informações necessárias pro app funcionar antes de sair da SplashScreen
+  // ✅ Simulação simples de inicialização - FUNCIONAL
   const loadApp = async () => {
     try {
       console.log('🚀 Inicializando aplicação...')
 
-      if (getCompanyInfo) {
-        const companyInfoLoaded = await getCompanyInfo()
+      // Simular carregamento (2 segundos)
+      await new Promise((resolve) => setTimeout(resolve, 2000))
 
-        if (!companyInfoLoaded) {
-          console.warn('⚠️ Falha ao carregar informações da empresa')
-          return
-        }
-      }
+      // Por enquanto, apenas marcar como carregado
+      dispatch(setLoadingSystem(false))
 
       console.log('✅ Aplicação inicializada com sucesso')
     } catch (error) {
       console.error('❌ Erro ao inicializar aplicação:', error)
+      dispatch(setLoadingSystem(false))
     }
   }
 
@@ -55,6 +55,6 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     return null // Splash screen continua visível
   }
 
-  // ✅ Usar React.Fragment explícito em vez de <>
+  // ✅ Usar React.Fragment explícito
   return React.createElement(React.Fragment, null, children)
 }

@@ -4,19 +4,18 @@ import { Text } from '@/components/ui/text'
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs'
 import {
   WeatherIcon,
-  LocationIcon,
   MapsIcon,
-  SettingsIcon,
-  ActiveWeatherIcon,
-  ActiveLocationIcon,
+  UserIcon,
+  ActiveUserIcon,
   ActiveMapsIcon,
-  ActiveSettingsIcon,
+  ActivePlanoIcon,
+  PlanoIcon,
 } from '@/components/shared/icon'
 import { HStack } from '@/components/ui/hstack'
 import { Box } from '@/components/ui/box'
 import { Platform } from 'react-native'
 import { Icon } from '@/components/ui/icon'
-import { BaggageClaim, Home, Plane, PlayIcon } from 'lucide-react-native'
+import { Home, HomeIcon } from 'lucide-react-native'
 
 interface TabItem {
   name: string
@@ -31,7 +30,7 @@ const tabItems: TabItem[] = [
     name: '(weather)',
     label: 'Home',
     path: '(weather)',
-    inActiveIcon: WeatherIcon,
+    inActiveIcon: HomeIcon,
     icon: Home,
   },
 
@@ -39,8 +38,8 @@ const tabItems: TabItem[] = [
     name: 'location',
     label: 'Plano',
     path: 'location',
-    inActiveIcon: BaggageClaim,
-    icon: PlayIcon,
+    inActiveIcon: ActivePlanoIcon,
+    icon: PlanoIcon,
   },
   {
     name: 'maps',
@@ -51,10 +50,10 @@ const tabItems: TabItem[] = [
   },
   {
     name: 'settings',
-    label: 'Configurações',
+    label: 'Perfil',
     path: 'settings',
-    inActiveIcon: SettingsIcon,
-    icon: ActiveSettingsIcon,
+    inActiveIcon: UserIcon,
+    icon: ActiveUserIcon,
   },
 ]
 

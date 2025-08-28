@@ -1,7 +1,7 @@
 // ✅ Configurações de ambiente centralizadas
 export const env = {
   // TODO: Configurar valores reais
-  COMPANY_ID: 1,
+  COMPANY_ID: 46,
   ACCESS_TK: 'your_access_token_here',
   API_BASE_URL: 'https://sistema.playmovel.com.br',
 
