@@ -8,6 +8,9 @@ import { Box } from '@/components/ui/box'
 
 import { SafeAreaView } from '@/components/ui/safe-area-view'
 import { useAuth } from '@/src/store/hooks/useAuth'
+import { Image } from 'react-native'
+import IconLogo from '../../assets/AssetsPartners/adaptive-icon.png'
+import { CustomInput } from '@/components/layout/CustomInput'
 
 export default function LoginScreen() {
   const [cpf, setCpf] = useState('')
@@ -18,69 +21,258 @@ export default function LoginScreen() {
     if (!cpf || !password) {
       return alert('Preencha CPF e senha')
     }
-
     signIn(cpf, password, '0', '0', 'login', 'app')
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-background-0">
-      <VStack className="flex-1 px-6 justify-center" space="xl">
-        {/* Logo */}
-        <Box className="items-center mb-8">
-          <Text className="text-3xl font-bold text-typography-900">
-            MVNO App
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'black' }}>
+      {/* 20% - Área do logo */}
+      <Box
+        style={{
+          flex: 4,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: 'black',
+          position: 'relative',
+        }}
+      >
+        {/* Background pattern - Grid manual */}
+        <Box
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            opacity: 0.3,
+          }}
+        >
+          {/* Primeira linha */}
+          <HStack style={{ justifyContent: 'space-around', marginTop: 20 }}>
+            <Image
+              source={IconLogo}
+              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
+            />
+            <Image
+              source={IconLogo}
+              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
+            />
+            <Image
+              source={IconLogo}
+              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
+            />
+            <Image
+              source={IconLogo}
+              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
+            />
+          </HStack>
+
+          {/* Segunda linha */}
+          <HStack style={{ justifyContent: 'space-around', marginTop: 30 }}>
+            <Image
+              source={IconLogo}
+              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
+            />
+            <Image
+              source={IconLogo}
+              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
+            />
+            <Image
+              source={IconLogo}
+              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
+            />
+            <Image
+              source={IconLogo}
+              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
+            />
+          </HStack>
+
+          {/* Terceira linha */}
+          <HStack style={{ justifyContent: 'space-around', marginTop: 30 }}>
+            <Image
+              source={IconLogo}
+              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
+            />
+            <Image
+              source={IconLogo}
+              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
+            />
+            <Image
+              source={IconLogo}
+              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
+            />
+            <Image
+              source={IconLogo}
+              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
+            />
+          </HStack>
+          <HStack style={{ justifyContent: 'space-around', marginTop: 30 }}>
+            <Image
+              source={IconLogo}
+              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
+            />
+            <Image
+              source={IconLogo}
+              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
+            />
+            <Image
+              source={IconLogo}
+              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
+            />
+            <Image
+              source={IconLogo}
+              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
+            />
+          </HStack>
+          <HStack style={{ justifyContent: 'space-around', marginTop: 30 }}>
+            <Image
+              source={IconLogo}
+              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
+            />
+            <Image
+              source={IconLogo}
+              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
+            />
+            <Image
+              source={IconLogo}
+              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
+            />
+            <Image
+              source={IconLogo}
+              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
+            />
+          </HStack>
+          <HStack style={{ justifyContent: 'space-around', marginTop: 30 }}>
+            <Image
+              source={IconLogo}
+              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
+            />
+            <Image
+              source={IconLogo}
+              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
+            />
+            <Image
+              source={IconLogo}
+              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
+            />
+            <Image
+              source={IconLogo}
+              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
+            />
+          </HStack>
+          <HStack style={{ justifyContent: 'space-around', marginTop: 30 }}>
+            <Image
+              source={IconLogo}
+              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
+            />
+            <Image
+              source={IconLogo}
+              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
+            />
+            <Image
+              source={IconLogo}
+              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
+            />
+            <Image
+              source={IconLogo}
+              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
+            />
+          </HStack>
+        </Box>
+
+        {/* Logo principal */}
+        <Image
+          source={IconLogo}
+          style={{
+            width: 120,
+            height: 120,
+            zIndex: 1,
+          }}
+          resizeMode="contain"
+        />
+      </Box>
+
+      {/* 80% - Área do formulário */}
+      <Box
+        style={{
+          flex: 8,
+          paddingHorizontal: 24,
+          paddingTop: 32,
+          justifyContent: 'flex-start',
+          borderTopLeftRadius: 70,
+
+          backgroundColor: 'white',
+        }}
+      >
+        {/* Título Login */}
+        <Box style={{ marginBottom: 32, alignItems: 'center' }}>
+          <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#333' }}>
+            Bem vindo!
           </Text>
-          <Text className="text-sm text-typography-600 mt-2">
-            Sua operadora móvel
+          <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#333' }}>
+            À Melhor Operadora do Brasil
           </Text>
         </Box>
 
-        {/* Formulário */}
-        <VStack space="lg">
-          {/* CPF */}
-          <VStack space="sm">
-            <Text className="text-sm font-medium text-typography-700">
-              CPF/CNPJ
-            </Text>
-            <Input className="border-outline-300">
-              <InputField
-                placeholder="000.000.000-00"
-                value={cpf}
-                onChangeText={setCpf}
-                keyboardType="numeric"
-              />
-            </Input>
-          </VStack>
+        {/* CPF */}
+        <Box style={{ marginBottom: 20 }}>
+          <Text style={{ marginBottom: 8, fontSize: 14, color: '#666' }}>
+            CPF/CNPJ
+          </Text>
+          <CustomInput
+            placeholder="000.000.000-00"
+            value={cpf}
+            onChangeText={setCpf}
+          />
+        </Box>
 
-          {/* Senha */}
-          <VStack space="sm">
-            <Text className="text-sm font-medium text-typography-700">
-              Senha
-            </Text>
-            <Input className="border-outline-300">
-              <InputField
-                placeholder="Digite sua senha"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-              />
-            </Input>
-          </VStack>
+        {/* Senha */}
+        <Box style={{ marginBottom: 24 }}>
+          <Text style={{ marginBottom: 8, fontSize: 14, color: '#666' }}>
+            Senha
+          </Text>
+          <CustomInput
+            placeholder="Digite sua senha"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
+        </Box>
 
-          {/* Botão Login */}
-          <Button onPress={handleLogin} disabled={loadingAuth} className="mt-6">
-            <ButtonText>{loadingAuth ? 'Entrando...' : 'Entrar'}</ButtonText>
-          </Button>
+        {/* Botão Login */}
+        <Button
+          onPress={handleLogin}
+          style={{
+            borderRadius: 10,
 
-          {/* Links */}
-          <HStack className="justify-between mt-4">
-            <Text className="text-sm text-primary-600">
-              Esqueci minha senha
+            marginBottom: 24,
+          }}
+        >
+          <ButtonText
+            style={{ color: 'white', fontSize: 16, fontWeight: '600' }}
+          >
+            {loadingAuth ? 'Entrando...' : 'Login'}
+          </ButtonText>
+        </Button>
+
+        {/* Link para cadastro */}
+        <Box style={{ alignItems: 'center' }}>
+          <Text style={{ fontSize: 14, color: '#666' }}>
+            Ainda não possui uma conta?{' '}
+            <Text style={{ color: '#000', fontWeight: '600' }}>
+              Cadastre-se
             </Text>
-            <Text className="text-sm text-primary-600">Criar conta</Text>
-          </HStack>
-        </VStack>
-      </VStack>
+          </Text>
+        </Box>
+        <Box style={{ alignItems: 'center' }}>
+          <Text style={{ fontSize: 14, color: '#666' }}>
+            Esqueci minha Senha!{' '}
+            <Text style={{ color: '#000', fontWeight: '600' }}>
+              Cliquei aqui!
+            </Text>
+          </Text>
+        </Box>
+      </Box>
     </SafeAreaView>
   )
 }
