@@ -25,162 +25,21 @@ export default function LoginScreen() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: 'black' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#1c1c22' }}>
       {/* 20% - Área do logo */}
       <Box
         style={{
           flex: 4,
           justifyContent: 'center',
           alignItems: 'center',
-          backgroundColor: 'black',
+          backgroundColor: '#1c1c22',
           position: 'relative',
         }}
       >
         {/* Background pattern - Grid manual */}
-        <Box
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            opacity: 0.3,
-          }}
-        >
-          {/* Primeira linha */}
-          <HStack style={{ justifyContent: 'space-around', marginTop: 20 }}>
-            <Image
-              source={IconLogo}
-              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
-            />
-            <Image
-              source={IconLogo}
-              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
-            />
-            <Image
-              source={IconLogo}
-              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
-            />
-            <Image
-              source={IconLogo}
-              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
-            />
-          </HStack>
-
-          {/* Segunda linha */}
-          <HStack style={{ justifyContent: 'space-around', marginTop: 30 }}>
-            <Image
-              source={IconLogo}
-              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
-            />
-            <Image
-              source={IconLogo}
-              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
-            />
-            <Image
-              source={IconLogo}
-              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
-            />
-            <Image
-              source={IconLogo}
-              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
-            />
-          </HStack>
-
-          {/* Terceira linha */}
-          <HStack style={{ justifyContent: 'space-around', marginTop: 30 }}>
-            <Image
-              source={IconLogo}
-              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
-            />
-            <Image
-              source={IconLogo}
-              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
-            />
-            <Image
-              source={IconLogo}
-              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
-            />
-            <Image
-              source={IconLogo}
-              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
-            />
-          </HStack>
-          <HStack style={{ justifyContent: 'space-around', marginTop: 30 }}>
-            <Image
-              source={IconLogo}
-              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
-            />
-            <Image
-              source={IconLogo}
-              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
-            />
-            <Image
-              source={IconLogo}
-              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
-            />
-            <Image
-              source={IconLogo}
-              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
-            />
-          </HStack>
-          <HStack style={{ justifyContent: 'space-around', marginTop: 30 }}>
-            <Image
-              source={IconLogo}
-              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
-            />
-            <Image
-              source={IconLogo}
-              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
-            />
-            <Image
-              source={IconLogo}
-              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
-            />
-            <Image
-              source={IconLogo}
-              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
-            />
-          </HStack>
-          <HStack style={{ justifyContent: 'space-around', marginTop: 30 }}>
-            <Image
-              source={IconLogo}
-              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
-            />
-            <Image
-              source={IconLogo}
-              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
-            />
-            <Image
-              source={IconLogo}
-              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
-            />
-            <Image
-              source={IconLogo}
-              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
-            />
-          </HStack>
-          <HStack style={{ justifyContent: 'space-around', marginTop: 30 }}>
-            <Image
-              source={IconLogo}
-              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
-            />
-            <Image
-              source={IconLogo}
-              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
-            />
-            <Image
-              source={IconLogo}
-              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
-            />
-            <Image
-              source={IconLogo}
-              style={{ width: 30, height: 30, tintColor: '#e4e4e442' }}
-            />
-          </HStack>
-        </Box>
 
         {/* Logo principal */}
+
         <Image
           source={IconLogo}
           style={{

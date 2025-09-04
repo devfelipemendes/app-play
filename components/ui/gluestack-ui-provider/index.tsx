@@ -1,48 +1,46 @@
-import React from 'react';
-import { config } from './config';
-import { ColorSchemeName, useColorScheme, View, ViewProps } from 'react-native';
-import { OverlayProvider } from '@gluestack-ui/overlay';
-import { ToastProvider } from '@gluestack-ui/toast';
-import { colorScheme as colorSchemeNW } from 'nativewind';
+import { useTheme } from '@/contexts/theme-context'
+import { useMemo } from 'react'
+import { config } from '@gluestack-ui/config'
+import { GluestackUIProvider } from '@gluestack-ui/themed'
 
-type ModeType = 'light' | 'dark' | 'system';
+interface ThemeWrapperProps {
+  children: React.ReactNode
+}
 
-const getColorSchemeName = (
-  colorScheme: ColorSchemeName,
-  mode: ModeType
-): 'light' | 'dark' => {
-  if (mode === 'system') {
-    return colorScheme ?? 'light';
+export const ThemeWrapper: React.FC<ThemeWrapperProps> = ({ children }) => {
+  const { state } = useTheme()
+
+  // Criar configuração customizada baseada no tema carregado
+  const customConfig = useMemo(() => {
+    if (!state.theme) return config
+
+    // Aqui você pode customizar as cores do Gluestack baseado no tema
+    const customizedConfig = {
+      ...config,
+      tokens: {
+        ...config.tokens,
+        colors: {
+          ...config.tokens.colors,
+          primary: state.theme.colors.primary,
+          secondary: state.theme.colors.secondary,
+        },
+      },
+    }
+
+    return customizedConfig
+  }, [state.theme])
+
+  // Mostrar loading enquanto carrega o tema
+  if (state.isLoading) {
+    return (
+      <GluestackUIProvider config={config}>
+        {/* Aqui você pode colocar um componente de loading */}
+        {children}
+      </GluestackUIProvider>
+    )
   }
-  return mode;
-};
-
-export function GluestackUIProvider({
-  mode = 'light',
-  ...props
-}: {
-  mode?: 'light' | 'dark' | 'system';
-  children?: React.ReactNode;
-  style?: ViewProps['style'];
-}) {
-  const colorScheme = useColorScheme();
-
-  const colorSchemeName = getColorSchemeName(colorScheme, mode);
-
-  colorSchemeNW.set(mode);
 
   return (
-    <View
-      style={[
-        config[colorSchemeName],
-        // eslint-disable-next-line react-native/no-inline-styles
-        { flex: 1, height: '100%', width: '100%' },
-        props.style,
-      ]}
-    >
-      <OverlayProvider>
-        <ToastProvider>{props.children}</ToastProvider>
-      </OverlayProvider>
-    </View>
-  );
+    <GluestackUIProvider config={customConfig}>{children}</GluestackUIProvider>
+  )
 }

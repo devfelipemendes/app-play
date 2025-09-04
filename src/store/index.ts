@@ -1,10 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit'
 import authSlice from './slices/authSlice'
 import { apiPlay } from '../api/endpoints/AuthApi'
+import companyReducer from './slices/companySlice'
 
 export const store = configureStore({
   reducer: {
     auth: authSlice,
+    company: companyReducer,
     [apiPlay.reducerPath]: apiPlay.reducer,
   },
   middleware: (getDefaultMiddleware) =>
