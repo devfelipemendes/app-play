@@ -11,6 +11,8 @@ import { useAuth } from '@/src/store/hooks/useAuth'
 import { Image } from 'react-native'
 import IconLogo from '../../assets/AssetsPartners/adaptive-icon.png'
 import { CustomInput } from '@/components/layout/CustomInput'
+import { useTheme } from '@/contexts/theme-context'
+import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
 
 export default function LoginScreen() {
   const [cpf, setCpf] = useState('')
@@ -23,6 +25,8 @@ export default function LoginScreen() {
     }
     signIn(cpf, password, '0', '0', 'login', 'app')
   }
+
+  const { colors, theme, isLoading, error } = useCompanyThemeSimple()
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#1c1c22' }}>
@@ -118,7 +122,7 @@ export default function LoginScreen() {
         <Box style={{ alignItems: 'center' }}>
           <Text style={{ fontSize: 14, color: '#666' }}>
             Ainda não possui uma conta?{' '}
-            <Text style={{ color: '#000', fontWeight: '600' }}>
+            <Text style={{ color: `${colors.primary}`, fontWeight: '600' }}>
               Cadastre-se
             </Text>
           </Text>
@@ -126,7 +130,7 @@ export default function LoginScreen() {
         <Box style={{ alignItems: 'center' }}>
           <Text style={{ fontSize: 14, color: '#666' }}>
             Esqueci minha Senha!{' '}
-            <Text style={{ color: '#000', fontWeight: '600' }}>
+            <Text style={{ color: `${colors.primary}`, fontWeight: '600' }}>
               Cliquei aqui!
             </Text>
           </Text>

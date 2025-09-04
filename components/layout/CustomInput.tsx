@@ -1,7 +1,7 @@
 import React from 'react'
 
-import { SearchIcon, Mic } from 'lucide-react-native'
 import { Input, InputField, InputIcon, InputSlot } from '../ui/input'
+import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
 
 interface CustomInputProps {
   label?: string
@@ -22,10 +22,11 @@ export const CustomInput = ({
   rightIcon,
   secureTextEntry,
 }: CustomInputProps) => {
+  const { color } = useCompanyThemeSimple
   return (
     <Input
       variant="outline"
-      className="border-0 bg-background-300 rounded-xl py-1 px-4 "
+      className={`border-0 rounded-xl py-1 px-4 `}
       size="lg"
     >
       {leftIcon && (
@@ -38,7 +39,7 @@ export const CustomInput = ({
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder || label}
-        className="placeholder:text-typography-200"
+        className="placeholder:text-[#c3c3c3]"
         secureTextEntry={secureTextEntry}
       />
 

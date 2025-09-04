@@ -103,6 +103,7 @@ export const useCompanyThemeSimple = () => {
     theme,
     isLoading,
     error,
+
     // Cores prontas para usar
     colors: theme
       ? {
