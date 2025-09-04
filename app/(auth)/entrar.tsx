@@ -1,141 +1,112 @@
-import React, { useState } from 'react'
-import { VStack } from '@/components/ui/vstack'
-import { HStack } from '@/components/ui/hstack'
-import { Text } from '@/components/ui/text'
-import { Input, InputField } from '@/components/ui/input'
-import { Button, ButtonText } from '@/components/ui/button'
-import { Box } from '@/components/ui/box'
+import React, { useEffect, useRef, useState } from 'react'
 
 import { SafeAreaView } from '@/components/ui/safe-area-view'
-import { useAuth } from '@/src/store/hooks/useAuth'
-import { Image } from 'react-native'
+import { Box } from '@/components/ui/box'
+import { Text } from '@/components/ui/text'
+
 import IconLogo from '../../assets/AssetsPartners/adaptive-icon.png'
-import { CustomInput } from '@/components/layout/CustomInput'
-import { useTheme } from '@/contexts/theme-context'
+
+import { Keyboard, Animated, Platform, Image } from 'react-native'
+
 import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
+import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
+import type { RootState } from '@/src/store'
+import FormLogin from '@/components/Pages/forms/FormLogin'
+import { setMode } from '@/src/store/slices/screenFlowSlice'
+import FormCadastro from '@/components/Pages/forms/FormCad'
+
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 
 export default function LoginScreen() {
-  const [cpf, setCpf] = useState('')
-  const [password, setPassword] = useState('')
-  const { signIn, loadingAuth } = useAuth()
+  const [keyboardOpen, setKeyboardOpen] = useState(false)
+  const { colors } = useCompanyThemeSimple()
 
-  const handleLogin = () => {
-    if (!cpf || !password) {
-      return alert('Preencha CPF e senha')
+  const dispatch = useAppDispatch()
+  const mode = useAppSelector((state: RootState) => state.screenFlow.mode)
+
+  const animValue = useRef(new Animated.Value(0)).current
+  const whiteBlockFlex = animValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: [8, 100],
+  })
+
+  const logoOpacity = animValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 0],
+  })
+
+  useEffect(() => {
+    Animated.timing(animValue, {
+      toValue: mode === 'cadastro' ? 1 : 0,
+      duration: 500,
+      useNativeDriver: false,
+    }).start()
+  }, [mode])
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener('keyboardDidShow', () => {
+      setKeyboardOpen(true)
+    })
+    const hideSub = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardOpen(false)
+    })
+
+    return () => {
+      showSub.remove()
+      hideSub.remove()
     }
-    signIn(cpf, password, '0', '0', 'login', 'app')
-  }
-
-  const { colors, theme, isLoading, error } = useCompanyThemeSimple()
+  }, [])
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#1c1c22' }}>
-      {/* 20% - Área do logo */}
-      <Box
-        style={{
-          flex: 4,
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: '#1c1c22',
-          position: 'relative',
-        }}
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.text }}>
+      <KeyboardAwareScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        keyboardShouldPersistTaps="handled"
+        enableOnAndroid
+        extraScrollHeight={20}
+        showsVerticalScrollIndicator={false}
       >
-        {/* Background pattern - Grid manual */}
+        {/* Área do logo */}
 
-        {/* Logo principal */}
-
-        <Image
-          source={IconLogo}
+        <Box
           style={{
-            width: 120,
-            height: 120,
-            zIndex: 1,
-          }}
-          resizeMode="contain"
-        />
-      </Box>
-
-      {/* 80% - Área do formulário */}
-      <Box
-        style={{
-          flex: 8,
-          paddingHorizontal: 24,
-          paddingTop: 32,
-          justifyContent: 'flex-start',
-          borderTopLeftRadius: 70,
-
-          backgroundColor: 'white',
-        }}
-      >
-        {/* Título Login */}
-        <Box style={{ marginBottom: 32, alignItems: 'center' }}>
-          <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#333' }}>
-            Bem vindo!
-          </Text>
-          <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#333' }}>
-            À Melhor Operadora do Brasil
-          </Text>
-        </Box>
-
-        {/* CPF */}
-        <Box style={{ marginBottom: 20 }}>
-          <Text style={{ marginBottom: 8, fontSize: 14, color: '#666' }}>
-            CPF/CNPJ
-          </Text>
-          <CustomInput
-            placeholder="000.000.000-00"
-            value={cpf}
-            onChangeText={setCpf}
-          />
-        </Box>
-
-        {/* Senha */}
-        <Box style={{ marginBottom: 24 }}>
-          <Text style={{ marginBottom: 8, fontSize: 14, color: '#666' }}>
-            Senha
-          </Text>
-          <CustomInput
-            placeholder="Digite sua senha"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-          />
-        </Box>
-
-        {/* Botão Login */}
-        <Button
-          onPress={handleLogin}
-          style={{
-            borderRadius: 10,
-
-            marginBottom: 24,
+            flex: keyboardOpen ? 0 : 1,
+            minHeight: keyboardOpen ? 60 : 30,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: colors.text,
           }}
         >
-          <ButtonText
-            style={{ color: 'white', fontSize: 16, fontWeight: '600' }}
-          >
-            {loadingAuth ? 'Entrando...' : 'Login'}
-          </ButtonText>
-        </Button>
+          {mode === 'login' && !keyboardOpen && (
+            <Animated.Image
+              source={IconLogo}
+              style={{
+                width: 120,
+                height: 120,
+                opacity: logoOpacity,
+                alignSelf: 'center',
+                marginBottom: 32,
+              }}
+              resizeMode="contain"
+            />
+          )}
+        </Box>
 
-        {/* Link para cadastro */}
-        <Box style={{ alignItems: 'center' }}>
-          <Text style={{ fontSize: 14, color: '#666' }}>
-            Ainda não possui uma conta?{' '}
-            <Text style={{ color: `${colors.primary}`, fontWeight: '600' }}>
-              Cadastre-se
-            </Text>
-          </Text>
-        </Box>
-        <Box style={{ alignItems: 'center' }}>
-          <Text style={{ fontSize: 14, color: '#666' }}>
-            Esqueci minha Senha!{' '}
-            <Text style={{ color: `${colors.primary}`, fontWeight: '600' }}>
-              Cliquei aqui!
-            </Text>
-          </Text>
-        </Box>
-      </Box>
+        {/* Área do formulário */}
+        <Animated.View
+          style={{
+            flexGrow: 1,
+            paddingHorizontal: 24,
+            paddingTop: 32,
+            paddingBottom: keyboardOpen ? 50 : 32,
+            justifyContent: 'flex-start',
+            borderTopLeftRadius: 70,
+            backgroundColor: 'white',
+          }}
+        >
+          {mode === 'login' ? <FormLogin /> : <FormCadastro />}
+        </Animated.View>
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   )
 }

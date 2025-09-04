@@ -1,27 +1,53 @@
-import React from "react";
-import { Pressable } from "@/components/ui/pressable";
-import { Text } from "@/components/ui/text";
-import { Icon } from "@/components/ui/icon";
+import React from 'react'
+import { Pressable } from 'react-native'
+import { Text } from '@/components/ui/text'
+import { Icon } from '@/components/ui/icon'
+import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
 
 interface IThemeCard {
-  title: string;
-  icon: any;
-  onPress: () => void;
-  active: boolean;
+  title: string
+  icon: any
+  onPress: () => void
+  active: boolean
 }
 
 const ThemeCard = ({ title, icon, onPress, active }: IThemeCard) => {
+  const { colors } = useCompanyThemeSimple()
+
   return (
     <Pressable
-      className={`py-3 px-6 h-14 items-center bg-background-100 rounded-[18px] gap-5 flex-1 flex-row ${
-        active ? "bg-background-200 border border-primary-100" : ""
-      }`}
       onPress={onPress}
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 12, // py-3
+        paddingHorizontal: 24, // px-6
+        height: 56, // h-14
+        borderRadius: 18,
+        flex: 1,
+        backgroundColor: active ? colors.primary : colors.primaryLight80,
+        borderWidth: active ? 1 : 0,
+        borderColor: active ? colors.primary : 'transparent',
+      }}
     >
-      <Icon as={icon} size="sm" className="text-primary-600" />
-      <Text className="font-dm-sans-medium text-typography-900">{title}</Text>
+      <Icon
+        as={icon}
+        size="sm"
+        style={{
+          color: active ? colors.textButton : colors.text,
+          marginRight: 12,
+        }}
+      />
+      <Text
+        style={{
+          fontFamily: 'DM Sans-Medium',
+          color: active ? colors.textButton : colors.text,
+        }}
+      >
+        {title}
+      </Text>
     </Pressable>
-  );
-};
+  )
+}
 
-export default ThemeCard;
+export default ThemeCard

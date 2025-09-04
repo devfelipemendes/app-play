@@ -1,11 +1,10 @@
 // hooks/useCompanyTheme.ts
 import { useEffect } from 'react'
 
-import { useSelector } from 'react-redux'
-import { RootState } from '@/src/store' // Ajuste conforme sua estrutura
 import { useAppSelector } from '@/src/store/hooks'
 import { useWhitelabelTheme } from '@/contexts/theme-context/whitelabel-the,e-context'
 import { useLazyGetCompanyInfoQuery } from '@/src/api/endpoints/AuthApi'
+import { lightenHexColor } from '@/src/utils/lightColorPrimary'
 
 interface UseCompanyThemeParams {
   companyid?: number
@@ -108,11 +107,23 @@ export const useCompanyThemeSimple = () => {
     colors: theme
       ? {
           primary: theme.colors.primary,
+          primaryLight80: lightenHexColor(theme.colors.primary, 80),
+          primaryLight60: lightenHexColor(theme.colors.primary, 60),
+          primaryLight50: lightenHexColor(theme.colors.primary, 50),
           secondary: theme.colors.secondary,
+          secondaryLight: lightenHexColor(theme.colors.secondary, 80),
+          text: '#1c1c22',
+          textButton: '#ffffff',
+          subTitle: '#666',
+          disabled: '#c3c3c3',
         }
       : {
           primary: '#007AFF',
           secondary: '#000000',
+          text: '#1c1c22',
+          textButton: '#ffffff',
+          subTitle: '#666',
+          disabled: '#c3c3c3',
         },
   }
 }

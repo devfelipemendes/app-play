@@ -1,6 +1,6 @@
 // src/store/api/companyApi.ts - Usando injectEndpoints
 
-import { apiPlay } from './AuthApi'
+import { apiPlay } from '../apiPlay'
 
 // ✅ Tipos para o endpoint da empresa
 export interface CompanyInfoRequest {
@@ -57,16 +57,7 @@ export const companyApiExtended = apiPlay.injectEndpoints({
   }),
 })
 
-// ✅ Export dos novos hooks (se mantém os existentes + adiciona os novos)
 export const {
-  // Hooks existentes da apiPlay continuam disponíveis
-  useLoginMutation,
-  useGetCompanyInfoQuery: useGetCompanyInfoQueryOriginal, // Se já existia, renomear
-  useLazyGetCompanyInfoQuery,
-  useForgotPasswordMutation,
-  useChangePasswordMutation,
-
-  // Novo hook injetado
-  useGetCompanyInfoQuery, // Novo endpoint
-  useLazyGetCompanyInfoQuery: useLazyGetCompanyInfoQueryNew, // Se quiser diferenciar
+  useGetCompanyInfoQuery,
+  useLazyGetCompanyInfoQuery: useLazyGetCompanyInfoQueryNew,
 } = companyApiExtended

@@ -6,10 +6,12 @@ import { Settings2, User } from 'lucide-react-native'
 import { SettingsIcon, SunIcon, MoonIcon } from '@/components/ui/icon'
 import { HStack } from '@/components/ui/hstack'
 import ThemeCard from '@/components/screens/settings/theme-card'
-import { ThemeContext } from '@/contexts/theme-context'
+
 import CustomHeader from '@/components/shared/custom-header'
 import { Link } from 'expo-router'
 import { useAuth } from '@/src/store/hooks/useAuth'
+import { ThemeContext } from '@/contexts/theme-context'
+import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
 
 const Settings = () => {
   const { colorMode, setColorMode }: any = useContext(ThemeContext)

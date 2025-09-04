@@ -7,10 +7,13 @@ import { Text } from '@/components/ui/text'
 import { LineChart } from 'react-native-gifted-charts'
 import { ThemeContext } from '@/contexts/theme-context'
 import { WeatherTabContext } from '@/contexts/weather-screen-context'
+import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
 
 const Chart = ({ chartRef }: any) => {
   const { colorMode }: any = useContext(ThemeContext)
   const { childRefs }: any = useContext(WeatherTabContext)
+
+  const { colors } = useCompanyThemeSimple()
   const lineData = [
     {},
     { value: 18, label: 'jan' },
@@ -24,7 +27,10 @@ const Chart = ({ chartRef }: any) => {
   ]
 
   return (
-    <VStack className="p-3 rounded-2xl bg-background-100 gap-3">
+    <VStack
+      className="p-3 rounded-2xl bg-background-100 gap-3"
+      style={{ backgroundColor: colors.primaryLight80 }}
+    >
       <HStack className="items-center gap-2">
         <Box className="h-7 w-7 bg-background-50 items-center justify-center rounded-full">
           <Icon
@@ -34,7 +40,7 @@ const Chart = ({ chartRef }: any) => {
           />
         </Box>
         <Text className="font-dm-sans-medium text-typography-400">
-          Consumo mensal
+          Consumo Mensal
         </Text>
       </HStack>
 
@@ -49,8 +55,8 @@ const Chart = ({ chartRef }: any) => {
             hideDataPoints
             rulesColor={colorMode === 'dark' ? '#414141' : '#d3d3d3'}
             rulesType="solid"
-            color="#b68cd4"
-            startFillColor="#b68cd4"
+            color={colors.primary}
+            startFillColor={colors.primary}
             endFillColor={colorMode === 'dark' ? '#30203c' : '#f1ebff'}
             startOpacity={1}
             endOpacity={0}

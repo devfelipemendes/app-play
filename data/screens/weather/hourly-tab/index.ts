@@ -51,12 +51,6 @@ export const PressureAndUVIndexData = [
 
 export const HourlyForecastData = [
   {
-    id: 1,
-    time: 'Hoje',
-    imgUrl: require('@/assets/images/connectMobile.png'),
-    temperature: 10,
-  },
-  {
     id: 2,
     time: 'seg',
     imgUrl: require('@/assets/images/connectMobile.png'),

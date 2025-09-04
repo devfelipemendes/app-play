@@ -1,5 +1,6 @@
-import { createApi } from '@reduxjs/toolkit/query/react'
-import axiosBaseQuery from '../Axios'
+// src/store/api/authEndpoints.ts - Endpoints principais
+
+import { apiPlay } from '../apiPlay'
 
 // ✅ Tipos baseados no código original
 interface LoginRequest {
@@ -52,17 +53,12 @@ interface ChangePasswordRequest {
   password: string
 }
 
-// ✅ API Service com RTK Query
-export const apiPlay = createApi({
-  reducerPath: 'apiPlay',
-  baseQuery: axiosBaseQuery({
-    baseUrl: '', // A URL base já está no axiosInstance
-  }),
-  tagTypes: ['User', 'Company'], // Para cache invalidation
+// ✅ Injetar endpoints na API base
+export const authApiExtended = apiPlay.injectEndpoints({
   endpoints: (builder) => ({
     // ✅ Login endpoint
     login: builder.mutation<LoginResponse, LoginRequest>({
-      query: (credentials: any) => ({
+      query: (credentials) => ({
         url: '/api/login',
         method: 'POST',
         data: credentials,
@@ -72,7 +68,7 @@ export const apiPlay = createApi({
 
     // ✅ Company info endpoint
     getCompanyInfo: builder.query<CompanyInfoResponse, CompanyInfoRequest>({
-      query: (params: any) => ({
+      query: (params) => ({
         url: '/api/consultaempresaApp',
         method: 'POST',
         data: params,
@@ -82,7 +78,7 @@ export const apiPlay = createApi({
 
     // ✅ Forgot password endpoint
     forgotPassword: builder.mutation<void, ForgotPasswordRequest>({
-      query: (data: any) => ({
+      query: (data) => ({
         url: '/api/esqueciMinhaSenha',
         method: 'POST',
         data,
@@ -91,7 +87,7 @@ export const apiPlay = createApi({
 
     // ✅ Change password endpoint
     changePassword: builder.mutation<void, ChangePasswordRequest>({
-      query: (data: any) => ({
+      query: (data) => ({
         url: '/api/alterarsenha',
         method: 'POST',
         data,
@@ -108,4 +104,4 @@ export const {
   useLazyGetCompanyInfoQuery,
   useForgotPasswordMutation,
   useChangePasswordMutation,
-} = apiPlay
+} = authApiExtended

@@ -19,19 +19,27 @@ import {
   SunriseAndSunsetData,
 } from '@/data/screens/weather/hourly-tab'
 import Animated, { FadeInDown } from 'react-native-reanimated'
+import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
 
 const Hourly = () => {
   const { childRefs, hasHourlyTabChild1Animated }: any =
     useContext(WeatherTabContext)
   const AnimatedVStack = Animated.createAnimatedComponent(VStack)
+  const { colors } = useCompanyThemeSimple()
 
   useEffect(() => {
     hasHourlyTabChild1Animated.current = true
   }, [])
 
   return (
-    <VStack space="md" className="px-4 pb-5 bg-background-0">
-      <AnimatedVStack space="md">
+    <VStack
+      style={{
+        paddingHorizontal: 16, // px-4
+        paddingBottom: 20, // pb-5
+        gap: 16, // space="md"
+      }}
+    >
+      <AnimatedVStack style={{ gap: 16 }}>
         <Animated.View
           entering={
             hasHourlyTabChild1Animated.current
@@ -41,20 +49,18 @@ const Hourly = () => {
                   .damping(12)
           }
         >
-          <HStack space="md">
-            {WindAndPrecipitationData.map((card: any) => {
-              return (
-                <HourlyCard
-                  key={card.id}
-                  icon={card.icon}
-                  text={card.text}
-                  currentUpdate={card.currentUpdate}
-                  lastUpdate={card.lastUpdate}
-                  arrowDownIcon={card.arrowDownIcon}
-                  arrowUpIcon={card.arrowUpIcon}
-                />
-              )
-            })}
+          <HStack style={{ gap: 16 }}>
+            {WindAndPrecipitationData.map((card: any) => (
+              <HourlyCard
+                key={card.id}
+                icon={card.icon}
+                text={card.text}
+                currentUpdate={card.currentUpdate}
+                lastUpdate={card.lastUpdate}
+                arrowDownIcon={card.arrowDownIcon}
+                arrowUpIcon={card.arrowUpIcon}
+              />
+            ))}
           </HStack>
         </Animated.View>
 
@@ -67,94 +73,77 @@ const Hourly = () => {
                   .damping(12)
           }
         >
-          <HStack space="md">
-            {PressureAndUVIndexData.map((card: any) => {
-              return (
-                <HourlyCard
-                  key={card.id}
-                  icon={card.icon}
-                  text={card.text}
-                  currentUpdate={card.currentUpdate}
-                  lastUpdate={card.lastUpdate}
-                  arrowDownIcon={card.arrowDownIcon}
-                  arrowUpIcon={card.arrowUpIcon}
-                />
-              )
-            })}
+          <HStack style={{ gap: 16 }}>
+            {PressureAndUVIndexData.map((card: any) => (
+              <HourlyCard
+                key={card.id}
+                icon={card.icon}
+                text={card.text}
+                currentUpdate={card.currentUpdate}
+                lastUpdate={card.lastUpdate}
+                arrowDownIcon={card.arrowDownIcon}
+                arrowUpIcon={card.arrowUpIcon}
+              />
+            ))}
           </HStack>
         </Animated.View>
       </AnimatedVStack>
 
       {/* ---------------------------- Hourly forecast ---------------------------- */}
-      <VStack className="py-3 rounded-2xl bg-background-100 gap-3 p-3">
-        <HStack className="gap-2 items-center">
-          <Box className="h-7 w-7 bg-background-50 items-center justify-center rounded-full">
-            <Icon as={ClockIcon} className="text-typography-400" size="sm" />
+      <VStack
+        style={{
+          paddingVertical: 12, // py-3
+          paddingHorizontal: 12, // p-3
+          borderRadius: 24, // rounded-2xl
+          backgroundColor: colors.primary,
+          gap: 12, // gap-3
+        }}
+      >
+        <HStack style={{ gap: 8, alignItems: 'center' }}>
+          <Box
+            style={{
+              width: 28,
+              height: 28,
+              backgroundColor: colors.primaryLight50,
+              justifyContent: 'center',
+              alignItems: 'center',
+              borderRadius: 999,
+            }}
+          >
+            <Icon
+              as={ClockIcon}
+              size="sm"
+              style={{ color: colors.textButton }}
+            />
           </Box>
-          <Text className="font-dm-sans-regular text-typography-400">
-            Consumo diário
+          <Text
+            style={{
+              fontFamily: 'DM Sans',
+              fontWeight: '400',
+              color: colors.textButton,
+            }}
+          >
+            Consumo Semanal
           </Text>
         </HStack>
 
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          className=""
-          contentContainerClassName="gap-x-8 px-3"
+          contentContainerStyle={{ gap: 32, paddingHorizontal: 12 }}
         >
-          {HourlyForecastData.map((card: any) => {
-            return (
-              <ForeCastCard
-                key={card.id}
-                time={card.time}
-                imgUrl={card.imgUrl}
-                temperature={card.temperature}
-              />
-            )
-          })}
+          {HourlyForecastData.map((card: any) => (
+            <ForeCastCard
+              key={card.id}
+              time={card.time}
+              imgUrl={card.imgUrl}
+              temperature={card.temperature}
+            />
+          ))}
         </ScrollView>
       </VStack>
 
-      {/* ---------------------------- Day forecast ----------------------------- */}
-
       <Chart chartRef={childRefs[0].ref} />
-
-      {/* ---------------------------- Chance of rain ---------------------------- */}
-      {/* <VStack
-        className="p-3 rounded-2xl bg-background-100 gap-3"
-        ref={childRefs[1].ref}
-      >
-        <HStack className="items-center gap-2">
-          <Box className="h-7 w-7 bg-background-50 items-center justify-center rounded-full">
-            <Icon as={CloudRain} className="text-typography-400" size="sm" />
-          </Box>
-          <Text className="font-dm-sans-regular text-typography-400">
-            Chance of rain
-          </Text>
-        </HStack>
-
-        <VStack className="justify-between px-3 gap-2.5">
-          {RainPredictionData.map((card: any) => {
-            return (
-              <RainCard key={card.id} time={card.time} value={card.value} />
-            )
-          })}
-        </VStack>
-      </VStack> */}
-
-      {/* <HStack space="md">
-        {SunriseAndSunsetData.map((card: any) => {
-          return (
-            <HourlyCard
-              key={card.id}
-              icon={card.icon}
-              text={card.text}
-              currentUpdate={card.currentUpdate}
-              lastUpdate={card.lastUpdate}
-            />
-          )
-        })}
-      </HStack> */}
     </VStack>
   )
 }

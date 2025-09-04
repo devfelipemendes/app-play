@@ -3,6 +3,10 @@ import { Box } from '@/components/ui/box'
 import { VStack } from '@/components/ui/vstack'
 import { Text } from '@/components/ui/text'
 import { Image } from '@/components/ui/image'
+import {
+  useCompanyTheme,
+  useCompanyThemeSimple,
+} from '@/hooks/theme/useThemeLoader'
 
 interface IForeCastCard {
   time: string
@@ -11,9 +15,13 @@ interface IForeCastCard {
 }
 
 const ForeCastCard = ({ time, imgUrl, temperature }: IForeCastCard) => {
+  const { colors } = useCompanyThemeSimple()
   return (
     <VStack className="gap-1.5 items-center">
-      <Text size="sm" className="text-typography-300 font-dm-sans-regular">
+      <Text
+        size="sm"
+        style={{ color: colors.textButton, fontFamily: 'font-dm-sans-regular' }}
+      >
         {time}
       </Text>
       <Box className="h-8 w-6">
@@ -24,7 +32,13 @@ const ForeCastCard = ({ time, imgUrl, temperature }: IForeCastCard) => {
           contentFit="contain"
         />
       </Box>
-      <Text className="text-typography-900 font-dm-sans-regular">
+      <Text
+        style={{
+          color: colors.textButton,
+          fontFamily: 'font-dm-sans-regular',
+          fontSize: 12,
+        }}
+      >
         {temperature}MB
       </Text>
     </VStack>

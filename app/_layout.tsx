@@ -18,12 +18,14 @@ import { Provider } from 'react-redux'
 import { store } from '@/src/store'
 import AuthProvider from '@/src/store/providers'
 import { useAuth } from '@/src/store/hooks/useAuth'
+
+// Novo contexto para tema whitelabel (separado do existente)
+
+import { createCustomConfig } from '@/config/theme'
 import {
   useWhitelabelTheme,
   WhitelabelThemeProvider,
 } from '@/contexts/theme-context/whitelabel-the,e-context'
-
-// Novo contexto para tema whitelabel (separado do existente)
 
 // Componente para carregar tema da empresa
 const CompanyThemeLoader = ({ children }: { children: React.ReactNode }) => {
@@ -64,26 +66,6 @@ const MainLayout = () => {
     'dm-sans-bold': DMSans_700Bold,
   })
 
-  // Customizar config do Gluestack com cores do tema whitelabel
-  const customConfig = React.useMemo(() => {
-    if (!whitelabelTheme) return config
-
-    return {
-      ...config,
-      tokens: {
-        ...config.tokens,
-        colors: {
-          ...config.tokens.colors,
-          // Sobrescrever cores primárias
-          primary500: whitelabelTheme.colors.primary,
-          primary600: whitelabelTheme.colors.primary,
-          secondary500: whitelabelTheme.colors.secondary,
-          secondary600: whitelabelTheme.colors.secondary,
-        },
-      },
-    }
-  }, [whitelabelTheme])
-
   if (!fontsLoaded) {
     return null
   }
@@ -109,7 +91,7 @@ const MainLayout = () => {
   }
 
   return (
-    <GluestackUIProvider config={customConfig} colorMode={colorMode}>
+    <GluestackUIProvider config={createCustomConfig} colorMode={colorMode}>
       <StatusBar translucent />
       <AuthProvider>
         <CompanyThemeLoader>
