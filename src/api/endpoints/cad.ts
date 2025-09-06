@@ -10,7 +10,7 @@ export interface CadastroRequest {
   cpf: string
   phone: string
   whats: string
-  parceiro: string
+  parceiro: number
   nivel: number
   cep: string
   uf: string
@@ -22,7 +22,7 @@ export interface CadastroRequest {
   revendedor: string
   porcentagem_recarga: number
   porcentagem_ativacao: number
-  token: string
+  token?: string
   parentcompany: number
 }
 

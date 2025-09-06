@@ -25,10 +25,6 @@ export default function LoginScreen() {
   const mode = useAppSelector((state: RootState) => state.screenFlow.mode)
 
   const animValue = useRef(new Animated.Value(0)).current
-  const whiteBlockFlex = animValue.interpolate({
-    inputRange: [0, 1],
-    outputRange: [8, 100],
-  })
 
   const logoOpacity = animValue.interpolate({
     inputRange: [0, 1],
@@ -71,7 +67,8 @@ export default function LoginScreen() {
         <Box
           style={{
             flex: keyboardOpen ? 0 : 1,
-            minHeight: keyboardOpen ? 60 : 30,
+
+            minHeight: keyboardOpen ? 60 : 60,
             justifyContent: 'center',
             alignItems: 'center',
             backgroundColor: colors.text,

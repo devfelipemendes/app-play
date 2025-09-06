@@ -1,10 +1,12 @@
-import React from 'react'
+import React, { type ComponentProps } from 'react'
 import { Input, InputField, InputIcon, InputSlot } from '../ui/input'
 import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
 import { Text } from '@gluestack-ui/themed'
 import { KeyboardTypeOptions } from 'react-native'
+import { any, boolean } from 'valibot'
+import { ArrowUpToLineIcon } from 'lucide-react-native'
 
-interface CustomInputProps {
+interface CustomInputProps extends InputFieldProps {
   label?: string
   value?: string
   onChangeText?: (text: string) => void
@@ -13,9 +15,13 @@ interface CustomInputProps {
   rightIcon?: any
   secureTextEntry?: boolean
   onEndIconPress?: () => void
-  keyboardType?: KeyboardTypeOptions // nova prop
+  keyboardType?: KeyboardTypeOptions
   maxlength?: number
+  editable?: boolean // nova prop para DatePicker
+  pointerEvents?: 'none' | 'auto' | 'box-none' | 'box-only' // nova prop para DatePicker
+  autoComplete?: any
 }
+type InputFieldProps = ComponentProps<typeof InputField>
 
 export const CustomInput = ({
   label,
@@ -26,8 +32,12 @@ export const CustomInput = ({
   rightIcon,
   secureTextEntry,
   onEndIconPress,
-  keyboardType = 'default', // valor padrão
+  keyboardType = 'default',
   maxlength,
+  editable = true, // padrão true para manter compatibilidade
+  pointerEvents = 'auto', // padrão auto para manter compatibilidade
+
+  ...inputFieldProps
 }: CustomInputProps) => {
   const { colors } = useCompanyThemeSimple()
 
@@ -40,8 +50,11 @@ export const CustomInput = ({
         borderWidth: 1,
         borderStyle: 'solid',
         borderRadius: 8,
+        // Muda aparência visual quando não editável
+        backgroundColor: !editable ? colors.disabled + '20' : 'transparent',
       }}
       size="lg"
+      pointerEvents={pointerEvents}
     >
       {leftIcon && (
         <InputSlot>
@@ -50,17 +63,19 @@ export const CustomInput = ({
       )}
 
       <InputField
+        {...inputFieldProps}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder || label}
-        placeholderTextColor="#c3c3c3"
+        placeholderTextColor="#eaeaea"
         style={{
           color: colors.text,
           fontSize: 12,
         }}
         secureTextEntry={secureTextEntry}
-        keyboardType={keyboardType} // aplica o tipo de teclado
+        keyboardType={keyboardType}
         maxLength={maxlength}
+        editable={editable}
       />
 
       {rightIcon && (

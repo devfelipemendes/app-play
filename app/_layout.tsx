@@ -18,6 +18,7 @@ import { Provider } from 'react-redux'
 import { store } from '@/src/store'
 import AuthProvider from '@/src/store/providers'
 import { useAuth } from '@/src/store/hooks/useAuth'
+import Toast from 'react-native-toast-message'
 
 // Novo contexto para tema whitelabel (separado do existente)
 
@@ -26,6 +27,8 @@ import {
   useWhitelabelTheme,
   WhitelabelThemeProvider,
 } from '@/contexts/theme-context/whitelabel-the,e-context'
+import 'react-native-toast-message/lib/src/Toast'
+import { PaperProvider } from 'react-native-paper'
 
 // Componente para carregar tema da empresa
 const CompanyThemeLoader = ({ children }: { children: React.ReactNode }) => {
@@ -112,7 +115,10 @@ export default function RootLayout() {
     <Provider store={store}>
       <ThemeProvider>
         <WhitelabelThemeProvider>
-          <MainLayout />
+          <PaperProvider>
+            <MainLayout />
+            <Toast />
+          </PaperProvider>
         </WhitelabelThemeProvider>
       </ThemeProvider>
     </Provider>
