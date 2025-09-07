@@ -21,7 +21,6 @@ export default function LoginScreen() {
   const [keyboardOpen, setKeyboardOpen] = useState(false)
   const { colors } = useCompanyThemeSimple()
 
-  const dispatch = useAppDispatch()
   const mode = useAppSelector((state: RootState) => state.screenFlow.mode)
 
   const animValue = useRef(new Animated.Value(0)).current

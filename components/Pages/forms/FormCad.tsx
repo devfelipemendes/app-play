@@ -54,6 +54,7 @@ import {
   type ChecaIccidRes,
 } from '@/src/api/endpoints/checkIccid'
 import { useDebounce } from '@/hooks/useDebounce'
+import PlansCarousel from '@/components/layout/PlansCarousel'
 
 const cadastroSchema = v.pipe(
   v.object({
@@ -171,7 +172,7 @@ export default function FormCadastro() {
   const [activeTab, setActiveTab] = useState<string>('tab1')
   const [activeTypeChipsTabs, setActiveTypeChipsTabs] =
     useState<string>('simCard')
-  const [step, setStep] = useState(3)
+  const [step, setStep] = useState(4)
   const [loading, setLoading] = useState(false)
   const [showTextInfo1, setShowTextInfo1] = useState(false)
   const [showTextInfo2, setShowTextInfo2] = useState(false)
@@ -393,68 +394,68 @@ export default function FormCadastro() {
     setShowTextInfo2(!showTextInfo2)
   }
 
-  useEffect(() => {
-    // Limpa os campos e reseta status quando mudar de aba
-    setValue('cpf', '')
-    setValue('cnpj', '')
-    setStatusCpf(null)
-    setStep(1)
-  }, [activeTab])
+  // useEffect(() => {
+  //   // Limpa os campos e reseta status quando mudar de aba
+  //   setValue('cpf', '')
+  //   setValue('cnpj', '')
+  //   setStatusCpf(null)
+  //   setStep(1)
+  // }, [activeTab])
 
-  useEffect(() => {
-    const docCpf = watch('cpf') || ''
-    const docCnpj = watch('cnpj') || ''
+  // useEffect(() => {
+  //   const docCpf = watch('cpf') || ''
+  //   const docCnpj = watch('cnpj') || ''
 
-    const checkDocumentStatus = async (value: string, type: string) => {
-      const cleanValue = unMask(value)
-      const expectedLength = type === 'cpf' ? 11 : 14
+  //   const checkDocumentStatus = async (value: string, type: string) => {
+  //     const cleanValue = unMask(value)
+  //     const expectedLength = type === 'cpf' ? 11 : 14
 
-      // Valida apenas se o número estiver completo
-      if (cleanValue.length !== expectedLength) {
-        setStatusCpf(null)
-        setStep(1)
-        return
-      }
+  //     // Valida apenas se o número estiver completo
+  //     if (cleanValue.length !== expectedLength) {
+  //       setStatusCpf(null)
+  //       setStep(1)
+  //       return
+  //     }
 
-      const result = await validateAndCheck(cleanValue, type)
+  //     const result = await validateAndCheck(cleanValue, type)
 
-      if (result.data) {
-        // Documento existe no sistema mas sem linha ativa
-        setStatusCpf('semLinhaAtiva')
-        setStep(3)
-        Toast.show({
-          type: 'info',
-          text1: `${type} já possui cadastro!`,
-          text2: 'Só falta ativar uma linha, vamos lá',
-        })
-      } else if (result.error) {
-        if (result.error.includes('não encontrado')) {
-          setStatusCpf('semCadastro')
-          setStep(2)
-        } else if (result.error.includes('linha ativa')) {
-          setStatusCpf('cpfAtivo')
-          Toast.show({
-            type: 'error',
-            text1: `${type.toUpperCase()} já possui linha ativa`,
-          })
-          dispatch(setMode('login'))
-        } else {
-          Toast.show({
-            type: 'info',
-            text1: 'Precisamos de um CPF/CNPJ válido',
-            text2: `Veja se o ${type.toUpperCase()} foi inserido corretamente`,
-          })
-        }
-      }
-    }
+  //     if (result.data) {
+  //       // Documento existe no sistema mas sem linha ativa
+  //       setStatusCpf('semLinhaAtiva')
+  //       setStep(3)
+  //       Toast.show({
+  //         type: 'info',
+  //         text1: `${type} já possui cadastro!`,
+  //         text2: 'Só falta ativar uma linha, vamos lá',
+  //       })
+  //     } else if (result.error) {
+  //       if (result.error.includes('não encontrado')) {
+  //         setStatusCpf('semCadastro')
+  //         setStep(2)
+  //       } else if (result.error.includes('linha ativa')) {
+  //         setStatusCpf('cpfAtivo')
+  //         Toast.show({
+  //           type: 'error',
+  //           text1: `${type.toUpperCase()} já possui linha ativa`,
+  //         })
+  //         dispatch(setMode('login'))
+  //       } else {
+  //         Toast.show({
+  //           type: 'info',
+  //           text1: 'Precisamos de um CPF/CNPJ válido',
+  //           text2: `Veja se o ${type.toUpperCase()} foi inserido corretamente`,
+  //         })
+  //       }
+  //     }
+  //   }
 
-    // Prioriza CPF, se estiver completo, senão verifica CNPJ completo
-    const cleanCpf = unMask(docCpf)
-    const cleanCnpj = unMask(docCnpj)
+  //   // Prioriza CPF, se estiver completo, senão verifica CNPJ completo
+  //   const cleanCpf = unMask(docCpf)
+  //   const cleanCnpj = unMask(docCnpj)
 
-    if (cleanCpf.length === 11) checkDocumentStatus(docCpf, 'cpf')
-    else if (cleanCnpj.length === 14) checkDocumentStatus(docCnpj, 'cnpj')
-  }, [watch('cpf'), watch('cnpj')])
+  //   if (cleanCpf.length === 11) checkDocumentStatus(docCpf, 'cpf')
+  //   else if (cleanCnpj.length === 14) checkDocumentStatus(docCnpj, 'cnpj')
+  // }, [watch('cpf'), watch('cnpj')])
 
   const debouncedValidateICCID = useDebounce(handleValidateICCID, 500)
 
@@ -1251,8 +1252,7 @@ export default function FormCadastro() {
             </Box>
           </Box>
         )
-
-      default:
+      case 3:
         return (
           <Box>
             <Box>
@@ -1366,6 +1366,171 @@ export default function FormCadastro() {
                     borderRadius: 5,
                   }}
                 />
+              </Box>
+            )}
+          </Box>
+        )
+      case 4:
+        return (
+          <>
+            <Box style={{ marginBottom: 20 }}>
+              <ArrowLeft color={colors.primary} onPress={() => setStep(1)} />
+            </Box>
+            <Box style={{ marginBottom: 32, alignItems: 'center' }}>
+              <Text
+                style={{
+                  fontSize: 24,
+                  fontWeight: 'bold',
+                  color: colors.text,
+                  textAlign: 'center',
+                }}
+              >
+                Escolha O melhor plano para você!
+              </Text>
+              <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: '500',
+                  color: colors.subTitle,
+                  textAlign: 'center',
+                }}
+              >
+                Nossa meta para você é o melhor custo e benefício baseado nos
+                seus objetivos!
+              </Text>
+              <PlansCarousel />
+            </Box>
+          </>
+        )
+      default:
+        return (
+          <Box>
+            <Box>
+              <ArrowLeft
+                color={colors.primary}
+                onPress={() => dispatch(setMode('login'))}
+              />
+            </Box>
+            <Box style={{ marginBottom: 32, alignItems: 'center' }}>
+              <Text
+                style={{ fontSize: 24, fontWeight: 'bold', color: colors.text }}
+              >
+                Crie sua conta
+              </Text>
+              <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: '500',
+                  color: colors.subTitle,
+                }}
+              >
+                Vamos fazer parte da melhor operadora 🚀
+              </Text>
+            </Box>
+            <VStack space="md" style={{ marginBottom: 20 }}>
+              <Text className="font-semibold" style={{ color: colors.text }}>
+                A linha que deseja usar será para?
+              </Text>
+              <HStack
+                space="sm"
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
+                {tabs.map((tab) => (
+                  <ThemeCard
+                    key={tab.id}
+                    title={tab.title}
+                    icon={tab.icon}
+                    active={activeTab === tab.id}
+                    onPress={() => setActiveTab(tab.id)}
+                  />
+                ))}
+              </HStack>
+            </VStack>
+            {activeTab === 'tab1' && (
+              <Box style={{ marginBottom: 20 }}>
+                <Text
+                  style={{
+                    marginBottom: 8,
+                    fontSize: 14,
+                    color: colors.subTitle,
+                  }}
+                >
+                  CPF
+                </Text>
+                <Controller
+                  control={control}
+                  name="cpf"
+                  render={({ field: { value } }) => (
+                    <CustomInput
+                      placeholder="000.000.000-00"
+                      value={value ? mask(value, ['999.999.999-99']) : value}
+                      maxlength={14}
+                      onChangeText={handleCpfChange}
+                      leftIcon={User}
+                      keyboardType="number-pad"
+                    />
+                  )}
+                />
+                {errors.cpf && (
+                  <Text style={{ color: 'red' }}>{errors.cpf.message}</Text>
+                )}
+                <Text
+                  style={{
+                    marginBottom: 8,
+                    fontSize: 14,
+                    color: colors.subTitle,
+                  }}
+                >
+                  Informe seu CPF para fornecermos uma experiêcia com maior
+                  qualidade na sua etapa de cadastro!
+                </Text>
+              </Box>
+            )}
+
+            {activeTab === 'tab2' && (
+              <Box style={{ marginBottom: 20 }}>
+                <Text
+                  style={{
+                    marginBottom: 8,
+                    fontSize: 14,
+                    color: colors.subTitle,
+                  }}
+                >
+                  CNPJ
+                </Text>
+                <Controller
+                  control={control}
+                  name="cnpj"
+                  render={({ field: { value } }) => (
+                    <CustomInput
+                      placeholder="00.000.000/0000-00"
+                      value={
+                        value ? mask(value, ['99.999.999/9999-99']) : value
+                      }
+                      maxlength={18}
+                      onChangeText={handleCnpjChange}
+                      leftIcon={Briefcase}
+                      keyboardType="number-pad"
+                    />
+                  )}
+                />
+                {errors.cnpj && (
+                  <Text style={{ color: 'red' }}>{errors.cnpj.message}</Text>
+                )}
+                <Text
+                  style={{
+                    marginBottom: 8,
+                    fontSize: 14,
+                    color: colors.subTitle,
+                  }}
+                >
+                  Informe seu CNPJ para fornecermos uma experiêcia com maior
+                  qualidade na sua etapa de cadastro!
+                </Text>
               </Box>
             )}
           </Box>
