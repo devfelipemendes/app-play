@@ -32,14 +32,41 @@ interface ICompanyInfo {
   appversion?: string | null
 }
 
+interface Fatura {
+  // Defina a estrutura das faturas se necessário
+  // Como o array está vazio no exemplo, deixamos genérico
+  [key: string]: any
+}
+
 interface User {
+  parceiro: string
+  cnpj: string
+  cnpjFranquia: string | null
   cpf: string
   name: string
-  email?: string
+  email: string
+  userid: number
+  companyid: number
+  profileid: number
   token: string
-  profileid?: number
-  parceiro?: string
-  primeiroAcesso?: boolean
+  logotipo: string // Base64 encoded image
+  status: number
+  status_parceiro: number
+  faturaaberta: number
+  faturas: Fatura[]
+  pospago: boolean
+  mk: boolean
+  cadastrocompleto: boolean
+  pages: any | null // Pode ser especificado mais detalhadamente se necessário
+  parceirorevendedor: boolean
+  etapaCadastro: any | null // Pode ser especificado mais detalhadamente se necessário
+  super: any | null // Pode ser especificado mais detalhadamente se necessário
+  idIndicacao: any | null // Pode ser especificado mais detalhadamente se necessário
+  primeiroAcesso: boolean
+  airtime_company: boolean
+  airtime_comissao: boolean
+  rede_company: string
+  link_logo: string | null
   [key: string]: any
 }
 

@@ -46,7 +46,7 @@ export default function AuthGuard({ children }: AuthGuardProps) {
 
     if (isAuthenticated && inAuthGroup) {
       // Usuário autenticado tentando acessar tela de login
-      router.replace('/(tabs)/(weather)')
+      router.replace('/(tabs)/(home)')
     } else if (!isAuthenticated && !inAuthGroup) {
       // Usuário não autenticado tentando acessar área protegida
       router.replace('/(auth)/entrar')

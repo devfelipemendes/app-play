@@ -45,6 +45,7 @@ export function useAuth() {
     loadingSystem,
     loadingAuth,
     isCheckingAuth,
+
     error,
   } = useAppSelector((state) => state.auth)
 
@@ -192,7 +193,7 @@ export function useAuth() {
       if (userData.primeiroAcesso) {
         router.replace('/alterar-senha-primeiro-acesso' as any)
       } else {
-        router.replace('/(tabs)/(weather)' as any)
+        router.replace('/(tabs)/(home)' as any)
       }
     } catch (error: any) {
       console.error('❌ Erro no login:', error)
@@ -283,7 +284,7 @@ export function useAuth() {
 
       dispatch(setLoadingAuth(false))
       showToast('Senha alterada com sucesso!', 'success')
-      router.replace('/(tabs)/(weather)' as any)
+      router.replace('/(tabs)/(home)' as any)
     } catch (error) {
       dispatch(setLoadingAuth(false))
       showToast('Erro ao alterar senha!', 'error')

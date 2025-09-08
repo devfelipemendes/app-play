@@ -29,7 +29,7 @@ export default function Index() {
 
   // Redireciona baseado na presença do token
   if (hasToken) {
-    return <Redirect href="/(tabs)/(weather)" />
+    return <Redirect href="/(tabs)/(home)" />
   }
 
   return <Redirect href="/(auth)/entrar" />

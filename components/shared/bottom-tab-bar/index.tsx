@@ -27,9 +27,9 @@ interface TabItem {
 
 const tabItems: TabItem[] = [
   {
-    name: '(weather)',
+    name: '(home)',
     label: 'Home',
-    path: '(weather)',
+    path: '(home)',
     inActiveIcon: HomeIcon,
     icon: Home,
   },

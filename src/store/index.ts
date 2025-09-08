@@ -5,6 +5,7 @@ import companyReducer from './slices/companySlice'
 import screenFlowReducer from './slices/screenFlowSlice'
 import { apiPlay } from '../api/apiPlay'
 import AtivalinhaReducer from './slices/ativarLinhaSlice'
+import det2ViewReducer from './slices/det2Slice'
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     company: companyReducer,
     screenFlow: screenFlowReducer,
     ativarLinha: AtivalinhaReducer,
+    det2View: det2ViewReducer,
     [apiPlay.reducerPath]: apiPlay.reducer,
   },
   middleware: (getDefaultMiddleware) =>

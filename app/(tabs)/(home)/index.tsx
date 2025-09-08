@@ -20,16 +20,58 @@ import {
 } from '@/data/screens/weather/hourly-tab'
 import Animated, { FadeInDown } from 'react-native-reanimated'
 import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
+import { useAppDispatch } from '@/src/store/hooks'
+import { useGetDet2Mutation } from '@/src/api/endpoints/getDetails'
+import { useAuth } from '@/hooks/useAuth'
+import { setError, setLoading, setSelected } from '@/src/store/slices/det2Slice'
 
-const Hourly = () => {
+const Home = () => {
   const { childRefs, hasHourlyTabChild1Animated }: any =
     useContext(WeatherTabContext)
   const AnimatedVStack = Animated.createAnimatedComponent(VStack)
   const { colors } = useCompanyThemeSimple()
 
+  const { user, isAuthenticated, loadingAuth } = useAuth()
+
+  const dispatch = useAppDispatch()
+
+  const [getDet2] = useGetDet2Mutation()
+
   useEffect(() => {
     hasHourlyTabChild1Animated.current = true
   }, [])
+
+  const iccid = user?.icc
+
+  useEffect(() => {
+    if (!iccid) return
+
+    const fetchDet2 = async () => {
+      try {
+        dispatch(setLoading(true))
+        const result = await useGetDet2Mutation({
+          atualizadet: 'SIM',
+          iccid,
+          parceiro: 'AMD',
+          token: '30684d5f2e7cfdd198e58f6a1efedf6f8da743c85ef0ef6558',
+          userInfo: JSON.stringify({
+            cpf: '05852179124',
+            name: 'Ronildo Filho',
+            parceiro: 'PLAY MÓVEL',
+          }),
+        }).unwrap()
+
+        dispatch(setSelected(result))
+        dispatch(setError(null))
+      } catch (err: any) {
+        dispatch(setError(err?.message || 'Erro ao carregar dados'))
+      } finally {
+        dispatch(setLoading(false))
+      }
+    }
+
+    fetchDet2()
+  }, [iccid, getDet2, dispatch])
 
   return (
     <VStack
@@ -151,4 +193,4 @@ const Hourly = () => {
   )
 }
 
-export default Hourly
+export default Home
