@@ -142,10 +142,10 @@ export const useCompanyThemeSimple = () => {
           background: '#ffffff',
         }
       : {
-          primary: '#27C5F5',
-          primaryLight80: lightenHexColor('#27C5F5', 80),
-          primaryLight60: lightenHexColor('#27C5F5', 60),
-          primaryLight50: lightenHexColor('#27C5F5', 50),
+          primary: '#cc3366',
+          primaryLight80: lightenHexColor('#cc3366', 80),
+          primaryLight60: lightenHexColor('#cc3366', 60),
+          primaryLight50: lightenHexColor('#cc3366', 50),
           secondary: '#000000',
           text: '#1c1c22',
           textButton: '#ffffff',

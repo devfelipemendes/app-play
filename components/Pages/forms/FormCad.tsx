@@ -1476,12 +1476,26 @@ export default function FormCadastro() {
                 <Controller
                   control={control}
                   name="cpf"
-                  render={({ field: { value } }) => (
+                  render={(
+                    { field: { onChange, value } }, // ✅ Adicione onChange
+                  ) => (
                     <CustomInput
                       placeholder="000.000.000-00"
                       value={value ? mask(value, ['999.999.999-99']) : value}
                       maxlength={14}
-                      onChangeText={handleCpfChange}
+                      onChangeText={(text) => {
+                        const cleanText = unMask(text)
+                        onChange(cleanText) // ✅ Atualiza o form corretamente
+
+                        // Validação apenas se necessário
+                        if (cleanText.length === 11) {
+                          validateAndCheck(cleanText, 'cpf').then((result) => {
+                            if (!result.isValid) {
+                              Toast.show({ type: 'error', text1: result.error })
+                            }
+                          })
+                        }
+                      }}
                       leftIcon={User}
                       keyboardType="number-pad"
                     />

@@ -44,7 +44,7 @@ const WeatherLayout = () => {
         isHeaderShrunk.value ? 140 : 340,
         {
           damping: 18,
-          stiffness: 80,
+          stiffness: 120,
           mass: 1.4,
         },
       )
