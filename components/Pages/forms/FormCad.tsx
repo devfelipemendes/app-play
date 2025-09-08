@@ -55,6 +55,7 @@ import {
 } from '@/src/api/endpoints/checkIccid'
 import { useDebounce } from '@/hooks/useDebounce'
 import PlansCarousel from '@/components/layout/PlansCarousel'
+import { setUserInfo } from '@/src/store/slices/ativarLinhaSlice'
 
 const cadastroSchema = v.pipe(
   v.object({
@@ -529,6 +530,39 @@ export default function FormCadastro() {
 
     return () => backHandler.remove()
   }, [step])
+
+  useEffect(() => {
+    if (step === 4) {
+      const formData = watch()
+      const documentValue = formData.cpf
+        ? unMask(formData.cpf)
+        : unMask(formData.cnpj || '')
+
+      // Extrair DDD do telefone
+      const phoneValue = unMask(formData.phone || '')
+      const ddd = phoneValue.slice(0, 2)
+
+      // Atualizar Redux com dados necessários para buscar planos
+      dispatch(
+        setUserInfo({
+          cpf: documentValue,
+          name: formData.name || '',
+          parceiro: env.COMPANY_ID || '',
+          token: '', // Será preenchido após login/cadastro se necessário
+          iccid: iccidValue,
+          ddd: ddd,
+        }),
+      )
+
+      console.log('Dados enviados para Redux:', {
+        cpf: documentValue,
+        name: formData.name || '',
+        parceiro: env.COMPANY_ID || '',
+        iccid: iccidValue,
+        ddd: ddd,
+      })
+    }
+  }, [step, watch(), iccidValue, dispatch])
 
   const handleCpfChange = async (text: string) => {
     const cleanText = unMask(text)

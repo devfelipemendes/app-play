@@ -1,4 +1,4 @@
-// components/PlansCarousel.tsx
+// components/layout/PlansCarousel.tsx
 import React, { useRef, useState, useCallback } from 'react'
 import {
   View,
@@ -8,7 +8,7 @@ import {
   Alert,
   Image,
 } from 'react-native'
-import { useDispatch, useSelector } from 'react-redux'
+import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { Box, Button, HStack, VStack } from '@gluestack-ui/themed'
 import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel'
 import {
@@ -22,10 +22,10 @@ import {
   useActivateLineMutation,
 } from '@/src/api/endpoints/plansApi'
 import { RootState } from '@/src/store/index'
+import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
 
 const { width: screenWidth } = Dimensions.get('window')
 const CARD_WIDTH = screenWidth * 0.85
-const SIDE_CARD_WIDTH = screenWidth * 0.65
 
 interface Plan {
   planid: number | string
@@ -86,6 +86,8 @@ interface PlanCardProps {
 }
 
 const PlanCard: React.FC<PlanCardProps> = ({ plan, animationValue, onBuy }) => {
+  const { colors } = useCompanyThemeSimple()
+
   const animatedStyle = useAnimatedStyle(() => {
     const scale = interpolate(
       animationValue.value,
@@ -140,7 +142,7 @@ const PlanCard: React.FC<PlanCardProps> = ({ plan, animationValue, onBuy }) => {
           style={{
             fontSize: 56,
             fontWeight: 'bold',
-            color: '#2563EB',
+            color: colors.primary,
             textAlign: 'center',
             lineHeight: 60,
           }}
@@ -150,7 +152,7 @@ const PlanCard: React.FC<PlanCardProps> = ({ plan, animationValue, onBuy }) => {
         <Text
           style={{
             fontSize: 18,
-            color: '#6B7280',
+            color: colors.subTitle,
             marginTop: -4,
             fontWeight: '500',
           }}
@@ -167,13 +169,13 @@ const PlanCard: React.FC<PlanCardProps> = ({ plan, animationValue, onBuy }) => {
               width: 10,
               height: 10,
               borderRadius: 5,
-              backgroundColor: '#10B981',
+              backgroundColor: colors.primary,
             }}
           />
           <Text
             style={{
               fontSize: 16,
-              color: '#374151',
+              color: colors.text,
               fontWeight: '500',
             }}
           >
@@ -187,13 +189,13 @@ const PlanCard: React.FC<PlanCardProps> = ({ plan, animationValue, onBuy }) => {
               width: 10,
               height: 10,
               borderRadius: 5,
-              backgroundColor: '#10B981',
+              backgroundColor: colors.primary,
             }}
           />
           <Text
             style={{
               fontSize: 16,
-              color: '#374151',
+              color: colors.text,
               fontWeight: '500',
             }}
           >
@@ -208,7 +210,7 @@ const PlanCard: React.FC<PlanCardProps> = ({ plan, animationValue, onBuy }) => {
           style={{
             fontSize: 18,
             fontWeight: '600',
-            color: '#374151',
+            color: colors.text,
             marginBottom: 16,
           }}
         >
@@ -250,7 +252,7 @@ const PlanCard: React.FC<PlanCardProps> = ({ plan, animationValue, onBuy }) => {
           <Text
             style={{
               fontSize: 14,
-              color: '#6B7280',
+              color: colors.subTitle,
               fontWeight: '500',
             }}
           >
@@ -260,7 +262,7 @@ const PlanCard: React.FC<PlanCardProps> = ({ plan, animationValue, onBuy }) => {
             style={{
               fontSize: 42,
               fontWeight: 'bold',
-              color: '#1F2937',
+              color: colors.text,
               lineHeight: 48,
             }}
           >
@@ -270,7 +272,7 @@ const PlanCard: React.FC<PlanCardProps> = ({ plan, animationValue, onBuy }) => {
         <Text
           style={{
             fontSize: 16,
-            color: '#6B7280',
+            color: colors.subTitle,
             fontWeight: '500',
           }}
         >
@@ -281,10 +283,10 @@ const PlanCard: React.FC<PlanCardProps> = ({ plan, animationValue, onBuy }) => {
       {/* Botão de Compra */}
       <Button
         onPress={onBuy}
-        backgroundColor="#2563EB"
+        backgroundColor={colors.primary}
         borderRadius={16}
         padding={18}
-        shadowColor="#2563EB"
+        shadowColor={colors.primary}
         shadowOffset={{ width: 0, height: 4 }}
         shadowOpacity={0.3}
         shadowRadius={8}
@@ -292,7 +294,7 @@ const PlanCard: React.FC<PlanCardProps> = ({ plan, animationValue, onBuy }) => {
       >
         <Text
           style={{
-            color: 'white',
+            color: colors.textButton,
             fontSize: 18,
             fontWeight: '600',
           }}
@@ -308,11 +310,12 @@ const PlansCarousel: React.FC = () => {
   const carouselRef = useRef<ICarouselInstance>(null)
   const [currentIndex, setCurrentIndex] = useState(0)
   const progressValue = useSharedValue<number>(0)
+  const { colors } = useCompanyThemeSimple()
 
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
 
-  // Buscar informações do usuário do Redux
-  const userInfo = useSelector((state: any) => state.user)
+  // Buscar informações do usuário do Redux (usando seu slice atual)
+  const userInfo = useAppSelector((state: RootState) => state.user)
   const { cpf, parceiro, token, iccid, ddd } = userInfo
 
   // Query para buscar planos
@@ -322,10 +325,10 @@ const PlansCarousel: React.FC = () => {
     error,
     refetch,
   } = useGetPlansQuery({
-    parceiro,
-    token,
+    parceiro: parceiro || '',
+    token: token || '',
     userInfo: JSON.stringify(userInfo),
-    iccid,
+    iccid: iccid || '',
   })
 
   // Mutation para ativar linha
@@ -348,9 +351,9 @@ const PlansCarousel: React.FC = () => {
             style: 'default',
             onPress: async () => {
               const payload = {
-                cpf,
-                ddd,
-                iccid,
+                cpf: cpf || '',
+                ddd: ddd || '',
+                iccid: iccid || '',
                 planid: plan.planid.toString(),
                 planid_personalizado: '', // Definir lógica para identificar se é personalizado
                 isApp: true,
@@ -426,8 +429,8 @@ const PlansCarousel: React.FC = () => {
                 width: currentIndex === index ? 24 : 10,
                 height: 10,
                 borderRadius: 5,
-                backgroundColor: currentIndex === index ? '#2563EB' : '#D1D5DB',
-                // transition: 'all 0.3s ease',
+                backgroundColor:
+                  currentIndex === index ? colors.primary : colors.disabled,
               }}
             />
           </TouchableOpacity>
@@ -442,10 +445,11 @@ const PlansCarousel: React.FC = () => {
         flex={1}
         justifyContent="center"
         alignItems="center"
-        backgroundColor="#F9FAFB"
+        backgroundColor={colors.background}
+        padding={20}
       >
         <VStack alignItems="center" space={'sm'}>
-          <Text style={{ fontSize: 18, color: '#6B7280' }}>
+          <Text style={{ fontSize: 18, color: colors.subTitle }}>
             Carregando planos...
           </Text>
         </VStack>
@@ -460,20 +464,28 @@ const PlansCarousel: React.FC = () => {
         justifyContent="center"
         alignItems="center"
         padding={20}
-        backgroundColor="#F9FAFB"
+        backgroundColor={colors.background}
       >
         <VStack alignItems="center" space={'sm'}>
-          <Text style={{ fontSize: 18, color: '#EF4444', textAlign: 'center' }}>
+          <Text
+            style={{ fontSize: 18, color: colors.error, textAlign: 'center' }}
+          >
             Erro ao carregar planos
           </Text>
           <Button
             onPress={() => refetch()}
-            backgroundColor="#2563EB"
+            backgroundColor={colors.primary}
             borderRadius={12}
             paddingHorizontal={24}
             paddingVertical={12}
           >
-            <Text style={{ color: 'white', fontSize: 16, fontWeight: '600' }}>
+            <Text
+              style={{
+                color: colors.textButton,
+                fontSize: 16,
+                fontWeight: '600',
+              }}
+            >
               Tentar Novamente
             </Text>
           </Button>
@@ -488,9 +500,10 @@ const PlansCarousel: React.FC = () => {
         flex={1}
         justifyContent="center"
         alignItems="center"
-        backgroundColor="#F9FAFB"
+        backgroundColor={colors.background}
+        padding={20}
       >
-        <Text style={{ fontSize: 18, color: '#6B7280' }}>
+        <Text style={{ fontSize: 18, color: colors.subTitle }}>
           Nenhum plano disponível
         </Text>
       </Box>
@@ -504,7 +517,7 @@ const PlansCarousel: React.FC = () => {
         justifyContent="center"
         alignItems="center"
         padding={20}
-        backgroundColor="#F9FAFB"
+        backgroundColor={colors.background}
       >
         <PlanCard
           plan={allPlans[0]}
@@ -516,7 +529,7 @@ const PlansCarousel: React.FC = () => {
   }
 
   return (
-    <Box flex={1} backgroundColor="#F9FAFB">
+    <Box flex={1} backgroundColor={colors.background}>
       <Box flex={1} justifyContent="center">
         <Carousel
           ref={carouselRef}

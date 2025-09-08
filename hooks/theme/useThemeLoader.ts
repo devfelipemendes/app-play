@@ -113,9 +113,35 @@ export const useCompanyThemeSimple = () => {
           secondary: theme.colors.secondary,
           secondaryLight: lightenHexColor(theme.colors.secondary, 80),
           text: '#1c1c22',
+
           textButton: '#ffffff',
           subTitle: '#666',
-          disabled: '#c3c3c3',
+
+          // Estados de feedback
+          success: '#4caf50',
+          error: '#f44336',
+          warning: '#ff9800',
+          info: '#2196f3',
+
+          // Variantes para hover/focus/tonalidades
+          successLight: '#81c784',
+          successDark: '#388e3c',
+
+          errorLight: '#e57373',
+          errorDark: '#d32f2f',
+
+          warningLight: '#ffb74d',
+          warningDark: '#f57c00',
+
+          infoLight: '#64b5f6',
+          infoDark: '#1976d2',
+
+          // Outros úteis
+          disabled: '#bdbdbd',
+          divider: '#e0e0e0',
+          overlay: 'rgba(0,0,0,0.5)',
+
+          background: '',
         }
       : {
           primary: '#007AFF',
@@ -123,7 +149,32 @@ export const useCompanyThemeSimple = () => {
           text: '#1c1c22',
           textButton: '#ffffff',
           subTitle: '#666',
-          disabled: '#c3c3c3',
+
+          // Estados de feedback
+          success: '#4caf50',
+          error: '#f44336',
+          warning: '#ff9800',
+          info: '#2196f3',
+
+          // Variantes para hover/focus/tonalidades
+          successLight: '#81c784',
+          successDark: '#388e3c',
+
+          errorLight: '#e57373',
+          errorDark: '#d32f2f',
+
+          warningLight: '#ffb74d',
+          warningDark: '#f57c00',
+
+          infoLight: '#64b5f6',
+          infoDark: '#1976d2',
+
+          // Outros úteis
+          disabled: '#bdbdbd',
+          divider: '#e0e0e0',
+          overlay: 'rgba(0,0,0,0.5)',
+
+          background: '#f5f5f5',
         },
   }
 }

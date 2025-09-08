@@ -1,9 +1,10 @@
+import { env } from '@/config/env'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 interface AtivarLinhaType {
   cpf: string
   name: string
-  parceiro: string
+  parceiro: number
   token: string
   iccid: string
   ddd: string
@@ -12,7 +13,7 @@ interface AtivarLinhaType {
 const initialState: AtivarLinhaType = {
   cpf: '',
   name: '',
-  parceiro: '',
+  parceiro: env.COMPANY_ID,
   token: '',
   iccid: '',
   ddd: '',
