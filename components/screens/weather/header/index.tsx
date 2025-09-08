@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useContext, useEffect } from 'react'
 import { HStack } from '@/components/ui/hstack'
 import { Icon, SearchIcon } from '@/components/ui/icon'
 import { VStack } from '@/components/ui/vstack'
@@ -9,73 +9,77 @@ import { ThemeContext } from '@/contexts/theme-context'
 import Animated, {
   interpolate,
   useAnimatedStyle,
+  useSharedValue,
+  withSpring,
 } from 'react-native-reanimated'
 
 const Header = ({ height }: { height: number }) => {
   const { colorMode }: any = useContext(ThemeContext)
 
-  // Update all interpolation ranges to match new height values
+  // Shared value para height suavizada
+  const smoothHeight = useSharedValue(height)
+
+  // Atualiza smoothHeight quando height mudar com animação suave
+  useEffect(() => {
+    smoothHeight.value = withSpring(height, {
+      damping: 20, // Maior = menos oscilação
+      stiffness: 100, // Menor = mais suave
+      mass: 1.2, // Maior = mais inércia
+    })
+  }, [height])
+
+  // Estilos animados usando smoothHeight e extrapolation 'clamp'
   const locationTextStyle = useAnimatedStyle(() => ({
     fontSize: interpolate(
-      height,
-      [340, 140], // Updated from [340, 170]
+      smoothHeight.value,
+      [340, 140],
       [20, 16],
+      'clamp', // Evita valores extremos
     ),
   }))
 
   const dateTextStyle = useAnimatedStyle(() => ({
-    fontSize: interpolate(
-      height,
-      [340, 140], // Updated from [340, 170]
-      [16, 14],
-    ),
+    fontSize: interpolate(smoothHeight.value, [340, 140], [16, 14], 'clamp'),
   }))
 
   const temperatureTextStyle = useAnimatedStyle(() => ({
-    fontSize: interpolate(
-      height,
-      [600, 140], // Updated from [340, 170]
-      [112, 40],
-    ),
-    marginLeft: interpolate(
-      height,
-      [340, 140], // Updated from [340, 170]
-      [0, 15],
-    ),
+    fontSize: interpolate(smoothHeight.value, [600, 140], [112, 40], 'clamp'),
+    marginLeft: interpolate(smoothHeight.value, [340, 140], [0, 15], 'clamp'),
   }))
 
   const feelsLikeTextStyle = useAnimatedStyle(() => ({
-    fontSize: interpolate(
-      height,
-      [340, 140], // Updated from [340, 170]
-      [18, 14],
-    ),
+    fontSize: interpolate(smoothHeight.value, [340, 140], [18, 14], 'clamp'),
   }))
 
   const weatherTextStyle = useAnimatedStyle(() => ({
-    fontSize: interpolate(
-      height,
-      [340, 140], // Updated from [340, 170]
-      [20, 14],
-    ),
+    fontSize: interpolate(smoothHeight.value, [340, 140], [20, 14], 'clamp'),
   }))
 
   const imageStyle = useAnimatedStyle(() => ({
-    width: interpolate(
-      height,
-      [340, 140], // Updated from [340, 170]
-      [124, 56],
-    ),
-    height: interpolate(
-      height,
-      [340, 140], // Updated from [340, 170]
-      [112, 50],
-    ),
-    marginTop: interpolate(
-      height,
-      [340, 140], // Updated from [340, 170]
-      [6, 0],
-    ),
+    width: interpolate(smoothHeight.value, [340, 140], [124, 56], 'clamp'),
+    height: interpolate(smoothHeight.value, [340, 140], [112, 50], 'clamp'),
+    marginTop: interpolate(smoothHeight.value, [340, 140], [6, 0], 'clamp'),
+  }))
+
+  // Estilo animado para o container principal
+  const containerStyle = useAnimatedStyle(() => ({
+    marginTop: interpolate(smoothHeight.value, [340, 140], [64, 70], 'clamp'),
+  }))
+
+  // Estilo animado para opacity do SearchIcon
+  const searchIconStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(smoothHeight.value, [340, 200], [1, 0], 'clamp'),
+  }))
+
+  // Estilo animado para o container de temperatura
+  const temperatureContainerStyle = useAnimatedStyle(() => ({
+    left: interpolate(smoothHeight.value, [340, 140], [0, 170], 'clamp'),
+    bottom: interpolate(smoothHeight.value, [340, 140], [0, -5], 'clamp'),
+  }))
+
+  // Estilo animado para o container de texto do tempo
+  const weatherContainerStyle = useAnimatedStyle(() => ({
+    bottom: interpolate(smoothHeight.value, [340, 140], [0, -5], 'clamp'),
   }))
 
   return (
@@ -96,13 +100,7 @@ const Header = ({ height }: { height: number }) => {
               flex: 1,
               flexDirection: 'column',
             },
-            useAnimatedStyle(() => ({
-              marginTop: interpolate(
-                height,
-                [340, 140], // Updated from [340, 170]
-                [64, 70],
-              ),
-            })),
+            containerStyle,
           ]}
         >
           <HStack className="justify-between">
@@ -130,13 +128,7 @@ const Header = ({ height }: { height: number }) => {
                 28 de Agosto - 08:16
               </Animated.Text>
             </VStack>
-            <Animated.View
-              style={[
-                {
-                  opacity: interpolate(height, [340, 200], [1, 0], 'clamp'),
-                },
-              ]}
-            >
+            <Animated.View style={searchIconStyle}>
               <Icon as={SearchIcon} size="xl" className="text-background-700" />
             </Animated.View>
           </HStack>
@@ -147,18 +139,7 @@ const Header = ({ height }: { height: number }) => {
                 justifyContent: 'space-between',
                 position: 'absolute',
               },
-              useAnimatedStyle(() => ({
-                left: interpolate(
-                  height,
-                  [340, 140], // Updated from [340, 170]
-                  [0, 170],
-                ),
-                bottom: interpolate(
-                  height,
-                  [340, 140], // Updated from [340, 170]
-                  [0, -5],
-                ),
-              })),
+              temperatureContainerStyle,
             ]}
           >
             <Animated.Text
@@ -191,15 +172,8 @@ const Header = ({ height }: { height: number }) => {
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 position: 'absolute',
-                right: 0,
               },
-              useAnimatedStyle(() => ({
-                bottom: interpolate(
-                  height,
-                  [340, 140], // Updated from [340, 170]
-                  [0, -5],
-                ),
-              })),
+              weatherContainerStyle,
             ]}
           >
             {/* <Animated.View style={imageStyle}>
@@ -209,7 +183,7 @@ const Header = ({ height }: { height: number }) => {
                 size="full"
               />
             </Animated.View> */}
-            <Animated.Text
+            {/* <Animated.Text
               style={[
                 {
                   fontFamily: 'dm-sans-regular',
@@ -219,7 +193,7 @@ const Header = ({ height }: { height: number }) => {
               ]}
             >
               Play Móvel
-            </Animated.Text>
+            </Animated.Text> */}
           </Animated.View>
         </Animated.View>
       </ImageBackground>

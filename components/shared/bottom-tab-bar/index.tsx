@@ -8,13 +8,9 @@ import { Box } from '@/components/ui/box'
 import { Animated, Platform, LayoutChangeEvent } from 'react-native'
 import { Icon } from '@/components/ui/icon'
 import {
-  ChartArea,
-  GalleryHorizontal,
   Home,
   HomeIcon,
   MessageCircle,
-  MessageCircleQuestion,
-  Settings,
   SignalHigh,
   User,
 } from 'lucide-react-native'
@@ -72,6 +68,11 @@ function BottomTabBar(props: BottomTabBarProps) {
 
   const activeIndex = props.state.index
 
+  const shadowStyle =
+    Platform.OS === 'ios'
+      ? { boxShadow: '0px -2px 6px 0px rgba(0, 0, 0, 0.182)' }
+      : { elevation: 4 }
+
   // Atualiza animação quando muda a aba ou layout
   useEffect(() => {
     if (!tabLayouts[activeIndex]) return
@@ -90,22 +91,19 @@ function BottomTabBar(props: BottomTabBarProps) {
   }, [activeIndex, tabLayouts])
 
   return (
-    <Box style={{ backgroundColor: colors.background }}>
+    <Box style={{ backgroundColor: ' #f2f2f2' }}>
       <HStack
-        style={{
-          paddingBottom: Platform.OS === 'ios' ? insets.bottom : 16,
-          paddingTop: 16,
-          paddingHorizontal: 28,
-          borderTopLeftRadius: 24,
-          borderTopRightRadius: 24,
-          backgroundColor: colors.background,
-
-          // iOS
-          boxShadow: '0px -2px 6px 0px rgba(0, 0, 0, 0.182)',
-
-          // Android
-          elevation: 4,
-        }}
+        style={[
+          {
+            paddingBottom: Platform.OS === 'ios' ? insets.bottom : 16,
+            paddingTop: 16,
+            paddingHorizontal: 28,
+            borderTopLeftRadius: 24,
+            borderTopRightRadius: 24,
+            backgroundColor: colors.background,
+          },
+          shadowStyle,
+        ]}
         space="md"
       >
         {tabItems.map((item, index) => {
