@@ -118,13 +118,11 @@ export const useCompanyThemeSimple = () => {
           textButton: '#ffffff',
           subTitle: '#666',
 
-          // Estados de feedback
           success: '#4caf50',
           error: '#f44336',
           warning: '#ff9800',
           info: '#2196f3',
 
-          // Variantes para hover/focus/tonalidades
           successLight: '#81c784',
           successDark: '#388e3c',
 
@@ -137,7 +135,6 @@ export const useCompanyThemeSimple = () => {
           infoLight: '#64b5f6',
           infoDark: '#1976d2',
 
-          // Outros úteis
           disabled: '#bdbdbd',
           divider: '#e0e0e0',
           overlay: 'rgba(0,0,0,0.5)',
@@ -145,19 +142,20 @@ export const useCompanyThemeSimple = () => {
           background: '#ffffff',
         }
       : {
-          primary: '#007AFF',
+          primary: '#27C5F5',
+          primaryLight80: lightenHexColor('#27C5F5', 80),
+          primaryLight60: lightenHexColor('#27C5F5', 60),
+          primaryLight50: lightenHexColor('#27C5F5', 50),
           secondary: '#000000',
           text: '#1c1c22',
           textButton: '#ffffff',
           subTitle: '#666',
 
-          // Estados de feedback
           success: '#4caf50',
           error: '#f44336',
           warning: '#ff9800',
           info: '#2196f3',
 
-          // Variantes para hover/focus/tonalidades
           successLight: '#81c784',
           successDark: '#388e3c',
 
@@ -170,7 +168,6 @@ export const useCompanyThemeSimple = () => {
           infoLight: '#64b5f6',
           infoDark: '#1976d2',
 
-          // Outros úteis
           disabled: '#bdbdbd',
           divider: '#e0e0e0',
           overlay: 'rgba(0,0,0,0.5)',

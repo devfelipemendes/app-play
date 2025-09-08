@@ -1,6 +1,6 @@
 // app/_layout.tsx
 import '@/global.css'
-import React, { useContext } from 'react'
+import React, { useContext, useEffect } from 'react'
 import { Stack } from 'expo-router'
 import { useFonts } from 'expo-font'
 import { StatusBar } from 'expo-status-bar'
@@ -30,21 +30,7 @@ import AuthGuard from '@/src/components/auth/AuthGuard'
 const CompanyThemeLoader = ({ children }: { children: React.ReactNode }) => {
   const { loadTheme } = useWhitelabelTheme()
 
-  React.useEffect(() => {
-    // Aqui você carregaria os dados reais da empresa
-    const mockCompanyData = {
-      companyId: 46,
-      companyname: 'PLAY MÓVEL',
-      appTheme:
-        '{"darkLightMode":false,"colors":{"primary":"#df3b67","secondary":"#000624"}}',
-      logotipo: '',
-    }
-
-    // Carregar tema quando dados chegarem
-    setTimeout(() => {
-      loadTheme(mockCompanyData)
-    }, 1000)
-  }, [])
+  useEffect(() => {}, [])
 
   return <>{children}</>
 }
@@ -70,6 +56,7 @@ const MainLayout = () => {
         <CompanyThemeLoader>
           <AuthGuard>
             <Stack>
+              <Stack.Screen name="index" options={{ headerShown: false }} />
               <Stack.Screen name="(auth)" options={{ headerShown: false }} />
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             </Stack>

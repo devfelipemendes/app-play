@@ -124,7 +124,7 @@ export const WhitelabelThemeProvider: React.FC<
         payload: {
           darkLightMode: false,
           colors: {
-            primary: '#007AFF',
+            primary: '#636363',
             secondary: '#000000',
           },
         },
