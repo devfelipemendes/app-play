@@ -20,7 +20,7 @@ const ForeCastCard = ({ time, imgUrl, temperature }: IForeCastCard) => {
     <VStack className="gap-1.5 items-center">
       <Text
         size="sm"
-        style={{ color: colors.textButton, fontFamily: 'font-dm-sans-regular' }}
+        style={{ color: colors.secondary, fontFamily: 'font-dm-sans-regular' }}
       >
         {time}
       </Text>
@@ -34,7 +34,7 @@ const ForeCastCard = ({ time, imgUrl, temperature }: IForeCastCard) => {
       </Box>
       <Text
         style={{
-          color: colors.textButton,
+          color: colors.secondary,
           fontFamily: 'font-dm-sans-regular',
           fontSize: 12,
         }}

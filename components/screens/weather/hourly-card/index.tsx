@@ -6,6 +6,14 @@ import { Icon } from '@/components/ui/icon'
 import { Text } from '@/components/ui/text'
 import { ArrowUpIcon, ArrowDownIcon } from '@/components/shared/icon'
 import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
+import {
+  ArrowRight,
+  ArrowRightIcon,
+  ChevronUpIcon,
+  GalleryVertical,
+  Phone,
+  Smartphone,
+} from 'lucide-react-native'
 
 interface IHourlyCard {
   icon: any
@@ -31,16 +39,13 @@ const HourlyCard = ({
       style={{
         padding: 12, // p-3
         borderRadius: 24, // rounded-2xl
-        backgroundColor: colors.primary,
+        backgroundColor: colors.primaryLight80,
         flex: 1,
         alignItems: 'flex-start',
         gap: 16, // gap-4
 
-        shadowColor: '#000000a4',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
         shadowRadius: 4,
-
+        boxShadow: ' 0px 1px 3px rgba(0, 0, 0, 0.24)',
         // Sombra (Android)
         elevation: 4,
       }}
@@ -55,7 +60,7 @@ const HourlyCard = ({
           style={{
             width: 28, // w-7
             height: 28, // h-7
-            backgroundColor: colors.primaryLight50,
+            backgroundColor: colors.primary,
             borderRadius: 999, // rounded-full
             justifyContent: 'center',
             alignItems: 'center',
@@ -65,7 +70,7 @@ const HourlyCard = ({
         </Box>
         <Text
           style={{
-            color: colors.textButton,
+            color: colors.secondary,
             fontFamily: 'font-dm-sans-regular',
             fontWeight: '400',
             fontSize: 14,
@@ -83,7 +88,7 @@ const HourlyCard = ({
       >
         <Text
           style={{
-            color: colors.textButton,
+            color: colors.secondary,
             fontFamily: 'font-dm-sans-regular',
             fontWeight: '400',
             fontSize: 24,
@@ -100,21 +105,21 @@ const HourlyCard = ({
         >
           {arrowDownIcon && (
             <Icon
-              as={ArrowDownIcon}
+              as={Smartphone}
               size="xs"
-              style={{ color: colors.primary[200] }}
+              style={{ color: colors.secondary }}
             />
           )}
           {arrowUpIcon && (
             <Icon
-              as={ArrowUpIcon}
+              as={GalleryVertical}
               size="xs"
-              style={{ color: colors.primary[200] }}
+              style={{ color: colors.primary }}
             />
           )}
           <Text
             style={{
-              color: colors.textButton,
+              color: colors.secondary,
               fontFamily: 'font-dm-sans-regular',
               fontWeight: '500',
               fontSize: 12, // tamanho xs

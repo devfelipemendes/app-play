@@ -2,20 +2,24 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Pressable } from '@/components/ui/pressable'
 import { Text } from '@/components/ui/text'
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs'
-import {
-  WeatherIcon,
-  MapsIcon,
-  UserIcon,
-  ActiveUserIcon,
-  ActiveMapsIcon,
-  ActivePlanoIcon,
-  PlanoIcon,
-} from '@/components/shared/icon'
+
 import { HStack } from '@/components/ui/hstack'
 import { Box } from '@/components/ui/box'
-import { Platform } from 'react-native'
+import { Animated, Platform, LayoutChangeEvent } from 'react-native'
 import { Icon } from '@/components/ui/icon'
-import { Home, HomeIcon } from 'lucide-react-native'
+import {
+  ChartArea,
+  GalleryHorizontal,
+  Home,
+  HomeIcon,
+  MessageCircle,
+  MessageCircleQuestion,
+  Settings,
+  SignalHigh,
+  User,
+} from 'lucide-react-native'
+import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
+import { useEffect, useRef, useState } from 'react'
 
 interface TabItem {
   name: string
@@ -33,76 +37,131 @@ const tabItems: TabItem[] = [
     inActiveIcon: HomeIcon,
     icon: Home,
   },
-
-  {
-    name: 'location',
-    label: 'Plano',
-    path: 'location',
-    inActiveIcon: ActivePlanoIcon,
-    icon: PlanoIcon,
-  },
   {
     name: 'maps',
-    label: 'teste',
+    label: 'Plano',
     path: 'maps',
-    inActiveIcon: MapsIcon,
-    icon: ActiveMapsIcon,
+    inActiveIcon: SignalHigh,
+    icon: SignalHigh,
+  },
+  {
+    name: 'location',
+    label: 'Chat',
+    path: 'location',
+    inActiveIcon: MessageCircle,
+    icon: MessageCircle,
   },
   {
     name: 'settings',
     label: 'Perfil',
     path: 'settings',
-    inActiveIcon: UserIcon,
-    icon: ActiveUserIcon,
+    inActiveIcon: User,
+    icon: User,
   },
 ]
 
 function BottomTabBar(props: BottomTabBarProps) {
   const insets = useSafeAreaInsets()
+  const { colors } = useCompanyThemeSimple()
+
+  const [tabLayouts, setTabLayouts] = useState<{ x: number; width: number }[]>(
+    [],
+  )
+  const underlineAnim = useRef(new Animated.Value(0)).current
+  const widthAnim = useRef(new Animated.Value(0)).current
+
+  const activeIndex = props.state.index
+
+  // Atualiza animação quando muda a aba ou layout
+  useEffect(() => {
+    if (!tabLayouts[activeIndex]) return
+    const { x, width } = tabLayouts[activeIndex]
+
+    Animated.parallel([
+      Animated.spring(underlineAnim, {
+        toValue: x + width / 4,
+        useNativeDriver: false,
+      }),
+      Animated.spring(widthAnim, {
+        toValue: width / 2,
+        useNativeDriver: false,
+      }),
+    ]).start()
+  }, [activeIndex, tabLayouts])
 
   return (
-    <Box className="bg-background-0">
+    <Box style={{ backgroundColor: colors.background }}>
       <HStack
-        className="bg-background-0 pt-4 px-7 rounded-t-3xl min-h-[78px]"
         style={{
           paddingBottom: Platform.OS === 'ios' ? insets.bottom : 16,
-          boxShadow: '0px -10px 12px 0px rgba(0, 0, 0, 0.04)',
+          paddingTop: 16,
+          paddingHorizontal: 28,
+          borderTopLeftRadius: 24,
+          borderTopRightRadius: 24,
+          backgroundColor: colors.background,
+
+          // iOS
+          boxShadow: '0px -2px 6px 0px rgba(0, 0, 0, 0.182)',
+
+          // Android
+          elevation: 4,
         }}
         space="md"
       >
-        {tabItems.map((item) => {
-          const isActive =
-            props.state.routeNames[props.state.index] === item.path
+        {tabItems.map((item, index) => {
+          const isActive = activeIndex === index
+
           return (
             <Pressable
               key={item.name}
-              className="flex-1 items-center justify-center"
-              onPress={() => {
-                props.navigation.navigate(item.path)
+              style={{
+                flex: 1,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+              onPress={() => props.navigation.navigate(item.path)}
+              onLayout={(e: LayoutChangeEvent) => {
+                const layout = e.nativeEvent.layout
+                setTabLayouts((prev) => {
+                  const copy = [...prev]
+                  copy[index] = { x: layout.x, width: layout.width }
+                  return copy
+                })
               }}
             >
               <Icon
                 as={isActive ? item.icon : item.inActiveIcon}
                 size="xl"
-                className={`${
-                  isActive
-                    ? item.icon === ActiveMapsIcon
-                      ? 'fill-primary-800 text-background-0'
-                      : 'fill-primary-800 text-primary-800'
-                    : 'text-background-500'
-                }`}
+                style={{ color: isActive ? colors.primary : colors.secondary }}
               />
               <Text
                 size="xs"
-                className={`mt-1 font-medium ${
-                  isActive ? 'text-primary-800' : 'text-background-500'
-                }`}
+                style={{
+                  marginTop: 4,
+                  fontWeight: '500',
+                  color: isActive ? colors.primary : colors.secondary,
+                }}
               >
                 {item.label}
               </Text>
             </Pressable>
           )
         })}
+
+        {/* Barrinha animada */}
+        {tabLayouts[activeIndex] && (
+          <Animated.View
+            style={{
+              position: 'absolute',
+              bottom: Platform.OS === 'ios' ? insets.bottom + 8 : 8,
+              left: underlineAnim,
+              width: widthAnim,
+              height: 3,
+              borderRadius: 2,
+              backgroundColor: colors.primary,
+            }}
+          />
+        )}
       </HStack>
     </Box>
   )

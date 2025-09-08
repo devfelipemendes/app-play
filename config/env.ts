@@ -5,7 +5,7 @@ export const env = {
 
   // Company Configuration
   COMPANY_ID: 46,
-  PARCEIRO: 'play',
+  PARCEIRO: 'PLAY MÓVEL',
 
   // Access Token - ATUALIZAR COM O TOKEN CORRETO
   // IMPORTANTE: Este token precisa ser um token válido fornecido pela API

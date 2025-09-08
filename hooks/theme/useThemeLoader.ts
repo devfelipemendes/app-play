@@ -107,6 +107,7 @@ export const useCompanyThemeSimple = () => {
     colors: theme
       ? {
           primary: theme.colors.primary,
+
           primaryLight80: lightenHexColor(theme.colors.primary, 80),
           primaryLight60: lightenHexColor(theme.colors.primary, 60),
           primaryLight50: lightenHexColor(theme.colors.primary, 50),
@@ -141,7 +142,7 @@ export const useCompanyThemeSimple = () => {
           divider: '#e0e0e0',
           overlay: 'rgba(0,0,0,0.5)',
 
-          background: '',
+          background: '#ffffff',
         }
       : {
           primary: '#007AFF',
@@ -174,7 +175,7 @@ export const useCompanyThemeSimple = () => {
           divider: '#e0e0e0',
           overlay: 'rgba(0,0,0,0.5)',
 
-          background: '#f5f5f5',
+          background: '#ffffff',
         },
   }
 }

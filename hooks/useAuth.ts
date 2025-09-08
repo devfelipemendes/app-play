@@ -202,9 +202,11 @@ export function useAuth() {
   // Logout
   const signOut = async () => {
     dispatch(setLoadingAuth(true))
+    console.log('teste1')
 
     try {
       // Limpar dados seguros
+
       await SecureStorage.clearAll()
 
       // Limpar estado do Redux

@@ -95,7 +95,7 @@ const Hourly = () => {
           paddingVertical: 12, // py-3
           paddingHorizontal: 12, // p-3
           borderRadius: 24, // rounded-2xl
-          backgroundColor: colors.primary,
+          backgroundColor: colors.primaryLight80,
           gap: 12, // gap-3
         }}
       >
@@ -104,7 +104,7 @@ const Hourly = () => {
             style={{
               width: 28,
               height: 28,
-              backgroundColor: colors.primaryLight50,
+              backgroundColor: colors.primary,
               justifyContent: 'center',
               alignItems: 'center',
               borderRadius: 999,
@@ -120,7 +120,7 @@ const Hourly = () => {
             style={{
               fontFamily: 'DM Sans',
               fontWeight: '400',
-              color: colors.textButton,
+              color: colors.secondary,
             }}
           >
             Consumo Semanal
