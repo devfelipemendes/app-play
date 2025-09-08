@@ -1,4 +1,4 @@
-// components/layout/PlansCarousel.tsx
+// components/layout/PlansCarousel.tsx - Versão Responsiva
 import React, { useRef, useState, useCallback } from 'react'
 import {
   View,
@@ -24,8 +24,9 @@ import {
 import { RootState } from '@/src/store/index'
 import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
 
-const { width: screenWidth } = Dimensions.get('window')
-const CARD_WIDTH = screenWidth * 0.85
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window')
+const CARD_WIDTH = screenWidth * 0.9 // 90% da largura da tela
+const CARD_HEIGHT = screenHeight * 0.7 // 65% da altura da tela
 
 interface Plan {
   planid: number | string
@@ -92,26 +93,19 @@ const PlanCard: React.FC<PlanCardProps> = ({ plan, animationValue, onBuy }) => {
     const scale = interpolate(
       animationValue.value,
       [-1, 0, 1],
-      [0.85, 1, 0.85],
+      [0.9, 1, 0.9],
       Extrapolation.CLAMP,
     )
 
     const opacity = interpolate(
       animationValue.value,
       [-1, 0, 1],
-      [0.6, 1, 0.6],
-      Extrapolation.CLAMP,
-    )
-
-    const translateY = interpolate(
-      animationValue.value,
-      [-1, 0, 1],
-      [20, 0, 20],
+      [0.7, 1, 0.7],
       Extrapolation.CLAMP,
     )
 
     return {
-      transform: [{ scale }, { translateY }],
+      transform: [{ scale }],
       opacity,
     }
   })
@@ -121,134 +115,137 @@ const PlanCard: React.FC<PlanCardProps> = ({ plan, animationValue, onBuy }) => {
       style={[
         {
           width: CARD_WIDTH,
+          height: CARD_HEIGHT,
           alignSelf: 'center',
         },
         animatedStyle,
       ]}
       backgroundColor="white"
       borderRadius={20}
-      borderWidth={1}
-      borderColor="#E5E7EB"
-      padding={24}
-      shadowColor="#000"
+      borderWidth={2}
+      borderColor={colors.primary}
+      padding={20}
+      shadowColor="#383838"
       shadowOffset={{ width: 0, height: 4 }}
       shadowOpacity={0.15}
       shadowRadius={12}
       elevation={8}
     >
       {/* Gigas - Destaque Principal */}
-      <VStack alignItems="center" marginBottom={28}>
+
+      <HStack
+        alignItems="baseline"
+        justifyContent="center"
+        display="flex"
+        flexDirection="row"
+        marginBottom={10}
+      >
         <Text
           style={{
-            fontSize: 56,
+            fontSize: screenWidth * 0.12, // Responsivo baseado na largura
             fontWeight: 'bold',
             color: colors.primary,
             textAlign: 'center',
-            lineHeight: 60,
           }}
         >
           {plan.gigas}
         </Text>
         <Text
           style={{
-            fontSize: 18,
-            color: colors.subTitle,
-            marginTop: -4,
-            fontWeight: '500',
+            fontSize: screenWidth * 0.06,
+            fontWeight: 'bold',
+            color: colors.primary,
+            marginLeft: 4,
           }}
         >
-          de internet
+          GB
+        </Text>
+      </HStack>
+
+      {/* Benefícios */}
+      <VStack space={'sm'} marginBottom={15}>
+        <Text
+          style={{
+            fontSize: 14,
+            color: colors.text,
+            fontWeight: '500',
+            textAlign: 'center',
+          }}
+        >
+          {plan.min} Minutos • {plan.sms} SMS
         </Text>
       </VStack>
 
-      {/* Benefícios */}
-      <VStack space={'sm'} marginBottom={28}>
-        <HStack alignItems="center" space={'sm'}>
-          <View
-            style={{
-              width: 10,
-              height: 10,
-              borderRadius: 5,
-              backgroundColor: colors.primary,
-            }}
-          />
-          <Text
-            style={{
-              fontSize: 16,
-              color: colors.text,
-              fontWeight: '500',
-            }}
-          >
-            {plan.min} de ligações
-          </Text>
-        </HStack>
-
-        <HStack alignItems="center" space={'sm'}>
-          <View
-            style={{
-              width: 10,
-              height: 10,
-              borderRadius: 5,
-              backgroundColor: colors.primary,
-            }}
-          />
-          <Text
-            style={{
-              fontSize: 16,
-              color: colors.text,
-              fontWeight: '500',
-            }}
-          >
-            {plan.sms} SMS
-          </Text>
-        </HStack>
-      </VStack>
-
       {/* Apps Inclusos */}
-      <VStack marginBottom={28}>
+      <VStack marginBottom={20} flex={1}>
         <Text
           style={{
-            fontSize: 18,
+            fontSize: 16,
             fontWeight: '600',
             color: colors.text,
-            marginBottom: 16,
+            marginBottom: 12,
+            textAlign: 'center',
           }}
         >
           Apps inclusos:
         </Text>
-        <HStack flexWrap="wrap" space={'sm'} justifyContent="center">
+
+        <View
+          style={{
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: 8,
+          }}
+        >
           {mockApps.slice(0, 6).map((app, index) => (
             <View
               key={index}
               style={{
-                width: 44,
-                height: 44,
-                borderRadius: 10,
-                marginBottom: 8,
+                width: (CARD_WIDTH - 80) / 3 - 8, // 3 colunas responsivas
+                aspectRatio: 1,
+                borderRadius: 12,
+                backgroundColor: '#F8F9FA',
+                justifyContent: 'center',
+                alignItems: 'center',
                 shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.1,
-                shadowRadius: 4,
-                elevation: 3,
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.08,
+                shadowRadius: 2,
+                elevation: 2,
+                marginBottom: 4,
               }}
             >
               <Image
                 source={{ uri: app.icon }}
                 style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: 10,
+                  width: '60%',
+                  height: '60%',
+                  borderRadius: 6,
                 }}
                 resizeMode="cover"
               />
+              <Text
+                style={{
+                  fontSize: 8,
+                  color: colors.text,
+                  fontWeight: '500',
+                  marginTop: 2,
+                  textAlign: 'center',
+                }}
+                numberOfLines={1}
+              >
+                {app.name}
+              </Text>
             </View>
           ))}
-        </HStack>
+        </View>
       </VStack>
 
       {/* Preço */}
-      <VStack alignItems="center" marginBottom={24}>
-        <HStack alignItems="baseline" space={'sm'}>
+      <VStack alignItems="center" marginBottom={20}>
+        <HStack alignItems="baseline" justifyContent="center">
           <Text
             style={{
               fontSize: 14,
@@ -260,10 +257,10 @@ const PlanCard: React.FC<PlanCardProps> = ({ plan, animationValue, onBuy }) => {
           </Text>
           <Text
             style={{
-              fontSize: 42,
+              fontSize: 36,
               fontWeight: 'bold',
               color: colors.text,
-              lineHeight: 48,
+              marginLeft: 4,
             }}
           >
             {plan.value}
@@ -271,7 +268,7 @@ const PlanCard: React.FC<PlanCardProps> = ({ plan, animationValue, onBuy }) => {
         </HStack>
         <Text
           style={{
-            fontSize: 16,
+            fontSize: 14,
             color: colors.subTitle,
             fontWeight: '500',
           }}
@@ -283,20 +280,24 @@ const PlanCard: React.FC<PlanCardProps> = ({ plan, animationValue, onBuy }) => {
       {/* Botão de Compra */}
       <Button
         onPress={onBuy}
-        backgroundColor={colors.primary}
-        borderRadius={16}
-        padding={18}
-        shadowColor={colors.primary}
-        shadowOffset={{ width: 0, height: 4 }}
-        shadowOpacity={0.3}
-        shadowRadius={8}
-        elevation={6}
+        style={{
+          backgroundColor: colors.primary,
+          borderRadius: 16,
+          paddingVertical: 16,
+          paddingHorizontal: 24,
+          shadowColor: colors.primary,
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.3,
+          shadowRadius: 8,
+          elevation: 6,
+        }}
       >
         <Text
           style={{
             color: colors.textButton,
-            fontSize: 18,
+            fontSize: 16,
             fontWeight: '600',
+            textAlign: 'center',
           }}
         >
           Contratar Plano
@@ -312,12 +313,10 @@ const PlansCarousel: React.FC = () => {
   const progressValue = useSharedValue<number>(0)
   const { colors } = useCompanyThemeSimple()
 
-  const dispatch = useAppDispatch()
-
-  // Buscar informações do usuário do Redux (usando seu slice atual)
+  // Buscar informações do usuário do Redux
   const userInfo = useAppSelector((state: RootState) => state.ativarLinha || {})
   const {
-    parceiro = '',
+    parceiro = 'PLAY MÓVEL',
     token = '30684d5f2e7cfdd198e58f6a1efedf6f8da743c85ef0ef6558',
     cpf = '',
     ddd = '',
@@ -331,9 +330,8 @@ const PlansCarousel: React.FC = () => {
     error,
     refetch,
   } = useGetPlansQuery({
-    parceiro: parceiro || '',
-    token: token || '',
-    userInfo: JSON.stringify(userInfo),
+    parceiro: parceiro || '46',
+    token: token || '30684d5f2e7cfdd198e58f6a1efedf6f8da743c85ef0ef6558',
   })
 
   // Mutation para ativar linha
@@ -344,8 +342,8 @@ const PlansCarousel: React.FC = () => {
   const allPlans = plansData
     ? [...(plansData.Original || []), ...(plansData.personalizado || [])]
     : []
+
   const handleBuyPlan = async (plan: Plan) => {
-    // ✅ VALIDAÇÃO COMPLETA antes de tentar ativar
     if (!cpf || !ddd || !iccid) {
       Alert.alert(
         'Dados Incompletos',
@@ -411,10 +409,7 @@ const PlansCarousel: React.FC = () => {
     [],
   )
 
-  const onProgressChange = (
-    offsetProgress: number,
-    absoluteProgress: number,
-  ) => {
+  const onProgressChange = (offsetProgress: number) => {
     progressValue.value = offsetProgress
   }
 
@@ -422,16 +417,12 @@ const PlansCarousel: React.FC = () => {
     setCurrentIndex(index)
   }
 
+  // Renderizar dots indicadores
   const renderDots = () => {
     if (allPlans.length <= 1) return null
 
     return (
-      <HStack
-        justifyContent="center"
-        space={'sm'}
-        marginTop={24}
-        marginBottom={20}
-      >
+      <HStack justifyContent="center" space={'sm'} marginTop={20}>
         {allPlans.map((_, index) => (
           <TouchableOpacity
             key={index}
@@ -444,9 +435,9 @@ const PlansCarousel: React.FC = () => {
           >
             <View
               style={{
-                width: currentIndex === index ? 24 : 10,
-                height: 10,
-                borderRadius: 5,
+                width: currentIndex === index ? 24 : 8,
+                height: 8,
+                borderRadius: 4,
                 backgroundColor:
                   currentIndex === index ? colors.primary : colors.disabled,
               }}
@@ -469,9 +460,6 @@ const PlansCarousel: React.FC = () => {
         <VStack alignItems="center" space={'sm'}>
           <Text style={{ fontSize: 18, color: colors.subTitle }}>
             Preparando planos...
-          </Text>
-          <Text style={{ fontSize: 14, color: colors.subTitle }}>
-            Aguarde um momento
           </Text>
         </VStack>
       </Box>
@@ -555,8 +543,8 @@ const PlansCarousel: React.FC = () => {
         flex={1}
         justifyContent="center"
         alignItems="center"
-        padding={20}
         backgroundColor={colors.background}
+        padding={10}
       >
         <PlanCard
           plan={allPlans[0]}
@@ -568,30 +556,26 @@ const PlansCarousel: React.FC = () => {
   }
 
   return (
-    <Box flex={1} backgroundColor={colors.background}>
-      <Box flex={1} justifyContent="center">
-        <Carousel
-          ref={carouselRef}
-          loop={false}
-          width={screenWidth}
-          height={600}
-          data={allPlans}
-          renderItem={renderPlanCard}
-          onProgressChange={onProgressChange}
-          onSnapToItem={onSnapToItem}
-          mode="parallax"
-          modeConfig={{
-            parallaxScrollingScale: 0.85,
-            parallaxScrollingOffset: 50,
-            parallaxAdjacentItemScale: 0.75,
-          }}
-          customConfig={() => ({ type: 'positive', viewCount: 3 })}
-          scrollAnimationDuration={800}
-          enabled={true}
-          pagingEnabled={true}
-        />
-      </Box>
-      {renderDots()}
+    <Box flex={1} backgroundColor={colors.background} justifyContent="center">
+      <Carousel
+        ref={carouselRef}
+        loop={false}
+        width={screenWidth}
+        height={CARD_HEIGHT} // Altura do card + espaço para dots
+        data={allPlans}
+        renderItem={renderPlanCard}
+        onProgressChange={onProgressChange}
+        onSnapToItem={onSnapToItem}
+        mode="parallax"
+        modeConfig={{
+          parallaxScrollingScale: 0.9,
+          parallaxScrollingOffset: 40,
+          parallaxAdjacentItemScale: 0.8,
+        }}
+        scrollAnimationDuration={400}
+        enabled={true}
+        pagingEnabled={true}
+      />
     </Box>
   )
 }

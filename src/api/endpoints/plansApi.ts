@@ -34,8 +34,6 @@ interface ResponseBuscaPlanos {
 interface PayloadBuscaPlanos {
   parceiro: string
   token: string | Blob | undefined
-  userInfo?: string
-  iccid?: string
 }
 
 interface ActiveLineBody {
@@ -57,11 +55,17 @@ interface ResponseActiveLine {
 const plansAPI = apiPlay.injectEndpoints({
   endpoints: (builder) => ({
     getPlans: builder.query<ResponseBuscaPlanos, PayloadBuscaPlanos>({
-      query: (payload) => ({
-        url: '/api/planos/visualizar',
-        method: 'POST',
-        body: payload,
-      }),
+      query: (payload) => {
+        console.log('🎯 plansApi.ts - Payload recebido:', payload)
+        console.log('🎯 plansApi.ts - Token:', payload.token)
+        console.log('🎯 plansApi.ts - Parceiro:', payload.parceiro)
+
+        return {
+          url: '/api/planos/visualizar',
+          method: 'POST',
+          data: payload, // ✅ Mudança: 'data' em vez de 'body'
+        }
+      },
       providesTags: ['Plans'],
     }),
 

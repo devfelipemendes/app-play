@@ -20,7 +20,7 @@ const initialState: AtivarLinhaType = {
 }
 
 const ativarLinhaSlice = createSlice({
-  name: 'user',
+  name: 'ativarLinha',
   initialState,
   reducers: {
     setUserInfo: (state, action: PayloadAction<Partial<AtivarLinhaType>>) => {

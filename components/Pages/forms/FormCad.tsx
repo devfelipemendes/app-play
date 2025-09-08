@@ -533,39 +533,14 @@ export default function FormCadastro() {
 
   useEffect(() => {
     if (step === 4) {
-      const formData = watch()
-      const documentValue = formData.cpf
-        ? unMask(formData.cpf)
-        : unMask(formData.cnpj || '')
-
-      // Extrair DDD do telefone
-      const phoneValue = unMask(formData.phone || '')
-      const ddd = phoneValue.slice(0, 2)
-
-      console.log('FormCadastro - Enviando dados para Redux:', {
-        cpf: documentValue,
-        name: formData.name || '',
-        parceiro: env.PARCEIRO || '',
-        iccid: iccidValue,
-        ddd: ddd,
-      })
-
-      // Atualizar Redux com dados necessários para buscar planos
       dispatch(
         setUserInfo({
           parceiro: env.PARCEIRO || '46',
           token: '30684d5f2e7cfdd198e58f6a1efedf6f8da743c85ef0ef6558',
-          // Estes campos são opcionais para visualização:
-          iccid: iccidValue || '',
-
-          // Campos que vamos precisar DEPOIS para ativação:
-          cpf: documentValue || '',
-          name: formData.name || '',
-          ddd: ddd || '',
         }),
       )
     }
-  }, [step, watch(), iccidValue, dispatch])
+  }, [step, dispatch])
 
   const handleCpfChange = async (text: string) => {
     const cleanText = unMask(text)
@@ -1409,11 +1384,11 @@ export default function FormCadastro() {
         )
       case 4:
         return (
-          <>
+          <Box style={{ flex: 1 }}>
             <Box style={{ marginBottom: 20 }}>
               <ArrowLeft color={colors.primary} onPress={() => setStep(1)} />
             </Box>
-            <Box style={{ marginBottom: 32, alignItems: 'center' }}>
+            <Box style={{ alignItems: 'center' }}>
               <Text
                 style={{
                   fontSize: 24,
@@ -1437,7 +1412,7 @@ export default function FormCadastro() {
               </Text>
               <PlansCarousel />
             </Box>
-          </>
+          </Box>
         )
       default:
         return (
