@@ -1,6 +1,6 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
+// src/store/slices/authSlice.ts
+import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
-// ✅ Interfaces adaptadas do código antigo
 interface ICompanyInfo {
   companyId?: number
   companyname?: string | null
@@ -32,9 +32,20 @@ interface ICompanyInfo {
   appversion?: string | null
 }
 
+interface User {
+  cpf: string
+  name: string
+  email?: string
+  token: string
+  profileid?: number
+  parceiro?: string
+  primeiroAcesso?: boolean
+  [key: string]: any
+}
+
 interface AuthState {
   // Estados do usuário
-  user: { [key: string]: any } | null
+  user: User | null
   isAuthenticated: boolean
 
   // Estados da empresa
@@ -43,6 +54,7 @@ interface AuthState {
   // Estados de loading
   loadingSystem: boolean
   loadingAuth: boolean
+  isCheckingAuth: boolean // Novo estado para verificação inicial
 
   // Estados de erro
   error: string | null
@@ -54,6 +66,7 @@ const initialState: AuthState = {
   companyInfo: null,
   loadingSystem: true,
   loadingAuth: false,
+  isCheckingAuth: true, // Inicia como true para verificar autenticação
   error: null,
 }
 
@@ -61,18 +74,21 @@ const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    // ✅ Loading states
+    // Loading states
     setLoadingAuth: (state, action: PayloadAction<boolean>) => {
       state.loadingAuth = action.payload
     },
     setLoadingSystem: (state, action: PayloadAction<boolean>) => {
       state.loadingSystem = action.payload
     },
+    setCheckingAuth: (state, action: PayloadAction<boolean>) => {
+      state.isCheckingAuth = action.payload
+    },
 
-    // ✅ User management
-    setUser: (state, action: PayloadAction<AuthState['user']>) => {
+    // User management
+    setUser: (state, action: PayloadAction<User>) => {
       state.user = action.payload
-      state.isAuthenticated = !!action.payload
+      state.isAuthenticated = true
       state.error = null
     },
     clearUser: (state) => {
@@ -80,29 +96,34 @@ const authSlice = createSlice({
       state.isAuthenticated = false
     },
 
-    // ✅ Company info
+    // Company info
     setCompanyInfo: (state, action: PayloadAction<ICompanyInfo>) => {
       state.companyInfo = action.payload
     },
 
-    // ✅ Error handling
+    // Error handling
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload
     },
     clearError: (state) => {
       state.error = null
     },
+
+    // Reset state
+    resetAuthState: () => initialState,
   },
 })
 
 export const {
   setLoadingAuth,
   setLoadingSystem,
+  setCheckingAuth,
   setUser,
   clearUser,
   setCompanyInfo,
   setError,
   clearError,
+  resetAuthState,
 } = authSlice.actions
 
 export default authSlice.reducer

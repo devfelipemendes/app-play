@@ -9,7 +9,7 @@ import ThemeCard from '@/components/screens/settings/theme-card'
 
 import CustomHeader from '@/components/shared/custom-header'
 import { Link } from 'expo-router'
-import { useAuth } from '@/src/store/hooks/useAuth'
+import { useAuth } from '@/hooks/useAuth'
 import { ThemeContext } from '@/contexts/theme-context'
 import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
 

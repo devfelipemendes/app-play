@@ -1,16 +1,17 @@
-// src/store/hooks/useAuth.ts - VERSÃO FUNCIONAL SIMPLES
+// src/store/hooks/useAuth.ts
 import { useRouter } from 'expo-router'
-import { Alert, Platform } from 'react-native'
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import { useAppSelector, useAppDispatch } from '../hooks'
+import { Alert } from 'react-native'
+import { useAppSelector, useAppDispatch } from '@/src/store/hooks'
 import {
   clearUser,
   setLoadingAuth,
   setLoadingSystem,
+  setCheckingAuth,
   setUser,
   setCompanyInfo,
   setError,
-} from '../slices/authSlice'
+  resetAuthState,
+} from '@/src/store/slices/authSlice'
 import {
   useLoginMutation,
   useLazyGetCompanyInfoQuery,
@@ -18,36 +19,58 @@ import {
   useChangePasswordMutation,
 } from '@/src/api/endpoints/AuthApi'
 import { env } from '@/config/env'
+import SecureStorage from '@/services/secureStorage'
 
-// ✅ Helper temporário para toasts
+// Helper para toasts
 const showToast = (message: string, type: 'success' | 'error' = 'error') => {
   console.log(`Toast ${type}:`, message)
   Alert.alert(type === 'error' ? 'Erro' : 'Sucesso', message)
 }
 
-// ✅ Hook useAuth - versão funcional básica
 export function useAuth() {
   const dispatch = useAppDispatch()
   const router = useRouter()
 
-  // ✅ RTK Query hooks
+  // RTK Query hooks
   const [loginMutation] = useLoginMutation()
   const [getCompanyInfoQuery] = useLazyGetCompanyInfoQuery()
   const [forgotPasswordMutation] = useForgotPasswordMutation()
   const [changePasswordMutation] = useChangePasswordMutation()
 
-  // ✅ Selectors do Redux
+  // Selectors do Redux
   const {
     user,
     isAuthenticated,
     companyInfo,
     loadingSystem,
     loadingAuth,
+    isCheckingAuth,
     error,
   } = useAppSelector((state) => state.auth)
 
-  // ✅ Buscar informações da empresa - FUNCIONAL
-  const getCompanyInfo = async () => {
+  // Verificar autenticação ao inicializar
+  const checkAuthentication = async () => {
+    dispatch(setCheckingAuth(true))
+
+    try {
+      // Verificar se tem token salvo
+      const token = await SecureStorage.getToken()
+      const userData = await SecureStorage.getUserData()
+
+      if (token && userData) {
+        // Validar token com o backend (opcional)
+        // Se válido, restaurar sessão
+        dispatch(setUser({ ...userData, token }))
+      }
+    } catch (error) {
+      console.error('Erro ao verificar autenticação:', error)
+    } finally {
+      dispatch(setCheckingAuth(false))
+    }
+  }
+
+  // Buscar informações da empresa com retry logic
+  const getCompanyInfo = async (retryCount = 0) => {
     try {
       console.log('🏢 Carregando informações da empresa...')
       dispatch(setLoadingSystem(true))
@@ -59,6 +82,22 @@ export function useAuth() {
       })
 
       if ('error' in result) {
+        const error = result.error as any
+
+        // Se for erro 429 (rate limit), aguardar e tentar novamente
+        if (error?.status === 429 && retryCount < 3) {
+          const retryAfter = error?.data?.retry_after || 30
+          console.log(
+            `⏳ Rate limit atingido. Aguardando ${retryAfter} segundos...`,
+          )
+
+          // Aguardar o tempo necessário
+          await new Promise((resolve) => setTimeout(resolve, retryAfter * 1000))
+
+          // Tentar novamente
+          return getCompanyInfo(retryCount + 1)
+        }
+
         throw new Error('Erro ao carregar informações da empresa')
       }
 
@@ -73,15 +112,19 @@ export function useAuth() {
     } catch (error: any) {
       console.error('❌ Erro ao carregar company info:', error)
       dispatch(setLoadingSystem(false))
-      dispatch(setError('Erro ao carregar informações da empresa'))
+
+      // Não bloquear o app se falhar ao carregar info da empresa
+      // Pode continuar funcionando com configurações padrão
+      console.warn('⚠️ Continuando sem informações da empresa...')
       return false
     }
   }
 
-  // ✅ Login - versão simplificada e funcional
+  // Login
   const signIn = async (
     cpf: string,
     senha: string,
+    rememberMe: boolean = false,
     latitude: string = '0',
     longitude: string = '0',
     acao_realizada: string = 'login',
@@ -112,49 +155,71 @@ export function useAuth() {
         if (error.status === 551) {
           return showToast('CPF/CNPJ não encontrado!', 'error')
         }
-        return showToast('Erro ao logar!', 'error')
+        return showToast('Erro ao fazer login!', 'error')
       }
 
       const userData = result.data
 
       if (userData.profileid === 5) {
         dispatch(setLoadingAuth(false))
-        return showToast('CPF/CNPJ não encontrado!', 'error')
+        return showToast('Usuário inativo!', 'error')
+      }
+
+      // Salvar token de forma segura
+      await SecureStorage.saveToken(userData.token)
+
+      // Salvar dados do usuário
+      await SecureStorage.saveUserData({
+        cpf: userData.cpf,
+        name: userData.name,
+        email: userData.email,
+        profileid: userData.profileid,
+        parceiro: userData.parceiro,
+      })
+
+      // Salvar credenciais se "Lembrar-me" estiver marcado
+      if (rememberMe) {
+        await SecureStorage.saveRememberMe(cpf, senha)
+      } else {
+        await SecureStorage.clearRememberMe()
       }
 
       dispatch(setUser(userData))
-      await AsyncStorage.setItem(
-        'usr_c',
-        JSON.stringify({ cpf, password: senha }),
-      )
-
       dispatch(setLoadingAuth(false))
 
       if (userData.primeiroAcesso) {
-        router.push('/alterar-senha-primeiro-acesso' as any)
+        router.replace('/alterar-senha-primeiro-acesso' as any)
       } else {
-        router.push('/' as any)
+        router.replace('/(tabs)/(weather)' as any)
       }
     } catch (error: any) {
       console.error('❌ Erro no login:', error)
       dispatch(setLoadingAuth(false))
-      showToast('Erro ao logar!', 'error')
+      showToast('Erro ao fazer login!', 'error')
     }
   }
 
-  // ✅ Logout
+  // Logout
   const signOut = async () => {
     dispatch(setLoadingAuth(true))
+
     try {
-      dispatch(clearUser())
-      await AsyncStorage.removeItem('usr_c')
-      router.push('/' as any)
+      // Limpar dados seguros
+      await SecureStorage.clearAll()
+
+      // Limpar estado do Redux
+      dispatch(resetAuthState())
+
+      // Navegar para login
+      router.replace('/(auth)/entrar' as any)
+    } catch (error) {
+      console.error('Erro ao fazer logout:', error)
     } finally {
       dispatch(setLoadingAuth(false))
     }
   }
 
-  // ✅ Esqueci senha
+  // Esqueci senha
   const forgotPassword = async (cpf: string) => {
     dispatch(setLoadingAuth(true))
 
@@ -166,19 +231,19 @@ export function useAuth() {
         return showToast('Erro ao solicitar recuperação!', 'error')
       }
 
-      showToast('Recuperação solicitada! Verifique seu email/SMS.', 'success')
+      showToast('Instruções enviadas para seu email/SMS!', 'success')
       dispatch(setLoadingAuth(false))
-      router.push('/entrar' as any)
+      router.push('/(auth)/entrar' as any)
     } catch (error: any) {
       dispatch(setLoadingAuth(false))
       showToast('Erro ao solicitar recuperação!', 'error')
     }
   }
 
-  // ✅ Alterar senha
+  // Alterar senha
   const changePassword = async (newPassword: string) => {
     if (!user) {
-      return showToast('Usuário não logado!', 'error')
+      return showToast('Usuário não autenticado!', 'error')
     }
 
     dispatch(setLoadingAuth(true))
@@ -197,35 +262,33 @@ export function useAuth() {
 
       dispatch(setLoadingAuth(false))
       showToast('Senha alterada com sucesso!', 'success')
-      router.push('/' as any)
+      router.replace('/(tabs)/(weather)' as any)
     } catch (error) {
       dispatch(setLoadingAuth(false))
       showToast('Erro ao alterar senha!', 'error')
     }
   }
 
-  // ✅ Estados computados
+  // Estados computados
   const isClientePj = user?.profileid === 3 && user?.cpf?.length > 11
 
-  // ✅ Return - API simples e funcional
   return {
-    // Estados principais
+    // Estados
     user,
     companyInfo,
     loadingSystem,
     loadingAuth,
+    isCheckingAuth,
     isAuthenticated,
     error,
 
-    // Funções principais
+    // Funções
     signIn,
     signOut,
     forgotPassword,
     changePassword,
-    getCompanyInfo, // ✅ Agora existe e é funcional
-
-    // Setters
-    setLoadingAuth: (loading: boolean) => dispatch(setLoadingAuth(loading)),
+    getCompanyInfo,
+    checkAuthentication,
 
     // Estados computados
     isClientePj,

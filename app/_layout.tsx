@@ -1,11 +1,10 @@
-// app/_layout.tsx - Versão mais simples sem conflitos
+// app/_layout.tsx
 import '@/global.css'
-import React, { useContext, useEffect } from 'react'
-import { Stack, useRouter, useSegments } from 'expo-router'
+import React, { useContext } from 'react'
+import { Stack } from 'expo-router'
 import { useFonts } from 'expo-font'
 import { StatusBar } from 'expo-status-bar'
 import { GluestackUIProvider } from '@gluestack-ui/themed'
-import { config } from '@gluestack-ui/config'
 
 import { ThemeContext, ThemeProvider } from '@/contexts/theme-context'
 import {
@@ -17,28 +16,22 @@ import {
 import { Provider } from 'react-redux'
 import { store } from '@/src/store'
 import AuthProvider from '@/src/store/providers'
-import { useAuth } from '@/src/store/hooks/useAuth'
 import Toast from 'react-native-toast-message'
-
-// Novo contexto para tema whitelabel (separado do existente)
 
 import { createCustomConfig } from '@/config/theme'
 import {
   useWhitelabelTheme,
   WhitelabelThemeProvider,
 } from '@/contexts/theme-context/whitelabel-the,e-context'
-import 'react-native-toast-message/lib/src/Toast'
 import { PaperProvider } from 'react-native-paper'
+import AuthGuard from '@/src/components/auth/AuthGuard'
 
 // Componente para carregar tema da empresa
 const CompanyThemeLoader = ({ children }: { children: React.ReactNode }) => {
   const { loadTheme } = useWhitelabelTheme()
 
-  // Aqui você carregaria os dados da empresa do Redux
-  // const companyData = useSelector(state => state.company.data)
-
-  useEffect(() => {
-    // Simular carregamento dos dados da empresa
+  React.useEffect(() => {
+    // Aqui você carregaria os dados reais da empresa
     const mockCompanyData = {
       companyId: 46,
       companyname: 'PLAY MÓVEL',
@@ -57,10 +50,7 @@ const CompanyThemeLoader = ({ children }: { children: React.ReactNode }) => {
 }
 
 const MainLayout = () => {
-  // Manter seu contexto original
-  const { colorMode }: any = useContext(ThemeContext) // Seu contexto existente
-
-  // Novo contexto whitelabel
+  const { colorMode }: any = useContext(ThemeContext)
   const { theme: whitelabelTheme } = useWhitelabelTheme()
 
   const [fontsLoaded] = useFonts({
@@ -73,37 +63,17 @@ const MainLayout = () => {
     return null
   }
 
-  function NavigationController({ children }: { children: React.ReactNode }) {
-    const { isAuthenticated, loadingSystem } = useAuth()
-    const segments = useSegments()
-    const router = useRouter()
-
-    useEffect(() => {
-      if (loadingSystem) return
-
-      const inAuthGroup = segments[0] === '(auth)'
-
-      if (isAuthenticated && inAuthGroup) {
-        router.replace('/(tabs)/(weather)')
-      } else if (!isAuthenticated && !inAuthGroup) {
-        router.replace('/(auth)/entrar')
-      }
-    }, [isAuthenticated, segments, loadingSystem])
-
-    return <>{children}</>
-  }
-
   return (
     <GluestackUIProvider config={createCustomConfig} colorMode={colorMode}>
       <StatusBar translucent />
       <AuthProvider>
         <CompanyThemeLoader>
-          <NavigationController>
+          <AuthGuard>
             <Stack>
               <Stack.Screen name="(auth)" options={{ headerShown: false }} />
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             </Stack>
-          </NavigationController>
+          </AuthGuard>
         </CompanyThemeLoader>
       </AuthProvider>
     </GluestackUIProvider>

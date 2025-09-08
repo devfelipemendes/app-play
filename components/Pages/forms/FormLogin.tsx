@@ -6,7 +6,7 @@ import { Button, ButtonText } from '@/components/ui/button'
 import { Box } from '@/components/ui/box'
 import { CustomInput } from '@/components/layout/CustomInput'
 import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
-import { useAuth } from '@/src/store/hooks/useAuth'
+import { useAuth } from '@/hooks/useAuth'
 import { useAppDispatch } from '@/src/store/hooks'
 import { setMode } from '@/src/store/slices/screenFlowSlice'
 import { useForm, Controller } from 'react-hook-form'
@@ -55,7 +55,15 @@ export default function FormLogin() {
     // Validação com valibot
     try {
       const UnMaskData = unMask(data.cpfCnpj)
-      signIn(UnMaskData, data.password, '0', '0', 'login', 'app')
+      signIn(
+        UnMaskData,
+        data.password,
+        data.rememberMe,
+        '0',
+        '0',
+        'login',
+        'app',
+      )
     } catch (err: any) {
       console.log('Erro de validação', err.errors)
       alert(err.errors.map((e: any) => e.message).join('\n'))
