@@ -39,7 +39,7 @@ const HourlyCard = ({
       style={{
         padding: 12, // p-3
         borderRadius: 24, // rounded-2xl
-        backgroundColor: colors.primaryLight80,
+        backgroundColor: colors.background,
         flex: 1,
         alignItems: 'flex-start',
         gap: 16, // gap-4

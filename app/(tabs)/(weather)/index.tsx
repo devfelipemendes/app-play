@@ -95,7 +95,10 @@ const Hourly = () => {
           paddingVertical: 12, // py-3
           paddingHorizontal: 12, // p-3
           borderRadius: 24, // rounded-2xl
-          backgroundColor: colors.primaryLight80,
+          backgroundColor: colors.background,
+          boxShadow: ' 0px 1px 3px rgba(0, 0, 0, 0.24)',
+          // Sombra (Android)
+          elevation: 4,
           gap: 12, // gap-3
         }}
       >

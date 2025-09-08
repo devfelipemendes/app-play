@@ -55,14 +55,16 @@ const Tabs = () => {
               backgroundColor:
                 selectedTabIndex === index
                   ? colors.secondary
-                  : lightenHexColor(colors.primary, 80),
+                  : lightenHexColor(colors.primary, 0),
             }}
           >
             <Text
               style={{
                 fontFamily: 'font-dm-sans-regular', // ou o nome correto da sua fonte
                 color:
-                  selectedTabIndex === index ? colors.textButton : colors.text,
+                  selectedTabIndex === index
+                    ? colors.textButton
+                    : colors.textButton,
               }}
             >
               {tab.label}

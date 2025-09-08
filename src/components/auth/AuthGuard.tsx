@@ -20,6 +20,7 @@ export default function AuthGuard({ children }: AuthGuardProps) {
   const segments = useSegments()
   const router = useRouter()
   const hasInitialized = useRef(false)
+  const hasLoggedOut = useRef(false)
 
   // Verificar autenticação ao montar o componente - APENAS UMA VEZ
   useEffect(() => {
@@ -52,6 +53,12 @@ export default function AuthGuard({ children }: AuthGuardProps) {
     }
   }, [isAuthenticated, segments, isCheckingAuth, loadingSystem])
 
+  useEffect(() => {
+    if (!isAuthenticated && hasInitialized.current) {
+      hasLoggedOut.current = true
+    }
+  }, [isAuthenticated])
+
   // Mostrar loading enquanto verifica autenticação
   if (isCheckingAuth || loadingSystem) {
     return (
@@ -63,7 +70,7 @@ export default function AuthGuard({ children }: AuthGuardProps) {
           backgroundColor: '#fff',
         }}
       >
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color="red" />
       </View>
     )
   }

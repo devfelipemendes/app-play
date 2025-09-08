@@ -49,7 +49,9 @@ export function useAuth() {
   } = useAppSelector((state) => state.auth)
 
   // Verificar autenticação ao inicializar
-  const checkAuthentication = async () => {
+  const checkAuthentication = async (force = false) => {
+    if (!force && isAuthenticated) return
+
     dispatch(setCheckingAuth(true))
 
     try {
@@ -202,22 +204,39 @@ export function useAuth() {
   // Logout
   const signOut = async () => {
     dispatch(setLoadingAuth(true))
-    console.log('teste1')
+    console.log('Iniciando logout...')
 
     try {
-      // Limpar dados seguros
+      // Limpar dados seguros com timeout
+      const clearStoragePromise = SecureStorage.clearAll()
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Timeout')), 3000),
+      )
 
+      await Promise.race([clearStoragePromise, timeoutPromise])
+      console.log('Storage limpo com sucesso')
+    } catch (error) {
+      console.error('Erro ao limpar storage:', error)
+      // Continua mesmo se falhar
+    }
+
+    try {
       await SecureStorage.clearAll()
 
       // Limpar estado do Redux
       dispatch(resetAuthState())
 
-      // Navegar para login
+      // ✅ FORÇA todos os loadings como false
+      dispatch(setCheckingAuth(false))
+      dispatch(setLoadingSystem(false))
+      dispatch(setLoadingAuth(false))
+
       router.replace('/(auth)/entrar' as any)
     } catch (error) {
-      console.error('Erro ao fazer logout:', error)
-    } finally {
+      console.error('Erro:', error)
       dispatch(setLoadingAuth(false))
+      dispatch(setCheckingAuth(false))
+      dispatch(setLoadingSystem(false))
     }
   }
 

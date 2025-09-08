@@ -12,6 +12,7 @@ import { Link } from 'expo-router'
 import { useAuth } from '@/hooks/useAuth'
 import { ThemeContext } from '@/contexts/theme-context'
 import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
+import { Pressable } from '@/components/ui/pressable'
 
 const Settings = () => {
   const { colorMode, setColorMode }: any = useContext(ThemeContext)
@@ -45,9 +46,15 @@ const Settings = () => {
         </HStack>
       </VStack>
       <VStack className="px-4" space="md">
-        <Link href="/(auth)/entrar" onPress={() => signOut()}>
-          <Text className="font-semibold text-red-600">Logout</Text>
-        </Link>
+        <Pressable onPress={signOut} disabled={loadingAuth}>
+          <Text
+            className={`font-semibold ${
+              loadingAuth ? 'text-gray-400' : 'text-red-600'
+            }`}
+          >
+            {loadingAuth ? 'Saindo...' : 'Logout'}
+          </Text>
+        </Pressable>
       </VStack>
     </VStack>
   )
