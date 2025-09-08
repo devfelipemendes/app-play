@@ -2,6 +2,7 @@
 export const env = {
   // TODO: Configurar valores reais
   COMPANY_ID: 46,
+  PARCEIRO: 'PLAY MÓVEL',
   ACCESS_TK: 'your_access_token_here',
   API_BASE_URL: 'https://sistema.playmovel.com.br',
 

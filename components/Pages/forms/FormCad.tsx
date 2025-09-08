@@ -542,25 +542,28 @@ export default function FormCadastro() {
       const phoneValue = unMask(formData.phone || '')
       const ddd = phoneValue.slice(0, 2)
 
-      // Atualizar Redux com dados necessários para buscar planos
-      dispatch(
-        setUserInfo({
-          cpf: documentValue,
-          name: formData.name || '',
-          parceiro: env.COMPANY_ID || '',
-          token: '', // Será preenchido após login/cadastro se necessário
-          iccid: iccidValue,
-          ddd: ddd,
-        }),
-      )
-
-      console.log('Dados enviados para Redux:', {
+      console.log('FormCadastro - Enviando dados para Redux:', {
         cpf: documentValue,
         name: formData.name || '',
-        parceiro: env.COMPANY_ID || '',
+        parceiro: env.PARCEIRO || '',
         iccid: iccidValue,
         ddd: ddd,
       })
+
+      // Atualizar Redux com dados necessários para buscar planos
+      dispatch(
+        setUserInfo({
+          parceiro: env.PARCEIRO || '46',
+          token: '30684d5f2e7cfdd198e58f6a1efedf6f8da743c85ef0ef6558',
+          // Estes campos são opcionais para visualização:
+          iccid: iccidValue || '',
+
+          // Campos que vamos precisar DEPOIS para ativação:
+          cpf: documentValue || '',
+          name: formData.name || '',
+          ddd: ddd || '',
+        }),
+      )
     }
   }, [step, watch(), iccidValue, dispatch])
 

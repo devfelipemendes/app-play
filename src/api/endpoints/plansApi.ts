@@ -34,8 +34,8 @@ interface ResponseBuscaPlanos {
 interface PayloadBuscaPlanos {
   parceiro: string
   token: string | Blob | undefined
-  userInfo: string
-  iccid: string
+  userInfo?: string
+  iccid?: string
 }
 
 interface ActiveLineBody {

@@ -315,8 +315,14 @@ const PlansCarousel: React.FC = () => {
   const dispatch = useAppDispatch()
 
   // Buscar informações do usuário do Redux (usando seu slice atual)
-  const userInfo = useAppSelector((state: RootState) => state.user)
-  const { cpf, parceiro, token, iccid, ddd } = userInfo
+  const userInfo = useAppSelector((state: RootState) => state.ativarLinha || {})
+  const {
+    parceiro = '',
+    token = '30684d5f2e7cfdd198e58f6a1efedf6f8da743c85ef0ef6558',
+    cpf = '',
+    ddd = '',
+    iccid = '',
+  } = userInfo
 
   // Query para buscar planos
   const {
@@ -328,18 +334,30 @@ const PlansCarousel: React.FC = () => {
     parceiro: parceiro || '',
     token: token || '',
     userInfo: JSON.stringify(userInfo),
-    iccid: iccid || '',
   })
 
   // Mutation para ativar linha
   const [activateLine, { isLoading: isActivating }] = useActivateLineMutation()
+  const canShowPlans = parceiro && token
 
   // Combinar planos originais e personalizados
   const allPlans = plansData
     ? [...(plansData.Original || []), ...(plansData.personalizado || [])]
     : []
-
   const handleBuyPlan = async (plan: Plan) => {
+    // ✅ VALIDAÇÃO COMPLETA antes de tentar ativar
+    if (!cpf || !ddd || !iccid) {
+      Alert.alert(
+        'Dados Incompletos',
+        'Complete o cadastro antes de contratar um plano:\n\n' +
+          (!cpf ? '• CPF/CNPJ\n' : '') +
+          (!ddd ? '• Telefone\n' : '') +
+          (!iccid ? '• ICCID do SIM Card' : ''),
+        [{ text: 'OK', style: 'default' }],
+      )
+      return
+    }
+
     try {
       Alert.alert(
         'Confirmar Compra',
@@ -351,13 +369,13 @@ const PlansCarousel: React.FC = () => {
             style: 'default',
             onPress: async () => {
               const payload = {
-                cpf: cpf || '',
-                ddd: ddd || '',
-                iccid: iccid || '',
+                cpf: cpf,
+                ddd: ddd,
+                iccid: iccid,
                 planid: plan.planid.toString(),
-                planid_personalizado: '', // Definir lógica para identificar se é personalizado
+                planid_personalizado: '',
                 isApp: true,
-                pospago: 'N', // Definir lógica baseada no plano
+                pospago: 'N',
                 userInfo: JSON.stringify(userInfo),
               }
 
@@ -436,6 +454,27 @@ const PlansCarousel: React.FC = () => {
           </TouchableOpacity>
         ))}
       </HStack>
+    )
+  }
+
+  if (!canShowPlans) {
+    return (
+      <Box
+        flex={1}
+        justifyContent="center"
+        alignItems="center"
+        backgroundColor={colors.background}
+        padding={20}
+      >
+        <VStack alignItems="center" space={'sm'}>
+          <Text style={{ fontSize: 18, color: colors.subTitle }}>
+            Preparando planos...
+          </Text>
+          <Text style={{ fontSize: 14, color: colors.subTitle }}>
+            Aguarde um momento
+          </Text>
+        </VStack>
+      </Box>
     )
   }
 
