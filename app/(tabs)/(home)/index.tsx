@@ -1,26 +1,26 @@
 import React, { useContext, useEffect } from 'react'
 import { VStack } from '@/components/ui/vstack'
-import { CloudRain } from 'lucide-react-native'
+import { Globe } from 'lucide-react-native'
 import { ClockIcon, Icon } from '@/components/ui/icon'
 import { HStack } from '@/components/ui/hstack'
 import HourlyCard from '@/components/screens/weather/hourly-card'
 import { Box } from '@/components/ui/box'
 import { Text } from '@/components/ui/text'
 import ForeCastCard from '@/components/screens/weather/forecast-card'
-import RainCard from '@/components/screens/weather/rain-card'
+
 import Chart from '@/components/screens/weather/chart'
 import { ScrollView } from '@/components/ui/scroll-view'
+import { useFocusEffect } from '@react-navigation/native'
+import { useCallback } from 'react'
 import { WeatherTabContext } from '@/contexts/weather-screen-context'
 import {
   WindAndPrecipitationData,
   PressureAndUVIndexData,
   HourlyForecastData,
-  RainPredictionData,
-  SunriseAndSunsetData,
 } from '@/data/screens/weather/hourly-tab'
 import Animated, { FadeInDown } from 'react-native-reanimated'
 import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
-import { useAppDispatch } from '@/src/store/hooks'
+import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { useGetDet2Mutation } from '@/src/api/endpoints/getDetails'
 import { useAuth } from '@/hooks/useAuth'
 import { setError, setLoading, setSelected } from '@/src/store/slices/det2Slice'
@@ -29,9 +29,15 @@ const Home = () => {
   const { childRefs, hasHourlyTabChild1Animated }: any =
     useContext(WeatherTabContext)
   const AnimatedVStack = Animated.createAnimatedComponent(VStack)
+
+  const {
+    selected: det2Data,
+    loading: det2Loading,
+    error: det2Error,
+  } = useAppSelector((state) => state.det2View)
   const { colors } = useCompanyThemeSimple()
 
-  const { user, isAuthenticated, loadingAuth } = useAuth()
+  const { user } = useAuth()
 
   const dispatch = useAppDispatch()
 
@@ -43,35 +49,37 @@ const Home = () => {
 
   const iccid = user?.icc
 
-  useEffect(() => {
-    if (!iccid) return
+  useFocusEffect(
+    useCallback(() => {
+      if (!iccid) return
 
-    const fetchDet2 = async () => {
-      try {
-        dispatch(setLoading(true))
-        const result = await useGetDet2Mutation({
-          atualizadet: 'SIM',
-          iccid,
-          parceiro: 'AMD',
-          token: '30684d5f2e7cfdd198e58f6a1efedf6f8da743c85ef0ef6558',
-          userInfo: JSON.stringify({
-            cpf: '05852179124',
-            name: 'Ronildo Filho',
-            parceiro: 'PLAY MÓVEL',
-          }),
-        }).unwrap()
+      const fetchDet2 = async () => {
+        try {
+          dispatch(setLoading(true))
+          const result = await getDet2({
+            atualizadet: 'SIM',
+            iccid,
+            parceiro: user.parceiro,
+            token: user.token,
+            userInfo: JSON.stringify({
+              cpf: user.cpf,
+              name: user.name,
+              parceiro: user.parceiro,
+            }),
+          }).unwrap()
 
-        dispatch(setSelected(result))
-        dispatch(setError(null))
-      } catch (err: any) {
-        dispatch(setError(err?.message || 'Erro ao carregar dados'))
-      } finally {
-        dispatch(setLoading(false))
+          dispatch(setSelected(result))
+          dispatch(setError(null))
+        } catch (err: any) {
+          dispatch(setError(err?.message || 'Erro ao carregar dados'))
+        } finally {
+          dispatch(setLoading(false))
+        }
       }
-    }
 
-    fetchDet2()
-  }, [iccid, getDet2, dispatch])
+      fetchDet2()
+    }, [iccid, user?.parceiro, user?.token, user?.cpf, user?.name]),
+  )
 
   return (
     <VStack
@@ -103,6 +111,24 @@ const Home = () => {
                 arrowUpIcon={card.arrowUpIcon}
               />
             ))}
+          </HStack>
+          <HStack style={{ gap: 16 }}>
+            <HourlyCard
+              icon={Globe}
+              text={det2Data?.dados || ''}
+              currentUpdate=""
+              lastUpdate=""
+              arrowDownIcon={true}
+              arrowUpIcon={true}
+            />
+            <HourlyCard
+              icon={Globe}
+              text=""
+              currentUpdate=""
+              lastUpdate=""
+              arrowDownIcon={true}
+              arrowUpIcon={true}
+            />
           </HStack>
         </Animated.View>
 
