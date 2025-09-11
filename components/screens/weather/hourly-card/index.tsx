@@ -37,43 +37,51 @@ const HourlyCard = ({
   return (
     <VStack
       style={{
-        padding: 12, // p-3
-        borderRadius: 24, // rounded-2xl
+        padding: 12,
+        borderRadius: 24,
         backgroundColor: colors.background,
         flex: 1,
         alignItems: 'flex-start',
-        gap: 16, // gap-4
-
+        gap: 16,
         shadowRadius: 4,
-        boxShadow: ' 0px 1px 3px rgba(0, 0, 0, 0.24)',
-        // Sombra (Android)
-        elevation: 4,
+        boxShadow: colors.shadow,
+        minWidth: 0,
+        overflow: 'hidden',
       }}
     >
       <HStack
         style={{
-          gap: 8, // gap-2
+          gap: 8,
           alignItems: 'center',
+          width: '100%',
+          minWidth: 0,
         }}
       >
         <Box
           style={{
-            width: 28, // w-7
-            height: 28, // h-7
+            width: 28,
+            height: 28,
             backgroundColor: colors.primary,
-            borderRadius: 999, // rounded-full
+            borderRadius: 999,
             justifyContent: 'center',
             alignItems: 'center',
+            flexShrink: 0,
           }}
         >
           <Icon as={icon} size="sm" style={{ color: colors.textButton }} />
         </Box>
         <Text
+          numberOfLines={1}
+          ellipsizeMode="tail"
           style={{
             color: colors.secondary,
             fontFamily: 'font-dm-sans-regular',
             fontWeight: '400',
             fontSize: 14,
+            flex: 1,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            flexWrap: 'nowrap',
           }}
         >
           {text}
@@ -83,15 +91,22 @@ const HourlyCard = ({
       <VStack
         style={{
           flex: 1,
-          gap: 8, // gap-2
+          gap: 8,
+          width: '100%',
+          minWidth: 0,
         }}
       >
         <Text
+          numberOfLines={1}
+          ellipsizeMode="tail"
           style={{
             color: colors.secondary,
             fontFamily: 'font-dm-sans-regular',
             fontWeight: '400',
             fontSize: 24,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            flexWrap: 'nowrap',
           }}
         >
           {currentUpdate}
@@ -99,30 +114,44 @@ const HourlyCard = ({
 
         <HStack
           style={{
-            gap: 4, // gap-1
+            gap: 4,
             alignItems: 'center',
+            width: '100%',
+            minWidth: 0,
           }}
         >
           {arrowDownIcon && (
             <Icon
               as={Smartphone}
               size="xs"
-              style={{ color: colors.secondary }}
+              style={{
+                color: colors.secondary,
+                flexShrink: 0,
+              }}
             />
           )}
           {arrowUpIcon && (
             <Icon
               as={GalleryVertical}
               size="xs"
-              style={{ color: colors.primary }}
+              style={{
+                color: colors.primary,
+                flexShrink: 0,
+              }}
             />
           )}
           <Text
+            numberOfLines={1}
+            ellipsizeMode="tail"
             style={{
               color: colors.secondary,
               fontFamily: 'font-dm-sans-regular',
               fontWeight: '500',
-              fontSize: 12, // tamanho xs
+              fontSize: 12,
+              flex: 1,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              flexWrap: 'nowrap',
             }}
           >
             {lastUpdate}

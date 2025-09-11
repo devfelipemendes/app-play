@@ -5,8 +5,8 @@ import { apiPlay } from '../apiPlay'
 export interface Det2Request {
   atualizadet: 'SIM' | 'NAO'
   iccid: string
-  parceiro: string
-  token: string
+  parceiro: string | undefined
+  token: string | undefined
   userInfo: string // JSON string
 }
 

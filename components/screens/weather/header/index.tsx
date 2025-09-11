@@ -12,9 +12,18 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated'
+import { useAppSelector } from '@/src/store/hooks'
+import { selectDet2Data, selectDet2Loading } from '@/src/store/slices/det2Slice'
+import { useDadosFormatter } from '@/src/utils/dadosFormatter'
+import { formatPhoneNumber } from '@/src/utils/PhoneFormatter'
+import { getCurrentFormattedDate } from '@/src/utils/getDateFormatter'
 
 const Header = ({ height }: { height: number }) => {
   const { colorMode }: any = useContext(ThemeContext)
+  const det2Data = useAppSelector(selectDet2Data)
+  const loading = useAppSelector(selectDet2Loading)
+
+  const { convertMBtoGB } = useDadosFormatter()
 
   // Shared value para height suavizada
   const smoothHeight = useSharedValue(height)
@@ -125,7 +134,7 @@ const Header = ({ height }: { height: number }) => {
                   dateTextStyle,
                 ]}
               >
-                28 de Agosto - 08:16
+                {getCurrentFormattedDate('full')}
               </Animated.Text>
             </VStack>
             <Animated.View style={searchIconStyle}>
@@ -151,7 +160,7 @@ const Header = ({ height }: { height: number }) => {
                 temperatureTextStyle,
               ]}
             >
-              13 GB
+              {det2Data?.dados && convertMBtoGB(det2Data.dados).formatted}
             </Animated.Text>
             <Animated.Text
               style={[
@@ -162,7 +171,7 @@ const Header = ({ height }: { height: number }) => {
                 feelsLikeTextStyle,
               ]}
             >
-              (61) 9 8339-8676
+              {det2Data?.msisdn && formatPhoneNumber(det2Data?.msisdn)}
             </Animated.Text>
           </Animated.View>
 

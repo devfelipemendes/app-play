@@ -140,6 +140,11 @@ export const useCompanyThemeSimple = () => {
           overlay: 'rgba(0,0,0,0.5)',
 
           background: '#ffffff',
+
+          shadow: '0px 1px 3px rgba(0, 0, 0, 0.24)',
+          shadowLight: '0px 1px 2px rgba(0, 0, 0, 0.12)',
+          shadowMedium: '0px 2px 4px rgba(0, 0, 0, 0.16)',
+          shadowHeavy: '0px 4px 8px rgba(0, 0, 0, 0.24)',
         }
       : {
           primary: '#cc3366',
@@ -173,6 +178,11 @@ export const useCompanyThemeSimple = () => {
           overlay: 'rgba(0,0,0,0.5)',
 
           background: '#ffffff',
+
+          shadow: '0px 1px 3px rgba(0, 0, 0, 0.24)',
+          shadowLight: '0px 1px 2px rgba(0, 0, 0, 0.12)',
+          shadowMedium: '0px 2px 4px rgba(0, 0, 0, 0.16)',
+          shadowHeavy: '0px 4px 8px rgba(0, 0, 0, 0.24)',
         },
   }
 }

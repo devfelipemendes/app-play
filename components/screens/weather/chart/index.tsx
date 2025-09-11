@@ -31,9 +31,8 @@ const Chart = ({ chartRef }: any) => {
       className="p-3 rounded-2xl bg-background-100 gap-3"
       style={{
         backgroundColor: colors.background,
-        boxShadow: ' 0px 1px 3px rgba(0, 0, 0, 0.24)',
+        boxShadow: colors.shadow,
         // Sombra (Android)
-        elevation: 4,
       }}
     >
       <HStack className="items-center gap-2">
