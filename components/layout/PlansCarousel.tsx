@@ -26,12 +26,30 @@ import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
 import { env } from '@/config/env'
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window')
-const CARD_WIDTH = screenWidth * 0.9 // 90% da largura da tela
-const CARD_HEIGHT = screenHeight * 0.7 // 65% da altura da tela
+const CARD_WIDTH = screenWidth * 0.9
+const CARD_HEIGHT = screenHeight * 0.64
+const RESPONSIVE = {
+  fontSize: {
+    gigasNumber: screenWidth * 0.12,
+    gigasUnit: screenWidth * 0.048,
+    benefits: screenWidth * 0.033,
+    appsTitle: screenWidth * 0.038,
+    priceSymbol: screenWidth * 0.03,
+    priceValue: screenWidth * 0.08,
+    priceLabel: screenWidth * 0.03,
+  },
+  spacing: {
+    cardPadding: screenWidth * 0.045,
+    sectionGap: screenHeight * 0.01,
+  },
+  appIcon: {
+    size: (CARD_WIDTH - screenWidth * 0.18) / 3 - 6,
+  },
+}
 
 interface Plan {
   planid: number | string
-  descricao: string
+  description: string
   bundle: number | string
   value: string
   qtdvideos?: number | null
@@ -87,7 +105,7 @@ interface PlanCardProps {
   onBuy: () => void
 }
 
-const PlanCard: React.FC<PlanCardProps> = ({ plan, animationValue, onBuy }) => {
+const PlanCard: React.FC<PlanCardProps> = React.memo(({ plan, animationValue, onBuy }) => {
   const { colors } = useCompanyThemeSimple()
 
   const animatedStyle = useAnimatedStyle(() => {
@@ -125,49 +143,50 @@ const PlanCard: React.FC<PlanCardProps> = ({ plan, animationValue, onBuy }) => {
       borderRadius={20}
       borderWidth={2}
       borderColor={colors.primary}
-      padding={20}
-      shadowColor="#383838"
-      shadowOffset={{ width: 0, height: 4 }}
-      shadowOpacity={0.15}
-      shadowRadius={12}
-      elevation={8}
+      padding={RESPONSIVE.spacing.cardPadding}
+      shadowColor="#000"
+      shadowOffset={{ width: 0, height: 2 }}
+      shadowOpacity={0.1}
+      shadowRadius={8}
+      elevation={4}
     >
       {/* Gigas - Destaque Principal */}
-
-      <HStack
-        alignItems="baseline"
-        justifyContent="center"
-        display="flex"
-        flexDirection="row"
-        marginBottom={10}
-      >
-        <Text
-          style={{
-            fontSize: screenWidth * 0.12, // Responsivo baseado na largura
-            fontWeight: 'bold',
-            color: colors.primary,
-            textAlign: 'center',
-          }}
+      <VStack marginBottom={RESPONSIVE.spacing.sectionGap * 0.8}>
+        <HStack
+          alignItems="baseline"
+          justifyContent="center"
+          display="flex"
+          flexDirection="row"
         >
-          {plan.gigas}
-        </Text>
-        <Text
-          style={{
-            fontSize: screenWidth * 0.06,
-            fontWeight: 'bold',
-            color: colors.primary,
-            marginLeft: 4,
-          }}
-        >
-          GB
-        </Text>
-      </HStack>
+          <Text
+            style={{
+              fontSize: RESPONSIVE.fontSize.gigasNumber,
+              fontWeight: 'bold',
+              color: colors.primary,
+              textAlign: 'center',
+              lineHeight: RESPONSIVE.fontSize.gigasNumber * 1.1,
+            }}
+          >
+            {plan.gigas}
+          </Text>
+          <Text
+            style={{
+              fontSize: RESPONSIVE.fontSize.gigasUnit,
+              fontWeight: 'bold',
+              color: colors.primary,
+              marginLeft: 4,
+            }}
+          >
+            GB
+          </Text>
+        </HStack>
+      </VStack>
 
       {/* Benefícios */}
-      <VStack space={'sm'} marginBottom={15}>
+      <VStack marginBottom={RESPONSIVE.spacing.sectionGap * 0.8}>
         <Text
           style={{
-            fontSize: 14,
+            fontSize: RESPONSIVE.fontSize.benefits,
             color: colors.text,
             fontWeight: '500',
             textAlign: 'center',
@@ -178,13 +197,17 @@ const PlanCard: React.FC<PlanCardProps> = ({ plan, animationValue, onBuy }) => {
       </VStack>
 
       {/* Apps Inclusos */}
-      <VStack marginBottom={20} flex={1}>
+      <VStack
+        marginBottom={RESPONSIVE.spacing.sectionGap * 0.8}
+        flex={1}
+        minHeight={0}
+      >
         <Text
           style={{
-            fontSize: 16,
+            fontSize: RESPONSIVE.fontSize.appsTitle,
             fontWeight: '600',
             color: colors.text,
-            marginBottom: 12,
+            marginBottom: RESPONSIVE.spacing.sectionGap * 0.6,
             textAlign: 'center',
           }}
         >
@@ -197,14 +220,14 @@ const PlanCard: React.FC<PlanCardProps> = ({ plan, animationValue, onBuy }) => {
             flexWrap: 'wrap',
             justifyContent: 'center',
             alignItems: 'center',
-            gap: 8,
+            gap: 6,
           }}
         >
           {mockApps.slice(0, 6).map((app, index) => (
             <View
               key={index}
               style={{
-                width: (CARD_WIDTH - 80) / 3 - 8, // 3 colunas responsivas
+                width: RESPONSIVE.appIcon.size,
                 aspectRatio: 1,
                 borderRadius: 12,
                 backgroundColor: '#F8F9FA',
@@ -215,7 +238,6 @@ const PlanCard: React.FC<PlanCardProps> = ({ plan, animationValue, onBuy }) => {
                 shadowOpacity: 0.08,
                 shadowRadius: 2,
                 elevation: 2,
-                marginBottom: 4,
               }}
             >
               <Image
@@ -229,7 +251,7 @@ const PlanCard: React.FC<PlanCardProps> = ({ plan, animationValue, onBuy }) => {
               />
               <Text
                 style={{
-                  fontSize: 8,
+                  fontSize: RESPONSIVE.fontSize.benefits * 0.65,
                   color: colors.text,
                   fontWeight: '500',
                   marginTop: 2,
@@ -245,11 +267,15 @@ const PlanCard: React.FC<PlanCardProps> = ({ plan, animationValue, onBuy }) => {
       </VStack>
 
       {/* Preço */}
-      <VStack alignItems="center" marginBottom={20}>
+      <VStack
+        alignItems="center"
+        marginBottom={RESPONSIVE.spacing.sectionGap * 0.8}
+        marginTop={RESPONSIVE.spacing.sectionGap * 0.5}
+      >
         <HStack alignItems="baseline" justifyContent="center">
           <Text
             style={{
-              fontSize: 14,
+              fontSize: RESPONSIVE.fontSize.priceSymbol,
               color: colors.subTitle,
               fontWeight: '500',
             }}
@@ -258,10 +284,11 @@ const PlanCard: React.FC<PlanCardProps> = ({ plan, animationValue, onBuy }) => {
           </Text>
           <Text
             style={{
-              fontSize: 36,
+              fontSize: RESPONSIVE.fontSize.priceValue,
               fontWeight: 'bold',
               color: colors.text,
               marginLeft: 4,
+              lineHeight: RESPONSIVE.fontSize.priceValue * 1.1,
             }}
           >
             {plan.value}
@@ -269,7 +296,7 @@ const PlanCard: React.FC<PlanCardProps> = ({ plan, animationValue, onBuy }) => {
         </HStack>
         <Text
           style={{
-            fontSize: 14,
+            fontSize: RESPONSIVE.fontSize.priceLabel,
             color: colors.subTitle,
             fontWeight: '500',
           }}
@@ -284,8 +311,8 @@ const PlanCard: React.FC<PlanCardProps> = ({ plan, animationValue, onBuy }) => {
         style={{
           backgroundColor: colors.primary,
           borderRadius: 16,
-          paddingVertical: 16,
-          paddingHorizontal: 24,
+          paddingVertical: screenHeight * 0.018,
+          paddingHorizontal: screenWidth * 0.06,
           shadowColor: colors.primary,
           shadowOffset: { width: 0, height: 4 },
           shadowOpacity: 0.3,
@@ -296,7 +323,7 @@ const PlanCard: React.FC<PlanCardProps> = ({ plan, animationValue, onBuy }) => {
         <Text
           style={{
             color: colors.textButton,
-            fontSize: 16,
+            fontSize: screenWidth * 0.04,
             fontWeight: '600',
             textAlign: 'center',
           }}
@@ -306,7 +333,10 @@ const PlanCard: React.FC<PlanCardProps> = ({ plan, animationValue, onBuy }) => {
       </Button>
     </Box>
   )
-}
+}, (prevProps, nextProps) => {
+  // Só re-renderizar se o planid mudar
+  return prevProps.plan.planid === nextProps.plan.planid
+})
 
 const PlansCarousel: React.FC = () => {
   const carouselRef = useRef<ICarouselInstance>(null)
@@ -317,8 +347,6 @@ const PlansCarousel: React.FC = () => {
   // Buscar informações do usuário do Redux
   const userInfo = useAppSelector((state: RootState) => state.ativarLinha || {})
   const {
-    parceiro = 'PLAY MÓVEL',
-    token = '30684d5f2e7cfdd198e58f6a1efedf6f8da743c85ef0ef6558',
     cpf = '',
     ddd = '',
     iccid = '',
@@ -331,20 +359,17 @@ const PlansCarousel: React.FC = () => {
     error,
     refetch,
   } = useGetPlansQuery({
-    parceiro: parceiro || '46',
-    token: token || '30684d5f2e7cfdd198e58f6a1efedf6f8da743c85ef0ef6558',
+    companyid: env.COMPANY_ID,
   })
 
   // Mutation para ativar linha
   const [activateLine, { isLoading: isActivating }] = useActivateLineMutation()
-  const canShowPlans = parceiro && token
+  const canShowPlans = env.COMPANY_ID
 
-  // Combinar planos originais e personalizados
-  const allPlans = plansData
-    ? [...(plansData.Original || []), ...(plansData.personalizado || [])]
-    : []
+  // Mostrar apenas planos personalizados com mostraApp: true
+  const allPlans = (plansData?.personalizado || []).filter(plan => plan.mostraApp === true)
 
-  const handleBuyPlan = async (plan: Plan) => {
+  const handleBuyPlan = useCallback(async (plan: Plan) => {
     if (!cpf || !ddd || !iccid) {
       Alert.alert(
         'Dados Incompletos',
@@ -397,17 +422,20 @@ const PlansCarousel: React.FC = () => {
     } catch (error) {
       console.error('Erro ao processar compra:', error)
     }
-  }
+  }, [cpf, ddd, iccid, userInfo, activateLine])
 
   const renderPlanCard = useCallback(
-    ({ item, animationValue }: { item: Plan; animationValue: any }) => (
-      <PlanCard
-        plan={item}
-        animationValue={animationValue}
-        onBuy={() => handleBuyPlan(item)}
-      />
-    ),
-    [],
+    ({ item, animationValue }: { item: Plan; animationValue: any }) => {
+      const handleBuy = () => handleBuyPlan(item)
+      return (
+        <PlanCard
+          plan={item}
+          animationValue={animationValue}
+          onBuy={handleBuy}
+        />
+      )
+    },
+    [handleBuyPlan],
   )
 
   const onProgressChange = (offsetProgress: number) => {
@@ -423,7 +451,7 @@ const PlansCarousel: React.FC = () => {
     if (allPlans.length <= 1) return null
 
     return (
-      <HStack justifyContent="center" space={'sm'} marginTop={20}>
+      <HStack justifyContent="center" space={'sm'} marginTop={8}>
         {allPlans.map((_, index) => (
           <TouchableOpacity
             key={index}

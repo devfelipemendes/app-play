@@ -1,6 +1,13 @@
 // components/layout/ActivateLineModal.tsx
-import React, { useState } from 'react'
-import { Modal, TouchableOpacity, Alert, Image, Dimensions } from 'react-native'
+import React, { useState, useRef, useCallback } from 'react'
+import {
+  Modal,
+  TouchableOpacity,
+  Alert,
+  Image,
+  Dimensions,
+  View,
+} from 'react-native'
 import { VStack } from '@/components/ui/vstack'
 import { HStack } from '@/components/ui/hstack'
 import { Box } from '@/components/ui/box'
@@ -14,8 +21,35 @@ import {
 } from '@/src/api/endpoints/plansApi'
 import { useAuth } from '@/hooks/useAuth'
 import { env } from '@/config/env'
+import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel'
+import {
+  useSharedValue,
+  useAnimatedStyle,
+  interpolate,
+  Extrapolation,
+} from 'react-native-reanimated'
 
-const { width: screenWidth } = Dimensions.get('window')
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window')
+const CARD_WIDTH = screenWidth * 0.88
+const CARD_HEIGHT = screenHeight * 0.58
+const RESPONSIVE = {
+  fontSize: {
+    gigasNumber: screenWidth * 0.12,
+    gigasUnit: screenWidth * 0.048,
+    benefits: screenWidth * 0.033,
+    appsTitle: screenWidth * 0.038,
+    priceSymbol: screenWidth * 0.03,
+    priceValue: screenWidth * 0.08,
+    priceLabel: screenWidth * 0.03,
+  },
+  spacing: {
+    cardPadding: screenWidth * 0.04,
+    sectionGap: screenHeight * 0.008,
+  },
+  appIcon: {
+    size: (CARD_WIDTH - screenWidth * 0.16) / 3 - 6,
+  },
+}
 
 interface Plan {
   planid: number | string
@@ -76,6 +110,237 @@ const mockApps = [
   },
 ]
 
+interface PlanCardProps {
+  plan: Plan
+  animationValue: any
+  isSelected: boolean
+  onSelect: () => void
+  colors: any
+}
+
+const PlanCard: React.FC<PlanCardProps> = React.memo(
+  ({ plan, animationValue, isSelected, onSelect, colors }) => {
+    const animatedStyle = useAnimatedStyle(() => {
+      const scale = interpolate(
+        animationValue.value,
+        [-1, 0, 1],
+        [0.9, 1, 0.9],
+        Extrapolation.CLAMP,
+      )
+
+      const opacity = interpolate(
+        animationValue.value,
+        [-1, 0, 1],
+        [0.7, 1, 0.7],
+        Extrapolation.CLAMP,
+      )
+
+      return {
+        transform: [{ scale }],
+        opacity,
+      }
+    })
+
+    return (
+      <TouchableOpacity
+        onPress={onSelect}
+        activeOpacity={0.9}
+        style={[
+          {
+            width: CARD_WIDTH,
+            height: CARD_HEIGHT,
+            alignSelf: 'center',
+          },
+          animatedStyle,
+        ]}
+      >
+        <Box
+          style={{
+            flex: 1,
+            backgroundColor: 'white',
+            borderRadius: 20,
+            borderWidth: isSelected ? 3 : 2,
+            borderColor: isSelected ? colors.primary : colors.secondary + '20',
+            padding: RESPONSIVE.spacing.cardPadding,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 8,
+            elevation: 4,
+          }}
+        >
+          {/* Gigas - Destaque Principal */}
+          <VStack style={{ marginBottom: RESPONSIVE.spacing.sectionGap * 0.8 }}>
+            <HStack
+              style={{
+                alignItems: 'baseline',
+                justifyContent: 'center',
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: RESPONSIVE.fontSize.gigasNumber,
+                  fontWeight: 'bold',
+                  color: colors.primary,
+                  textAlign: 'center',
+                  lineHeight: RESPONSIVE.fontSize.gigasNumber * 1.1,
+                }}
+              >
+                {plan.gigas}
+              </Text>
+              <Text
+                style={{
+                  fontSize: RESPONSIVE.fontSize.gigasUnit,
+                  fontWeight: 'bold',
+                  color: colors.primary,
+                  marginLeft: 4,
+                }}
+              >
+                GB
+              </Text>
+            </HStack>
+          </VStack>
+
+          {/* Benefícios */}
+          <VStack style={{ marginBottom: RESPONSIVE.spacing.sectionGap * 0.8 }}>
+            <Text
+              style={{
+                fontSize: RESPONSIVE.fontSize.benefits,
+                color: colors.text,
+                fontWeight: '500',
+                textAlign: 'center',
+              }}
+            >
+              {plan.min} Minutos • {plan.sms} SMS
+            </Text>
+          </VStack>
+
+          {/* Apps Inclusos */}
+          <VStack
+            style={{
+              marginBottom: RESPONSIVE.spacing.sectionGap * 0.8,
+              flex: 1,
+              minHeight: 0,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: RESPONSIVE.fontSize.appsTitle,
+                fontWeight: '600',
+                color: colors.text,
+                marginBottom: RESPONSIVE.spacing.sectionGap * 0.6,
+                textAlign: 'center',
+              }}
+            >
+              Apps inclusos:
+            </Text>
+
+            <View
+              style={{
+                flexDirection: 'row',
+                flexWrap: 'wrap',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: 6,
+              }}
+            >
+              {mockApps.slice(0, 6).map((app, index) => (
+                <View
+                  key={index}
+                  style={{
+                    width: RESPONSIVE.appIcon.size,
+                    aspectRatio: 1,
+                    borderRadius: 12,
+                    backgroundColor: '#F8F9FA',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowOpacity: 0.08,
+                    shadowRadius: 2,
+                    elevation: 2,
+                  }}
+                >
+                  <Image
+                    source={{ uri: app.icon }}
+                    style={{
+                      width: '60%',
+                      height: '60%',
+                      borderRadius: 6,
+                    }}
+                    resizeMode="cover"
+                  />
+                  <Text
+                    style={{
+                      fontSize: RESPONSIVE.fontSize.benefits * 0.65,
+                      color: colors.text,
+                      fontWeight: '500',
+                      marginTop: 2,
+                      textAlign: 'center',
+                    }}
+                    numberOfLines={1}
+                  >
+                    {app.name}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          </VStack>
+
+          {/* Preço */}
+          <VStack
+            style={{
+              alignItems: 'center',
+              marginTop: RESPONSIVE.spacing.sectionGap * 0.5,
+            }}
+          >
+            <HStack
+              style={{ alignItems: 'baseline', justifyContent: 'center' }}
+            >
+              <Text
+                style={{
+                  fontSize: RESPONSIVE.fontSize.priceSymbol,
+                  color: colors.subTitle,
+                  fontWeight: '500',
+                }}
+              >
+                R$
+              </Text>
+              <Text
+                style={{
+                  fontSize: RESPONSIVE.fontSize.priceValue,
+                  fontWeight: 'bold',
+                  color: colors.text,
+                  marginLeft: 4,
+                  lineHeight: RESPONSIVE.fontSize.priceValue * 1.1,
+                }}
+              >
+                {plan.value}
+              </Text>
+            </HStack>
+            <Text
+              style={{
+                fontSize: RESPONSIVE.fontSize.priceLabel,
+                color: colors.subTitle,
+                fontWeight: '500',
+              }}
+            >
+              por mês
+            </Text>
+          </VStack>
+        </Box>
+      </TouchableOpacity>
+    )
+  },
+  (prevProps, nextProps) => {
+    // Só re-renderizar se planid ou isSelected mudarem
+    return (
+      prevProps.plan.planid === nextProps.plan.planid &&
+      prevProps.isSelected === nextProps.isSelected
+    )
+  },
+)
+
 const ActivateLineModal: React.FC<ActivateLineModalProps> = ({
   visible,
   onClose,
@@ -85,6 +350,9 @@ const ActivateLineModal: React.FC<ActivateLineModalProps> = ({
 }) => {
   const { user } = useAuth()
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null)
+  const carouselRef = useRef<ICarouselInstance>(null)
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const progressValue = useSharedValue<number>(0)
 
   // Query para buscar planos
   const {
@@ -93,31 +361,101 @@ const ActivateLineModal: React.FC<ActivateLineModalProps> = ({
     error,
     refetch,
   } = useGetPlansQuery({
-    companyId: env.COMPANY_ID,
+    companyid: env.COMPANY_ID,
   })
 
   // Mutation para ativar linha
   const [activateLine, { isLoading: isActivating }] = useActivateLineMutation()
 
-  // Combinar planos originais e personalizados com ID único
+  // Mostrar apenas planos personalizados com mostraApp: true
   const allPlans = React.useMemo(() => {
     if (!plansData) return []
 
-    const original = (plansData.Original || []).map((plan, index) => ({
-      ...plan,
-      uniqueId: `original-${plan.planid}-${index}`, // Key única
-    }))
+    const personalizado = (plansData.personalizado || [])
+      .filter((plan) => plan.mostraApp === true)
+      .map((plan, index) => ({
+        ...plan,
+        uniqueId: `personalizado-${plan.planid}-${index}`, // Key única
+      }))
 
-    const personalizado = (plansData.personalizado || []).map((plan, index) => ({
-      ...plan,
-      uniqueId: `personalizado-${plan.planid}-${index}`, // Key única
-    }))
-
-    return [...original, ...personalizado]
+    return personalizado
   }, [plansData])
+
+  // Auto-selecionar primeiro plano quando os planos carregarem
+  React.useEffect(() => {
+    if (allPlans.length > 0 && !selectedPlan) {
+      setSelectedPlan(allPlans[0])
+    }
+  }, [allPlans, selectedPlan])
 
   const handleSelectPlan = (plan: Plan) => {
     setSelectedPlan(plan)
+  }
+
+  const renderPlanCard = useCallback(
+    ({ item, animationValue }: { item: Plan; animationValue: any }) => {
+      const handleSelect = () => setSelectedPlan(item)
+      const isSelected = selectedPlan?.planid === item.planid
+
+      return (
+        <PlanCard
+          plan={item}
+          animationValue={animationValue}
+          isSelected={isSelected}
+          onSelect={handleSelect}
+          colors={colors}
+        />
+      )
+    },
+    [selectedPlan?.planid, colors],
+  )
+
+  const onProgressChange = (offsetProgress: number) => {
+    progressValue.value = offsetProgress
+  }
+
+  const onSnapToItem = (index: number) => {
+    setCurrentIndex(index)
+    // Auto-selecionar apenas quando o index mudar
+    const newPlan = allPlans[index]
+    if (newPlan && selectedPlan?.planid !== newPlan.planid) {
+      setSelectedPlan(newPlan)
+    }
+  }
+
+  const renderDots = () => {
+    if (allPlans.length <= 1) return null
+
+    return (
+      <HStack
+        style={{
+          justifyContent: 'center',
+          gap: 8,
+          marginTop: 8,
+          marginBottom: 4,
+        }}
+      >
+        {allPlans.map((_, index) => (
+          <TouchableOpacity
+            key={index}
+            onPress={() => {
+              carouselRef.current?.scrollTo({ index, animated: true })
+            }}
+            style={{ padding: 8 }}
+          >
+            <View
+              style={{
+                width: currentIndex === index ? 24 : 8,
+                height: 8,
+                borderRadius: 4,
+                backgroundColor:
+                  currentIndex === index ? colors.primary : colors.disabled,
+              }}
+            />
+          </TouchableOpacity>
+        ))}
+      </HStack>
+    )
   }
 
   const handleActivateLine = async () => {
@@ -211,7 +549,7 @@ const ActivateLineModal: React.FC<ActivateLineModalProps> = ({
             backgroundColor: colors.background,
             borderTopLeftRadius: 24,
             borderTopRightRadius: 24,
-            maxHeight: '85%',
+            height: '85%',
             elevation: 8,
             shadowColor: '#000',
             shadowOffset: { width: 0, height: -4 },
@@ -244,15 +582,11 @@ const ActivateLineModal: React.FC<ActivateLineModalProps> = ({
           </HStack>
 
           {/* Content */}
-          <ScrollView
-            style={{ flex: 1 }}
-            contentContainerStyle={{ padding: 16 }}
-            showsVerticalScrollIndicator={false}
-          >
+          <Box style={{ flex: 1 }}>
             {isLoading ? (
               <VStack
                 style={{
-                  padding: 40,
+                  flex: 1,
                   justifyContent: 'center',
                   alignItems: 'center',
                 }}
@@ -264,10 +598,11 @@ const ActivateLineModal: React.FC<ActivateLineModalProps> = ({
             ) : error ? (
               <VStack
                 style={{
-                  padding: 40,
+                  flex: 1,
                   justifyContent: 'center',
                   alignItems: 'center',
                   gap: 16,
+                  paddingHorizontal: 24,
                 }}
               >
                 <Text
@@ -302,7 +637,7 @@ const ActivateLineModal: React.FC<ActivateLineModalProps> = ({
             ) : allPlans.length === 0 ? (
               <VStack
                 style={{
-                  padding: 40,
+                  flex: 1,
                   justifyContent: 'center',
                   alignItems: 'center',
                 }}
@@ -312,147 +647,30 @@ const ActivateLineModal: React.FC<ActivateLineModalProps> = ({
                 </Text>
               </VStack>
             ) : (
-              <VStack style={{ gap: 12 }}>
-                {allPlans.map((plan) => (
-                  <TouchableOpacity
-                    key={plan.uniqueId}
-                    onPress={() => handleSelectPlan(plan)}
-                    style={{
-                      borderWidth: 2,
-                      borderColor:
-                        selectedPlan?.planid === plan.planid
-                          ? colors.primary
-                          : colors.secondary + '30',
-                      borderRadius: 16,
-                      padding: 16,
-                      backgroundColor:
-                        selectedPlan?.planid === plan.planid
-                          ? colors.primary + '10'
-                          : colors.background,
-                    }}
-                  >
-                    <VStack style={{ gap: 12 }}>
-                      {/* Header do plano */}
-                      <HStack
-                        style={{
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                        }}
-                      >
-                        <HStack style={{ alignItems: 'baseline', gap: 4 }}>
-                          <Text
-                            style={{
-                              fontSize: 32,
-                              fontWeight: 'bold',
-                              color: colors.primary,
-                            }}
-                          >
-                            {plan.gigas}
-                          </Text>
-                          <Text
-                            style={{
-                              fontSize: 16,
-                              fontWeight: 'bold',
-                              color: colors.primary,
-                            }}
-                          >
-                            GB
-                          </Text>
-                        </HStack>
-
-                        <VStack style={{ alignItems: 'flex-end' }}>
-                          <HStack style={{ alignItems: 'baseline' }}>
-                            <Text
-                              style={{
-                                fontSize: 12,
-                                color: colors.subTitle,
-                                fontWeight: '500',
-                              }}
-                            >
-                              R$
-                            </Text>
-                            <Text
-                              style={{
-                                fontSize: 24,
-                                fontWeight: 'bold',
-                                color: colors.text,
-                                marginLeft: 2,
-                              }}
-                            >
-                              {plan.value}
-                            </Text>
-                          </HStack>
-                          <Text
-                            style={{
-                              fontSize: 12,
-                              color: colors.subTitle,
-                            }}
-                          >
-                            por mês
-                          </Text>
-                        </VStack>
-                      </HStack>
-
-                      {/* Benefícios */}
-                      <Text
-                        style={{
-                          fontSize: 14,
-                          color: colors.secondary,
-                          fontWeight: '500',
-                        }}
-                      >
-                        {plan.min} Minutos • {plan.sms} SMS
-                      </Text>
-
-                      {/* Apps inclusos - grid compacto */}
-                      <VStack style={{ gap: 8 }}>
-                        <Text
-                          style={{
-                            fontSize: 12,
-                            fontWeight: '600',
-                            color: colors.text,
-                          }}
-                        >
-                          Apps inclusos:
-                        </Text>
-                        <HStack
-                          style={{
-                            flexWrap: 'wrap',
-                            gap: 6,
-                          }}
-                        >
-                          {mockApps.slice(0, 6).map((app, index) => (
-                            <Box
-                              key={index}
-                              style={{
-                                width: 50,
-                                height: 50,
-                                borderRadius: 8,
-                                backgroundColor: '#F8F9FA',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                elevation: 1,
-                              }}
-                            >
-                              <Image
-                                source={{ uri: app.icon }}
-                                style={{
-                                  width: 30,
-                                  height: 30,
-                                  borderRadius: 4,
-                                }}
-                                resizeMode="cover"
-                              />
-                            </Box>
-                          ))}
-                        </HStack>
-                      </VStack>
-                    </VStack>
-                  </TouchableOpacity>
-                ))}
-              </VStack>
+              <Box style={{ flex: 1, justifyContent: 'center' }}>
+                <Carousel
+                  ref={carouselRef}
+                  loop={false}
+                  width={screenWidth}
+                  height={CARD_HEIGHT + 40}
+                  data={allPlans}
+                  renderItem={renderPlanCard}
+                  onProgressChange={onProgressChange}
+                  onSnapToItem={onSnapToItem}
+                  mode="parallax"
+                  modeConfig={{
+                    parallaxScrollingScale: 0.9,
+                    parallaxScrollingOffset: 40,
+                    parallaxAdjacentItemScale: 0.8,
+                  }}
+                  scrollAnimationDuration={400}
+                  enabled={true}
+                  pagingEnabled={true}
+                />
+                {renderDots()}
+              </Box>
             )}
-          </ScrollView>
+          </Box>
 
           {/* Footer com botão de ação */}
           {allPlans.length > 0 && (

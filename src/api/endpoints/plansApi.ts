@@ -36,7 +36,7 @@ interface ResponseBuscaPlanos {
 }
 
 interface PayloadBuscaPlanos {
-  companyId: number
+  companyid: number
 }
 
 interface ActiveLineBody {
@@ -60,7 +60,7 @@ const plansAPI = apiPlay.injectEndpoints({
     getPlans: builder.query<ResponseBuscaPlanos, PayloadBuscaPlanos>({
       query: (payload) => {
         console.log('🎯 plansApi.ts - Payload recebido:', payload)
-        console.log('🎯 plansApi.ts - companyId:', payload.companyId)
+        console.log('🎯 plansApi.ts - companyId:', payload.companyid)
 
         return {
           url: '/api/app/planos/visualizar',
