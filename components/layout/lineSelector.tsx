@@ -27,15 +27,15 @@ const LineSelector = ({
 }: LineSelectorProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  // Filtrar apenas linhas ativas
-  const activeLines = userLines.filter((line) => line.msisdnstatus === 0)
+  // Mostrar TODAS as linhas (com ou sem MSISDN)
+  const allLines = userLines
 
   const handleLineSelect = (line: any) => {
     setIsModalOpen(false)
     onLineChange(line)
   }
 
-  if (!selectedLine || activeLines.length <= 1) {
+  if (!selectedLine || allLines.length <= 1) {
     // Se só tem uma linha ou nenhuma, mostrar sem dropdown
     return selectedLine ? (
       <Box
@@ -126,7 +126,7 @@ const LineSelector = ({
                 >
                   {formatPhoneNumber(selectedLine.msisdn) || 'Sem MSISDN Ativo'}
                 </Text>
-                {activeLines.length > 1 && (
+                {allLines.length > 1 && (
                   <Text
                     style={{
                       fontSize: 10,
@@ -137,7 +137,7 @@ const LineSelector = ({
                       borderRadius: 8,
                     }}
                   >
-                    {activeLines.length} linhas
+                    {allLines.length} linhas
                   </Text>
                 )}
               </HStack>
@@ -148,7 +148,7 @@ const LineSelector = ({
                   marginTop: 2,
                 }}
               >
-                {selectedLine.plandescription}
+                {selectedLine.plandescription || selectedLine.iccid}
               </Text>
             </VStack>
 
@@ -173,7 +173,7 @@ const LineSelector = ({
                 </Text>
               </Box>
 
-              {activeLines.length > 1 && (
+              {allLines.length > 1 && (
                 <Icon
                   as={ChevronDown}
                   size="sm"
@@ -237,7 +237,7 @@ const LineSelector = ({
 
               <ScrollView showsVerticalScrollIndicator={false}>
                 <VStack style={{ gap: 8 }}>
-                  {activeLines.map((line, index) => (
+                  {allLines.map((line, index) => (
                     <TouchableOpacity
                       key={line.id}
                       onPress={() => handleLineSelect(line)}

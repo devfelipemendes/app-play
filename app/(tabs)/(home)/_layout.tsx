@@ -1,5 +1,6 @@
 import React, { useContext, useState, useEffect, useRef } from 'react'
 import { Slot } from 'expo-router'
+import { RefreshControl } from 'react-native'
 import { ScrollView } from '@/components/ui/scroll-view'
 import { View } from '@/components/ui/view'
 import Header from '@/components/screens/weather/header'
@@ -17,15 +18,28 @@ import Animated, {
   runOnJS,
   withSpring,
 } from 'react-native-reanimated'
+import { useRefresh } from '@/hooks/useRefresh'
+import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
 
 const WeatherLayout = () => {
-  const { scrollViewRef, selectedTabIndex }: any = useContext(WeatherTabContext)
+  const { scrollViewRef, selectedTabIndex, refreshCurrentTab }: any = useContext(WeatherTabContext)
   const { handleScroll } = useChildVisibility()
   const scrollY = useSharedValue(0)
   const [height, setHeight] = useState(340)
   const animatedHeight = useSharedValue(340)
   const smoothAnimatedHeight = useSharedValue(340) // Nova shared value suavizada
   const isHeaderShrunk = useSharedValue(false)
+  const { colors } = useCompanyThemeSimple()
+
+  // Hook useRefresh para pull-to-refresh
+  const { refreshing, onRefresh } = useRefresh([
+    async () => {
+      console.log(`🔄 Pull-to-refresh na tab ${selectedTabIndex}`)
+      if (refreshCurrentTab) {
+        await refreshCurrentTab()
+      }
+    },
+  ])
 
   useEffect(() => {
     if (scrollViewRef.current) {
@@ -55,11 +69,14 @@ const WeatherLayout = () => {
     const y = event.nativeEvent.contentOffset.y
     scrollY.value = y
 
-    isHeaderShrunk.value = y >= 200
+    // Se Y for negativo (bounce/pull-to-refresh), manter header no tamanho máximo
+    const clampedY = Math.max(0, y)
 
-    // Calcular a altura interpolada
+    isHeaderShrunk.value = clampedY >= 200
+
+    // Calcular a altura interpolada usando Y clamped
     const interpolatedHeight = interpolate(
-      y,
+      clampedY,
       [0, 200],
       [340, 140],
       Extrapolation.CLAMP,
@@ -117,8 +134,17 @@ const WeatherLayout = () => {
         scrollEventThrottle={16}
         className="bg-background-0"
         contentContainerClassName="pt-[419px]"
-        bounces={false}
+        bounces={true}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[colors.primary]}
+            tintColor={colors.primary}
+            progressViewOffset={419} // Offset para aparecer abaixo do header
+          />
+        }
       >
         <Slot />
         {/* consider it like a {children} */}

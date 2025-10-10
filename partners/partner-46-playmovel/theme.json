@@ -1,0 +1,30 @@
+{
+  "darkLightMode": true,
+  "colors": {
+    "primary": "#007AFF",
+    "secondary": "#5856D6",
+    "accent": "#FF9500",
+    "background": {
+      "light": "#FFFFFF",
+      "dark": "#000000"
+    },
+    "text": {
+      "light": "#000000",
+      "dark": "#FFFFFF"
+    },
+    "card": {
+      "light": "#F2F2F7",
+      "dark": "#1C1C1E"
+    }
+  },
+  "fonts": {
+    "regular": "dm-sans-regular",
+    "medium": "dm-sans-medium",
+    "bold": "dm-sans-bold"
+  },
+  "branding": {
+    "companyName": "PLAY MÓVEL",
+    "logo": "./assets/logo.png",
+    "tagline": "Conecte-se com liberdade"
+  }
+}

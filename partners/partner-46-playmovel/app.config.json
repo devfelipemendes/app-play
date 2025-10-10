@@ -1,0 +1,29 @@
+{
+  "name": "Play Móvel",
+  "slug": "playmovel",
+  "owner": "playmovel-org",
+  "version": "1.0.0",
+  "ios": {
+    "supportsTablet": true,
+    "bundleIdentifier": "com.playmovel.app",
+    "buildNumber": "1"
+  },
+  "android": {
+    "package": "com.playmovel.app",
+    "versionCode": 1,
+    "adaptiveIcon": {
+      "backgroundColor": "#007AFF"
+    }
+  },
+  "splash": {
+    "backgroundColor": "#007AFF"
+  },
+  "extra": {
+    "supportEmail": "suporte@playmovel.com.br",
+    "supportPhone": "+55 11 0000-0000",
+    "websiteUrl": "https://playmovel.com.br"
+  },
+  "eas": {
+    "projectId": "your-expo-project-id-here"
+  }
+}

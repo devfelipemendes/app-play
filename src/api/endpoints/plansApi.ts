@@ -3,7 +3,7 @@ import { apiPlay } from '../apiPlay'
 
 interface Plan {
   planid: number | string
-  descricao: string
+  description: string // ✅ API usa 'description' não 'descricao'
   bundle: number | string
   value: string
   qtdvideos?: number | null
@@ -24,6 +24,10 @@ interface Plan {
   campanha?: string | null
   franquiaid?: string | null
   mostraappfranquia?: boolean | null
+  rede?: string
+  productid?: string | null
+  hlr_profile?: number | null
+  valor_telecall?: string | null
 }
 
 interface ResponseBuscaPlanos {
@@ -32,8 +36,7 @@ interface ResponseBuscaPlanos {
 }
 
 interface PayloadBuscaPlanos {
-  parceiro: string
-  token: string | Blob | undefined
+  companyId: number
 }
 
 interface ActiveLineBody {
@@ -57,13 +60,12 @@ const plansAPI = apiPlay.injectEndpoints({
     getPlans: builder.query<ResponseBuscaPlanos, PayloadBuscaPlanos>({
       query: (payload) => {
         console.log('🎯 plansApi.ts - Payload recebido:', payload)
-        console.log('🎯 plansApi.ts - Token:', payload.token)
-        console.log('🎯 plansApi.ts - Parceiro:', payload.parceiro)
+        console.log('🎯 plansApi.ts - companyId:', payload.companyId)
 
         return {
-          url: '/api/planos/visualizar',
+          url: '/api/app/planos/visualizar',
           method: 'POST',
-          data: payload, // ✅ Mudança: 'data' em vez de 'body'
+          data: payload,
         }
       },
       providesTags: ['Plans'],
@@ -74,9 +76,9 @@ const plansAPI = apiPlay.injectEndpoints({
       query: (payload) => ({
         url: '/api/ativacao/ativar',
         method: 'POST',
-        body: payload,
+        data: payload, // ✅ Mudança: 'data' em vez de 'body' (axios)
       }),
-      invalidatesTags: ['Plans'],
+      invalidatesTags: ['Plans', 'UserLines'], // Invalida também UserLines para atualizar lista
     }),
   }),
 })

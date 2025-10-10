@@ -23,6 +23,7 @@ import {
 } from '@/src/api/endpoints/plansApi'
 import { RootState } from '@/src/store/index'
 import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
+import { env } from '@/config/env'
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window')
 const CARD_WIDTH = screenWidth * 0.9 // 90% da largura da tela

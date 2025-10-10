@@ -43,7 +43,7 @@ export const det2Api = apiPlay.injectEndpoints({
       query: (body) => ({
         url: '/api/det2',
         method: 'POST',
-        data: body,
+        data: body, // Enviar diretamente sem wrapper
       }),
     }),
   }),

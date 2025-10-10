@@ -1,0 +1,265 @@
+name: Build WhiteLabel Apps
+
+on:
+  workflow_dispatch:
+    inputs:
+      partner:
+        description: 'Partner ID (or "all" for all partners)'
+        required: true
+        default: '46'
+        type: string
+      platform:
+        description: 'Platform to build'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - ios
+          - android
+      profile:
+        description: 'Build profile'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - preview
+          - development
+      auto_submit:
+        description: 'Auto-submit to stores (production only)'
+        required: false
+        default: false
+        type: boolean
+
+  schedule:
+    # Weekly builds on Sundays at 2 AM UTC
+    - cron: '0 2 * * 0'
+
+  push:
+    branches:
+      - main
+    paths:
+      - 'partners/**'
+      - '.github/workflows/build-whitelabel.yml'
+
+jobs:
+  # Job 1: Sync tenant configurations from backend
+  sync-configs:
+    name: Sync Tenant Configs
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🔄 Sync tenant configs from backend
+        env:
+          BACKEND_URL: ${{ secrets.BACKEND_URL || 'https://sistema.playmovel.com.br' }}
+          BACKEND_API_KEY: ${{ secrets.BACKEND_API_KEY }}
+        run: |
+          if [ "${{ github.event.inputs.partner }}" != "all" ] && [ -n "${{ github.event.inputs.partner }}" ]; then
+            node scripts/sync-configs.js ${{ github.event.inputs.partner }}
+          else
+            node scripts/sync-configs.js
+          fi
+
+      - name: 📤 Upload synced configs
+        uses: actions/upload-artifact@v4
+        with:
+          name: partner-configs
+          path: partners/
+          retention-days: 1
+
+  # Job 2: Get list of tenants to build
+  prepare-matrix:
+    name: Prepare Build Matrix
+    needs: sync-configs
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📥 Download partner configs
+        uses: actions/download-artifact@v4
+        with:
+          name: partner-configs
+          path: partners/
+
+      - name: 🎯 Set build matrix
+        id: set-matrix
+        run: |
+          if [ "${{ github.event.inputs.partner }}" == "all" ] || [ -z "${{ github.event.inputs.partner }}" ]; then
+            # Build all tenants
+            TENANTS=$(ls -d partners/partner-* | sed 's/partners\/partner-\([0-9]*\)-.*/\1/' | jq -R -s -c 'split("\n")[:-1]')
+          else
+            # Build specific tenant
+            TENANTS='["${{ github.event.inputs.partner }}"]'
+          fi
+
+          echo "matrix={\"tenant\":$TENANTS}" >> $GITHUB_OUTPUT
+          echo "Building for tenants: $TENANTS"
+
+  # Job 3: Build apps for each tenant
+  build:
+    name: Build App (Tenant ${{ matrix.tenant }})
+    needs: prepare-matrix
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJson(needs.prepare-matrix.outputs.matrix) }}
+      fail-fast: false
+      max-parallel: 3  # Limit concurrent builds
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📥 Download partner configs
+        uses: actions/download-artifact@v4
+        with:
+          name: partner-configs
+          path: partners/
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: 🎯 Setup Expo
+        uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: ✅ Validate tenant configuration
+        run: |
+          chmod +x scripts/prepare-build.sh
+          ./scripts/prepare-build.sh ${{ matrix.tenant }} --validate
+
+      - name: 🏗️ Build iOS
+        if: ${{ github.event.inputs.platform == 'all' || github.event.inputs.platform == 'ios' }}
+        env:
+          TENANT_ID: ${{ matrix.tenant }}
+          EXPO_PUBLIC_TENANT_ID: ${{ matrix.tenant }}
+        run: |
+          PLATFORM="ios"
+          PROFILE="${{ github.event.inputs.profile || 'production' }}"
+
+          echo "Building iOS for tenant ${{ matrix.tenant }} with profile $PROFILE"
+
+          eas build \
+            --platform $PLATFORM \
+            --profile $PROFILE \
+            --non-interactive \
+            --no-wait
+
+      - name: 🏗️ Build Android
+        if: ${{ github.event.inputs.platform == 'all' || github.event.inputs.platform == 'android' }}
+        env:
+          TENANT_ID: ${{ matrix.tenant }}
+          EXPO_PUBLIC_TENANT_ID: ${{ matrix.tenant }}
+        run: |
+          PLATFORM="android"
+          PROFILE="${{ github.event.inputs.profile || 'production' }}"
+
+          echo "Building Android for tenant ${{ matrix.tenant }} with profile $PROFILE"
+
+          eas build \
+            --platform $PLATFORM \
+            --profile $PROFILE \
+            --non-interactive \
+            --no-wait
+
+      - name: 📝 Save build logs
+        if: always()
+        run: |
+          mkdir -p logs
+          echo "Build completed for tenant ${{ matrix.tenant }}" > logs/build-${{ matrix.tenant }}.log
+          echo "Platform: ${{ github.event.inputs.platform }}" >> logs/build-${{ matrix.tenant }}.log
+          echo "Profile: ${{ github.event.inputs.profile }}" >> logs/build-${{ matrix.tenant }}.log
+          echo "Timestamp: $(date)" >> logs/build-${{ matrix.tenant }}.log
+
+      - name: 📤 Upload build logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs-tenant-${{ matrix.tenant }}
+          path: logs/
+          retention-days: 30
+
+  # Job 4: Submit to stores (optional)
+  submit:
+    name: Submit to Stores (Tenant ${{ matrix.tenant }})
+    needs: [prepare-matrix, build]
+    if: ${{ github.event.inputs.auto_submit == 'true' && github.event.inputs.profile == 'production' }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJson(needs.prepare-matrix.outputs.matrix) }}
+      fail-fast: false
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🎯 Setup Expo
+        uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: 🍎 Submit to App Store
+        if: ${{ github.event.inputs.platform == 'all' || github.event.inputs.platform == 'ios' }}
+        env:
+          TENANT_ID: ${{ matrix.tenant }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          ASC_APP_ID: ${{ secrets.ASC_APP_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          echo "Submitting iOS build to App Store for tenant ${{ matrix.tenant }}"
+          eas submit --platform ios --profile production --latest --non-interactive
+
+      - name: 🤖 Submit to Google Play
+        if: ${{ github.event.inputs.platform == 'all' || github.event.inputs.platform == 'android' }}
+        env:
+          TENANT_ID: ${{ matrix.tenant }}
+        run: |
+          echo "Submitting Android build to Google Play for tenant ${{ matrix.tenant }}"
+          eas submit --platform android --profile production --latest --non-interactive
+
+  # Job 5: Summary report
+  summary:
+    name: Build Summary
+    needs: [build]
+    if: always()
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📊 Generate summary
+        run: |
+          echo "## 📱 WhiteLabel Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Partner:** ${{ github.event.inputs.partner || 'all' }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Platform:** ${{ github.event.inputs.platform || 'all' }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Profile:** ${{ github.event.inputs.profile || 'production' }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Triggered by:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Time:** $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Builds queued successfully!" >> $GITHUB_STEP_SUMMARY

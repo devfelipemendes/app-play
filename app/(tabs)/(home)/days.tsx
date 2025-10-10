@@ -1,24 +1,217 @@
-import React, { useContext, useEffect } from "react";
-import { VStack } from "@/components/ui/vstack";
-import DaysCard from "@/components/screens/weather/days-card";
-import Animated, { FadeInDown } from "react-native-reanimated";
-import { DailyForecastData } from "@/data/screens/weather/days-tab";
-import { WeatherTabContext } from "@/contexts/weather-screen-context";
+import React, { useContext, useEffect } from 'react'
+import { VStack } from '@/components/ui/vstack'
+import { Text } from '@/components/ui/text'
+import { Box } from '@/components/ui/box'
+import { Icon } from '@/components/ui/icon'
+import { Globe } from 'lucide-react-native'
+import DaysCard from '@/components/screens/weather/days-card'
+import Animated, { FadeInDown } from 'react-native-reanimated'
+import { WeatherTabContext } from '@/contexts/weather-screen-context'
+import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
+import { useAuth } from '@/hooks/useAuth'
+import { useAppSelector } from '@/src/store/hooks'
+import { selectDet2Data, selectDet2Error } from '@/src/store/slices/det2Slice'
+import { useListarFaturasQuery } from '@/src/api/endpoints/faturasApi'
 
 const Days = () => {
-  const { hasDaysTabAnimated }: any = useContext(WeatherTabContext);
-  const AnimatedVStack = Animated.createAnimatedComponent(VStack);
+  const { hasDaysTabAnimated, registerRefreshCallback }: any = useContext(WeatherTabContext)
+  const AnimatedVStack = Animated.createAnimatedComponent(VStack)
+  const { colors } = useCompanyThemeSimple()
+  const { user } = useAuth()
+
+  // Pegar dados da linha selecionada do Redux
+  const det2Data = useAppSelector(selectDet2Data)
+  const det2Error = useAppSelector(selectDet2Error)
+
+  // Verificar se tem MSISDN ativo
+  const isNoMsisdn = det2Error === 'NO_MSISDN'
+  const hasLineData = det2Data?.iccid && user?.token && !isNoMsisdn
+
+  // Buscar faturas da API (só se tiver MSISDN ativo)
+  const {
+    data: faturasData,
+    isLoading,
+    error,
+    refetch,
+  } = useListarFaturasQuery(
+    {
+      token: user?.token || '',
+      parametro: det2Data?.iccid || '',
+    },
+    {
+      skip: !hasLineData, // Pular query se não tiver dados necessários
+    },
+  )
 
   useEffect(() => {
-    hasDaysTabAnimated.current = true;
-  }, []);
+    hasDaysTabAnimated.current = true
+  }, [])
+
+  // Registrar função de refresh no contexto (tab 1 = faturas)
+  useEffect(() => {
+    if (registerRefreshCallback) {
+      const refreshFaturas = async () => {
+        console.log('🔄 Atualizando faturas...')
+        if (hasLineData) {
+          await refetch()
+        }
+      }
+      registerRefreshCallback(1, refreshFaturas)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [registerRefreshCallback, hasLineData])
+
+  // Estado: Sem MSISDN ativo
+  if (isNoMsisdn) {
+    return (
+      <VStack
+        className="px-5 pb-5 justify-center items-center"
+        style={{ paddingTop: 40 }}
+      >
+        <Box
+          style={{
+            padding: 32,
+            borderRadius: 16,
+            backgroundColor: colors.background,
+            alignItems: 'center',
+            gap: 16,
+            elevation: 2,
+          }}
+        >
+          <Icon as={Globe} size="xl" style={{ color: colors.primary }} />
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: 'bold',
+              color: colors.text,
+              textAlign: 'center',
+            }}
+          >
+            ICCID sem linha ativa
+          </Text>
+          <Text
+            style={{
+              fontSize: 14,
+              color: colors.secondary,
+              textAlign: 'center',
+              lineHeight: 20,
+            }}
+          >
+            Ative uma linha para visualizar suas faturas
+          </Text>
+        </Box>
+      </VStack>
+    )
+  }
+
+  // Estado: Carregando
+  if (isLoading) {
+    return (
+      <VStack
+        className="px-5 pb-5 justify-center items-center"
+        style={{ paddingTop: 40 }}
+      >
+        <Text style={{ fontSize: 16, color: colors.secondary }}>
+          Carregando faturas...
+        </Text>
+      </VStack>
+    )
+  }
+
+  // Estado: Erro ao carregar
+  if (error) {
+    return (
+      <VStack
+        className="px-5 pb-5 justify-center items-center"
+        style={{ paddingTop: 40 }}
+      >
+        <Box
+          style={{
+            padding: 24,
+            borderRadius: 16,
+            backgroundColor: colors.background,
+            alignItems: 'center',
+            gap: 12,
+            elevation: 2,
+          }}
+        >
+          <Text
+            style={{ fontSize: 16, color: colors.error, textAlign: 'center' }}
+          >
+            Erro ao carregar faturas
+          </Text>
+          <Text
+            style={{
+              fontSize: 14,
+              color: colors.secondary,
+              textAlign: 'center',
+            }}
+          >
+            Tente novamente mais tarde
+          </Text>
+        </Box>
+      </VStack>
+    )
+  }
+
+  // Estado: Sem faturas
+  if (!faturasData?.data?.faturas || faturasData.data.faturas.length === 0) {
+    return (
+      <VStack
+        className="px-5 pb-5 justify-center items-center"
+        style={{ paddingTop: 40 }}
+      >
+        <Box
+          style={{
+            padding: 32,
+            borderRadius: 16,
+            backgroundColor: colors.background,
+            alignItems: 'center',
+            gap: 16,
+            elevation: 2,
+          }}
+        >
+          <Icon as={Globe} size="xl" style={{ color: colors.primary }} />
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: 'bold',
+              color: colors.text,
+              textAlign: 'center',
+            }}
+          >
+            Nenhuma fatura encontrada
+          </Text>
+          <Text
+            style={{
+              fontSize: 14,
+              color: colors.secondary,
+              textAlign: 'center',
+              lineHeight: 20,
+            }}
+          >
+            Quando você tiver faturas, elas aparecerão aqui
+          </Text>
+        </Box>
+      </VStack>
+    )
+  }
+
+  // Estado: Com faturas - Renderizar lista
+  // Ordenar faturas: pendentes (0) primeiro, depois estornadas (2), depois pagas (1)
+  const faturasOrdenadas = [...faturasData.data.faturas].sort((a, b) => {
+    const prioridade = { 0: 0, 2: 1, 1: 2 }
+    const prioA = prioridade[a.paymentstatus as keyof typeof prioridade] ?? 3
+    const prioB = prioridade[b.paymentstatus as keyof typeof prioridade] ?? 3
+    return prioA - prioB
+  })
 
   return (
     <AnimatedVStack space="md" className="px-5 pb-5">
-      {DailyForecastData.map((day: any, index: number) => {
+      {faturasOrdenadas.map((fatura: any, index: number) => {
         return (
           <Animated.View
-            key={day.id}
+            key={fatura.paymentid}
             entering={
               hasDaysTabAnimated.current
                 ? undefined
@@ -28,17 +221,17 @@ const Days = () => {
             }
           >
             <DaysCard
-              name={day.name}
-              weather={day.weather}
-              highest={day.highest}
-              lowest={day.lowest}
-              imgUrl={day.imgUrl}
+              name={fatura.tipo}
+              created={fatura.created}
+              highest={fatura.valuetopup}
+              lowest={fatura.netvalue}
+              paymentStatus={fatura.paymentstatus}
             />
           </Animated.View>
-        );
+        )
       })}
     </AnimatedVStack>
-  );
-};
+  )
+}
 
-export default Days;
+export default Days

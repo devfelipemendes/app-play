@@ -101,7 +101,7 @@ export const authApiExtended = apiPlay.injectEndpoints({
     // ✅ Company info endpoint
     getCompanyInfo: builder.query<CompanyInfoResponse, CompanyInfoRequest>({
       query: (params) => ({
-        url: '/api/consultaempresaApp',
+        url: '/api/consultaempresaNovoApp',
         method: 'POST',
         data: params,
       }),

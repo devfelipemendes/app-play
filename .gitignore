@@ -31,8 +31,38 @@ yarn-error.*
 
 # local env files
 .env*.local
+.env
 
 # typescript
 *.tsbuildinfo
 
 app-example
+
+# ========================================
+# WhiteLabel Multi-Tenant Specific
+# ========================================
+
+# Secrets and credentials
+secrets/
+*.json.secret
+*-credentials.json
+
+# Google Play service account keys
+google-play-*.json
+
+# Tenant assets (optional - pode commitar ou não)
+# Descomentar para ignorar assets de parceiros:
+# partners/*/assets/*.png
+# partners/*/assets/*.jpg
+# partners/*/assets/*.svg
+
+# Build logs
+logs/
+*.log
+
+# Temporary sync files
+*.tmp
+.sync-cache/
+
+# EAS credentials (já ignorados acima, mas explícito)
+eas-credentials/

@@ -13,7 +13,7 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated'
 import { useAppSelector } from '@/src/store/hooks'
-import { selectDet2Data, selectDet2Loading } from '@/src/store/slices/det2Slice'
+import { selectDet2Data, selectDet2Loading, selectDet2Error } from '@/src/store/slices/det2Slice'
 import { useDadosFormatter } from '@/src/utils/dadosFormatter'
 import { formatPhoneNumber } from '@/src/utils/PhoneFormatter'
 import { getCurrentFormattedDate } from '@/src/utils/getDateFormatter'
@@ -22,8 +22,24 @@ const Header = ({ height }: { height: number }) => {
   const { colorMode }: any = useContext(ThemeContext)
   const det2Data = useAppSelector(selectDet2Data)
   const loading = useAppSelector(selectDet2Loading)
+  const det2Error = useAppSelector(selectDet2Error)
 
   const { convertMBtoGB } = useDadosFormatter()
+
+  // Detectar se não tem MSISDN ativo
+  const isNoMsisdn = det2Error === 'NO_MSISDN'
+
+  // Mensagens motivadoras aleatórias
+  const motivationalMessages = [
+    '🚀 Pronto para decolar?',
+    '✨ Comece sua jornada!',
+    '🌟 Hora de se conectar!',
+    '💫 Ative e aproveite!',
+    '🎯 Seu mundo aguarda!',
+    '📱 Conecte-se agora!',
+  ]
+
+  const randomMessage = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)]
 
   // Shared value para height suavizada
   const smoothHeight = useSharedValue(height)
@@ -151,28 +167,60 @@ const Header = ({ height }: { height: number }) => {
               temperatureContainerStyle,
             ]}
           >
-            <Animated.Text
-              style={[
-                {
-                  fontFamily: 'dm-sans-regular',
-                  color: colorMode === 'dark' ? '#F2EDFF' : '#FEFEFF',
-                },
-                temperatureTextStyle,
-              ]}
-            >
-              {det2Data?.dados && convertMBtoGB(det2Data.dados).formatted}
-            </Animated.Text>
-            <Animated.Text
-              style={[
-                {
-                  fontFamily: 'dm-sans-regular',
-                  color: colorMode === 'dark' ? '#F2EDFF' : '#FEFEFF',
-                },
-                feelsLikeTextStyle,
-              ]}
-            >
-              {det2Data?.msisdn && formatPhoneNumber(det2Data?.msisdn)}
-            </Animated.Text>
+            {isNoMsisdn ? (
+              // Visualização quando NÃO tem MSISDN ativo
+              <>
+                <Animated.Text
+                  style={[
+                    {
+                      fontFamily: 'dm-sans-bold',
+                      color: colorMode === 'dark' ? '#F2EDFF' : '#FEFEFF',
+                    },
+                    temperatureTextStyle,
+                  ]}
+                >
+                  --
+                </Animated.Text>
+                <Animated.Text
+                  style={[
+                    {
+                      fontFamily: 'dm-sans-medium',
+                      color: colorMode === 'dark' ? '#F2EDFF' : '#FEFEFF',
+                      opacity: 0.9,
+                    },
+                    feelsLikeTextStyle,
+                  ]}
+                >
+                  {randomMessage}
+                </Animated.Text>
+              </>
+            ) : (
+              // Visualização normal quando TEM MSISDN ativo
+              <>
+                <Animated.Text
+                  style={[
+                    {
+                      fontFamily: 'dm-sans-regular',
+                      color: colorMode === 'dark' ? '#F2EDFF' : '#FEFEFF',
+                    },
+                    temperatureTextStyle,
+                  ]}
+                >
+                  {det2Data?.dados && convertMBtoGB(det2Data.dados).formatted}
+                </Animated.Text>
+                <Animated.Text
+                  style={[
+                    {
+                      fontFamily: 'dm-sans-regular',
+                      color: colorMode === 'dark' ? '#F2EDFF' : '#FEFEFF',
+                    },
+                    feelsLikeTextStyle,
+                  ]}
+                >
+                  {det2Data?.msisdn && formatPhoneNumber(det2Data?.msisdn)}
+                </Animated.Text>
+              </>
+            )}
           </Animated.View>
 
           <Animated.View
