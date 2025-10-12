@@ -70,10 +70,16 @@ module.exports = ({ config = {} }) => {
         ios: {
           ...(baseConfig.ios || {}),
           bundleIdentifier: baseConfig.ios?.bundleIdentifier || 'com.appplay.default',
+          infoPlist: {
+            ...(baseConfig.ios?.infoPlist || {}),
+            NSFaceIDUsageDescription: 'Este app usa Face ID para autenticar seu login de forma segura.',
+            UIViewControllerBasedStatusBarAppearance: false,
+          },
         },
         android: {
           ...(baseConfig.android || {}),
           package: baseConfig.android?.package || 'com.appplay.default',
+          permissions: baseConfig.android?.permissions || [],
         },
         extra: {
           ...(baseConfig.extra || {}),
@@ -105,6 +111,12 @@ module.exports = ({ config = {} }) => {
         supportsTablet: partnerConfig.ios?.supportsTablet ?? true,
         bundleIdentifier: partnerConfig.ios?.bundleIdentifier,
         buildNumber: partnerConfig.ios?.buildNumber,
+        infoPlist: {
+          ...(baseConfig.ios?.infoPlist || {}),
+          ...(partnerConfig.ios?.infoPlist || {}),
+          NSFaceIDUsageDescription: 'Este app usa Face ID para autenticar seu login de forma segura.',
+          UIViewControllerBasedStatusBarAppearance: false,
+        },
       },
 
       // Android Config
@@ -119,6 +131,7 @@ module.exports = ({ config = {} }) => {
           backgroundColor: partnerConfig.android?.adaptiveIcon?.backgroundColor || '#ffffff',
         },
         softwareKeyboardLayoutMode: baseConfig.android?.softwareKeyboardLayoutMode,
+        permissions: baseConfig.android?.permissions || [],
       },
 
       // Assets

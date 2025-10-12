@@ -12,7 +12,12 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.appplay.default",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "Precisamos acessar sua câmera para escanear o código de barras do seu chip SIM Card durante o cadastro.",
+        "NSPhotoLibraryUsageDescription": "Precisamos acessar suas fotos para permitir que você escolha uma imagem de perfil.",
+        "NSLocationWhenInUseUsageDescription": "Precisamos acessar sua localização para mostrar lojas e serviços próximos a você.",
+        "NSLocationAlwaysUsageDescription": "Precisamos acessar sua localização mesmo quando o app está em segundo plano para fornecer serviços baseados em localização.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Precisamos acessar sua localização para fornecer serviços baseados em localização."
       }
     },
     "android": {
@@ -20,7 +25,14 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "softwareKeyboardLayoutMode": "pan"
+      "softwareKeyboardLayoutMode": "pan",
+      "permissions": [
+        "CAMERA",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -38,7 +50,13 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Precisamos acessar sua câmera para escanear o código de barras do seu chip SIM Card durante o cadastro."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

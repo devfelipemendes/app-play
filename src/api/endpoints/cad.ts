@@ -22,7 +22,6 @@ export interface CadastroRequest {
   revendedor: string
   porcentagem_recarga: number
   porcentagem_ativacao: number
-  token?: string
   parentcompany: number
 }
 
@@ -43,7 +42,7 @@ export const cadastroApiExtended = apiPlay.injectEndpoints({
     // ✅ Cadastrar novo usuário
     createUser: builder.mutation<CadastroResponse, CadastroRequest>({
       query: (userData) => ({
-        url: '/api/cad',
+        url: '/api/app/cad',
         method: 'POST',
         data: userData,
       }),

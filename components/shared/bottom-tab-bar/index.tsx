@@ -34,9 +34,9 @@ const tabItems: TabItem[] = [
     icon: Home,
   },
   {
-    name: 'maps',
-    label: 'Plano',
-    path: 'maps',
+    name: 'plans',
+    label: 'Planos',
+    path: 'plans',
     inActiveIcon: SignalHigh,
     icon: SignalHigh,
   },
@@ -66,7 +66,18 @@ function BottomTabBar(props: BottomTabBarProps) {
   const underlineAnim = useRef(new Animated.Value(0)).current
   const widthAnim = useRef(new Animated.Value(0)).current
 
-  const activeIndex = props.state.index
+  // Mapeia o índice da rota do Expo Router para o índice visual da navbar
+  // Expo Router ordena alfabeticamente: (home), location, maps, plans, settings
+  // Nossa navbar mostra: home, plans, location, settings
+  const routeNameToIndex: Record<string, number> = {
+    '(home)': 0,
+    'plans': 1,
+    'location': 2,
+    'settings': 3,
+  }
+
+  const currentRouteName = props.state.routes[props.state.index]?.name || '(home)'
+  const activeIndex = routeNameToIndex[currentRouteName] ?? 0
 
   const shadowStyle =
     Platform.OS === 'ios'
@@ -151,7 +162,7 @@ function BottomTabBar(props: BottomTabBarProps) {
           <Animated.View
             style={{
               position: 'absolute',
-              bottom: Platform.OS === 'ios' ? insets.bottom + 8 : 8,
+              top: Platform.OS === 'ios' ? 62 : 60,
               left: underlineAnim,
               width: widthAnim,
               height: 3,

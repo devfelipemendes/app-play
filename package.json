@@ -105,7 +105,8 @@
     "tailwindcss": "^3.4.16",
     "valibot": "^1.1.0",
     "expo-secure-store": "~14.0.1",
-    "expo-dev-client": "~5.0.20"
+    "expo-dev-client": "~5.0.20",
+    "expo-local-authentication": "~15.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

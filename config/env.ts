@@ -44,6 +44,8 @@ const DEFAULT_CONFIG = {
   NODE_ENV: __DEV__ ? 'development' : 'production',
   ENABLE_ANALYTICS: false,
   ENABLE_CRASH_REPORTING: false,
+  SUPPORT_CHAT_URL: 'https://wa.me/5511999999999',
+  CHIP_PURCHASE_URL: 'https://playmovel.com.br/comprar-chip',
   FEATURES: {
     recharge: true,
     portability: true,
@@ -121,6 +123,10 @@ export const env = {
   ENABLE_ANALYTICS: tenantConfig.ENABLE_ANALYTICS || false,
   ENABLE_CRASH_REPORTING: tenantConfig.ENABLE_CRASH_REPORTING || false,
 
+  // External URLs
+  SUPPORT_CHAT_URL: tenantConfig.SUPPORT_CHAT_URL || 'https://wa.me/5511999999999',
+  CHIP_PURCHASE_URL: tenantConfig.CHIP_PURCHASE_URL || 'https://playmovel.com.br/comprar-chip',
+
   // Feature toggles por tenant
   FEATURES: tenantConfig.FEATURES || {
     recharge: true,
@@ -149,6 +155,8 @@ export interface TenantConfig {
   NODE_ENV: string;
   ENABLE_ANALYTICS: boolean;
   ENABLE_CRASH_REPORTING: boolean;
+  SUPPORT_CHAT_URL?: string;
+  CHIP_PURCHASE_URL?: string;
   FEATURES: {
     recharge: boolean;
     portability: boolean;

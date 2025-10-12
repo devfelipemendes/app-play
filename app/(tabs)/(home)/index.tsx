@@ -18,6 +18,7 @@ import {
   HourlyForecastData,
 } from '@/data/screens/weather/hourly-tab'
 import Animated, { FadeInDown } from 'react-native-reanimated'
+import { StatusBar } from 'expo-status-bar'
 import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { WeatherTabContext } from '@/contexts/weather-screen-context'
@@ -476,6 +477,7 @@ const Home = () => {
         gap: 16,
       }}
     >
+      <StatusBar style="dark" />
       {/* Seletor de linhas - Sempre mostrar se houver linhas */}
       {hasLines && (
         <LineSelector

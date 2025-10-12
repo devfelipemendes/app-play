@@ -6,6 +6,7 @@ import { Settings2, User } from 'lucide-react-native'
 import { SettingsIcon, SunIcon, MoonIcon } from '@/components/ui/icon'
 import { HStack } from '@/components/ui/hstack'
 import ThemeCard from '@/components/screens/settings/theme-card'
+import { StatusBar } from 'expo-status-bar'
 
 import CustomHeader from '@/components/shared/custom-header'
 import { Link } from 'expo-router'
@@ -19,7 +20,8 @@ const Settings = () => {
   const { signOut, loadingAuth } = useAuth()
 
   return (
-    <VStack space="md" className="bg-background-0 flex-1">
+    <VStack space="md" className="bg-white dark:bg-gray-900 flex-1">
+      <StatusBar style={colorMode === 'dark' ? 'light' : 'dark'} />
       <CustomHeader variant="general" title="Settings" />
 
       <VStack className="px-4" space="md">
@@ -29,7 +31,7 @@ const Settings = () => {
       </VStack>
 
       <VStack className="px-4" space="md">
-        <Text className="font-semibold">Theme</Text>
+        <Text className="font-semibold text-gray-900 dark:text-white">Theme</Text>
         <HStack space="sm">
           <ThemeCard
             title="Light Mode"

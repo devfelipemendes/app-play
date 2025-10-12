@@ -75,6 +75,7 @@ interface ThemeContextType {
   // Compatibilidade com código existente
   colorMode: 'light' | 'dark'
   toggleColorMode: () => void
+  setColorMode: (mode: 'light' | 'dark') => void
 
   // Novas funcionalidades whitelabel
   whitelabelTheme: WhitelabelTheme | null
@@ -107,6 +108,13 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     dispatch({
       type: 'SET_COLOR_MODE',
       payload: state.colorMode === 'light' ? 'dark' : 'light',
+    })
+  }
+
+  const setColorMode = (mode: 'light' | 'dark') => {
+    dispatch({
+      type: 'SET_COLOR_MODE',
+      payload: mode,
     })
   }
 
@@ -170,6 +178,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
       value={{
         colorMode: state.colorMode,
         toggleColorMode,
+        setColorMode,
         whitelabelTheme: state.whitelabelTheme,
         isLoading: state.isLoading,
         error: state.error,

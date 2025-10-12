@@ -6,7 +6,8 @@ import { Text } from '@/components/ui/text'
 
 import IconLogo from '../../assets/AssetsPartners/adaptive-icon.png'
 
-import { Keyboard, Animated, Platform, Image } from 'react-native'
+import { Keyboard, Animated, Platform, Image, Dimensions } from 'react-native'
+import { StatusBar } from 'expo-status-bar'
 
 import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
@@ -14,6 +15,9 @@ import type { RootState } from '@/src/store'
 import FormLogin from '@/components/Pages/forms/FormLogin'
 import { setMode } from '@/src/store/slices/screenFlowSlice'
 import FormCadastro from '@/components/Pages/forms/FormCad'
+import FormEsqueciSenha from '@/components/Pages/forms/FormEsqueciSenha'
+import FormValidarToken from '@/components/Pages/forms/FormValidarToken'
+import FormAlterarSenha from '@/components/Pages/forms/FormAlterarSenha'
 
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 
@@ -23,6 +27,11 @@ export default function LoginScreen() {
 
   const mode = useAppSelector((state: RootState) => state.screenFlow.mode)
 
+  // Detectar tamanho da tela
+  const { height: screenHeight } = Dimensions.get('window')
+  const isSmallScreen = screenHeight < 700 // iPhone SE, iPhone 8, etc.
+  const isIOS = Platform.OS === 'ios'
+
   const animValue = useRef(new Animated.Value(0)).current
 
   const logoOpacity = animValue.interpolate({
@@ -31,8 +40,9 @@ export default function LoginScreen() {
   })
 
   useEffect(() => {
+    // Esconde o logo quando não está no modo login
     Animated.timing(animValue, {
-      toValue: mode === 'cadastro' ? 1 : 0,
+      toValue: mode !== 'login' ? 1 : 0,
       duration: 500,
       useNativeDriver: false,
     }).start()
@@ -54,6 +64,7 @@ export default function LoginScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.text }}>
+      <StatusBar style="light" />
       <KeyboardAwareScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         keyboardShouldPersistTaps="handled"
@@ -65,9 +76,13 @@ export default function LoginScreen() {
 
         <Box
           style={{
-            flex: keyboardOpen ? 0 : 1,
+            // Em iOS e telas pequenas, não expande quando teclado fecha
+            flex: (isIOS || isSmallScreen) ? 0 : (keyboardOpen ? 0 : 1),
 
-            minHeight: keyboardOpen ? 60 : 60,
+            // Altura mínima ajustada para iOS e telas pequenas
+            minHeight: (isIOS || isSmallScreen)
+              ? (keyboardOpen ? 0 : 80)
+              : (keyboardOpen ? 60 : 60),
             justifyContent: 'center',
             alignItems: 'center',
             backgroundColor: colors.text,
@@ -77,11 +92,12 @@ export default function LoginScreen() {
             <Animated.Image
               source={IconLogo}
               style={{
-                width: 120,
-                height: 120,
+                // Tamanho menor do logo em telas pequenas
+                width: (isIOS || isSmallScreen) ? 80 : 120,
+                height: (isIOS || isSmallScreen) ? 80 : 120,
                 opacity: logoOpacity,
                 alignSelf: 'center',
-                marginBottom: 32,
+                marginBottom: (isIOS || isSmallScreen) ? 16 : 32,
               }}
               resizeMode="contain"
             />
@@ -93,14 +109,20 @@ export default function LoginScreen() {
           style={{
             flexGrow: 1,
             paddingHorizontal: 24,
-            paddingTop: 32,
+            // Padding superior menor em iOS/telas pequenas
+            paddingTop: (isIOS || isSmallScreen) ? 24 : 32,
             paddingBottom: keyboardOpen ? 50 : 32,
             justifyContent: 'flex-start',
-            borderTopLeftRadius: 70,
+            // Raio da borda menor em iOS/telas pequenas
+            borderTopLeftRadius: (isIOS || isSmallScreen) ? 50 : 70,
             backgroundColor: 'white',
           }}
         >
-          {mode === 'login' ? <FormLogin /> : <FormCadastro />}
+          {mode === 'login' && <FormLogin />}
+          {mode === 'cadastro' && <FormCadastro />}
+          {mode === 'esqueciSenha' && <FormEsqueciSenha />}
+          {mode === 'validarToken' && <FormValidarToken />}
+          {mode === 'alterarSenha' && <FormAlterarSenha />}
         </Animated.View>
       </KeyboardAwareScrollView>
     </SafeAreaView>

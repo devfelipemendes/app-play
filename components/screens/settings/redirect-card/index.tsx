@@ -5,10 +5,17 @@ import { ChevronRightIcon, Icon } from '@/components/ui/icon'
 import { Box } from '@/components/ui/box'
 import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
 
-const RedirectCard = ({ title, icon }: { title: string; icon: any }) => {
+interface RedirectCardProps {
+  title: string
+  icon: any
+  onPress?: () => void
+}
+
+const RedirectCard = ({ title, icon, onPress }: RedirectCardProps) => {
   const { colors } = useCompanyThemeSimple()
   return (
     <Pressable
+      onPress={onPress}
       style={{
         padding: 12, // p-3
         height: 56, // h-14

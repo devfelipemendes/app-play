@@ -173,7 +173,7 @@ export default function FormCadastro() {
   const [activeTab, setActiveTab] = useState<string>('tab1')
   const [activeTypeChipsTabs, setActiveTypeChipsTabs] =
     useState<string>('simCard')
-  const [step, setStep] = useState(4)
+  const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [showTextInfo1, setShowTextInfo1] = useState(false)
   const [showTextInfo2, setShowTextInfo2] = useState(false)
@@ -187,7 +187,8 @@ export default function FormCadastro() {
   const [isIccidValid, setIsIccidValid] = useState<boolean | null>(null)
   const [lastValidatedIccid, setLastValidatedIccid] = useState('')
 
-  const [permission, requestPermission] = useCameraPermissions()
+  // NÃO chamar useCameraPermissions na raiz - só quando necessário
+  // const [permission, requestPermission] = useCameraPermissions()
 
   const { validateAndCheck, isLoading: isCheckingCpf } = useCpfCnpjCheck()
 
@@ -247,8 +248,26 @@ export default function FormCadastro() {
   })
 
   async function getCameraPermissions() {
-    const { status } = await requestPermission()
-    setHasPermission(status === 'granted')
+    try {
+      // Usa API direta da Camera ao invés do hook
+      const { status } = await Camera.requestCameraPermissionsAsync()
+      setHasPermission(status === 'granted')
+
+      if (status === 'denied') {
+        Toast.show({
+          type: 'info',
+          text1: 'Permissão de câmera negada',
+          text2: 'Você pode habilitar nas configurações do dispositivo',
+        })
+        return false
+      }
+
+      return status === 'granted'
+    } catch (error) {
+      console.error('Erro ao solicitar permissão de câmera:', error)
+      setHasPermission(false)
+      return false
+    }
   }
 
   const formatDateForAPI = (dateString: string): string => {
@@ -395,68 +414,83 @@ export default function FormCadastro() {
     setShowTextInfo2(!showTextInfo2)
   }
 
-  // useEffect(() => {
-  //   // Limpa os campos e reseta status quando mudar de aba
-  //   setValue('cpf', '')
-  //   setValue('cnpj', '')
-  //   setStatusCpf(null)
-  //   setStep(1)
-  // }, [activeTab])
+  useEffect(() => {
+    // Limpa os campos e reseta status quando mudar de aba
+    setValue('cpf', '')
+    setValue('cnpj', '')
+    setStatusCpf(null)
+    setStep(1)
+  }, [activeTab])
 
-  // useEffect(() => {
-  //   const docCpf = watch('cpf') || ''
-  //   const docCnpj = watch('cnpj') || ''
+  const cpfValue = watch('cpf')
+  const cnpjValue = watch('cnpj')
 
-  //   const checkDocumentStatus = async (value: string, type: string) => {
-  //     const cleanValue = unMask(value)
-  //     const expectedLength = type === 'cpf' ? 11 : 14
+  useEffect(() => {
+    const checkDocumentStatus = async (value: string, type: any) => {
+      const cleanValue = unMask(value)
+      const expectedLength = type === 'cpf' ? 11 : 14
 
-  //     // Valida apenas se o número estiver completo
-  //     if (cleanValue.length !== expectedLength) {
-  //       setStatusCpf(null)
-  //       setStep(1)
-  //       return
-  //     }
+      if (cleanValue.length !== expectedLength) {
+        setStatusCpf(null)
+        setStep(1)
+        return
+      }
 
-  //     const result = await validateAndCheck(cleanValue, type)
+      try {
+        const result = await validateAndCheck(cleanValue, type)
 
-  //     if (result.data) {
-  //       // Documento existe no sistema mas sem linha ativa
-  //       setStatusCpf('semLinhaAtiva')
-  //       setStep(3)
-  //       Toast.show({
-  //         type: 'info',
-  //         text1: `${type} já possui cadastro!`,
-  //         text2: 'Só falta ativar uma linha, vamos lá',
-  //       })
-  //     } else if (result.error) {
-  //       if (result.error.includes('não encontrado')) {
-  //         setStatusCpf('semCadastro')
-  //         setStep(2)
-  //       } else if (result.error.includes('linha ativa')) {
-  //         setStatusCpf('cpfAtivo')
-  //         Toast.show({
-  //           type: 'error',
-  //           text1: `${type.toUpperCase()} já possui linha ativa`,
-  //         })
-  //         dispatch(setMode('login'))
-  //       } else {
-  //         Toast.show({
-  //           type: 'info',
-  //           text1: 'Precisamos de um CPF/CNPJ válido',
-  //           text2: `Veja se o ${type.toUpperCase()} foi inserido corretamente`,
-  //         })
-  //       }
-  //     }
-  //   }
+        // 👉 Caso com linha ativa
+        if (
+          !result.isValid &&
+          (result.descricao === 'Linha Ativa' ||
+            result.detalhes?.includes('linha ativa'))
+        ) {
+          Toast.show({
+            type: 'info',
+            text1: 'Você já possui uma linha ativa',
+            text2: 'Faça login para continuar.',
+          })
+          dispatch(setMode('login'))
+          return
+        }
 
-  //   // Prioriza CPF, se estiver completo, senão verifica CNPJ completo
-  //   const cleanCpf = unMask(docCpf)
-  //   const cleanCnpj = unMask(docCnpj)
+        // 👉 Caso já cadastrado mas sem linha ativa
+        if (result?.data) {
+          setStatusCpf('semLinhaAtiva')
+          setStep(3)
+          Toast.show({
+            type: 'info',
+            text1: `${type.toUpperCase()} já possui cadastro!`,
+            text2: 'Só falta ativar uma linha, vamos lá 🚀',
+          })
+          return
+        }
 
-  //   if (cleanCpf.length === 11) checkDocumentStatus(docCpf, 'cpf')
-  //   else if (cleanCnpj.length === 14) checkDocumentStatus(docCnpj, 'cnpj')
-  // }, [watch('cpf'), watch('cnpj')])
+        // 👉 Caso não encontrado (sem cadastro)
+        if (result?.error?.includes('não encontrado')) {
+          setStatusCpf('semCadastro')
+          setStep(2)
+          return
+        }
+      } catch (err) {
+        console.error('Erro ao verificar CPF/CNPJ:', err)
+        Toast.show({
+          type: 'error',
+          text1: 'Erro na verificação',
+          text2: 'Tente novamente em instantes.',
+        })
+      }
+    }
+
+    const cpfValue = watch('cpf')
+    const cnpjValue = watch('cnpj')
+    const cleanCpf = unMask(cpfValue || '')
+    const cleanCnpj = unMask(cnpjValue || '')
+
+    if (cleanCpf.length === 11) checkDocumentStatus(cpfValue || '', 'cpf')
+    else if (cleanCnpj.length === 14)
+      checkDocumentStatus(cnpjValue || '', 'cnpj')
+  }, [watch('cpf'), watch('cnpj')])
 
   const debouncedValidateICCID = useDebounce(handleValidateICCID, 500)
 
@@ -480,10 +514,7 @@ export default function FormCadastro() {
     }
   }, [iccidValue])
 
-  // 4. useEffect PARA PERMISSÕES
-  useEffect(() => {
-    getCameraPermissions()
-  }, [])
+  // 4. REMOVIDO - não precisa verificar permissões na montagem
 
   useEffect(() => {
     const cleanIccid = iccidValue.replace(/\D/g, '').trim()
@@ -1350,7 +1381,21 @@ export default function FormCadastro() {
                       backgroundColor: colors.primary,
                       borderRadius: 8,
                     }}
-                    onPress={() => setShowScan(true)}
+                    onPress={async () => {
+                      // Solicita permissão e só abre se concedida
+                      const granted = await getCameraPermissions()
+
+                      if (granted) {
+                        setShowScan(true)
+                      } else {
+                        Toast.show({
+                          type: 'error',
+                          text1: 'Permissão necessária',
+                          text2:
+                            'Habilite a câmera nas configurações para escanear',
+                        })
+                      }
+                    }}
                   >
                     <ButtonIcon as={ScanBarcode} color={colors.textButton} />
                   </Button>

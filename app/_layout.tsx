@@ -1,10 +1,11 @@
 // app/_layout.tsx
 import '@/global.css'
-import React, { useContext, useEffect } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { Stack } from 'expo-router'
 import { useFonts } from 'expo-font'
 import { StatusBar } from 'expo-status-bar'
 import { GluestackUIProvider } from '@gluestack-ui/themed'
+import { useColorScheme } from 'nativewind'
 
 import { ThemeContext, ThemeProvider } from '@/contexts/theme-context'
 import {
@@ -37,7 +38,7 @@ const CompanyThemeLoader = ({ children }: { children: React.ReactNode }) => {
 
 const MainLayout = () => {
   const { colorMode }: any = useContext(ThemeContext)
-  const { theme: whitelabelTheme } = useWhitelabelTheme()
+  const { setColorScheme } = useColorScheme()
 
   const [fontsLoaded] = useFonts({
     'dm-sans-regular': DMSans_400Regular,
@@ -45,13 +46,18 @@ const MainLayout = () => {
     'dm-sans-bold': DMSans_700Bold,
   })
 
+  // Sincronizar colorMode do ThemeContext com o NativeWind
+  useEffect(() => {
+    setColorScheme(colorMode)
+  }, [colorMode, setColorScheme])
+
   if (!fontsLoaded) {
     return null
   }
 
   return (
     <GluestackUIProvider config={createCustomConfig} colorMode={colorMode}>
-      <StatusBar translucent />
+      <StatusBar style="auto" translucent />
       <AuthProvider>
         <CompanyThemeLoader>
           <AuthGuard>
