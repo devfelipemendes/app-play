@@ -552,6 +552,394 @@ const SettingsScreen = () => {
 
 ---
 
+## Integração com Backend (Whitelabel)
+
+### Como o Sistema Está Preparado
+
+O app já está preparado para receber cores do backend através do sistema **Whitelabel**. O fluxo funciona assim:
+
+```
+Backend API
+    │
+    ▼
+WhitelabelThemeProvider (carrega tema do parceiro)
+    │
+    ▼
+useCompanyThemeSimple (usa cores do backend + dark mode)
+    │
+    ▼
+Componentes (renderizam com cores corretas)
+```
+
+### Estrutura de Cores do Backend
+
+O backend deve retornar as cores no seguinte formato:
+
+```json
+{
+  "id": 46,
+  "name": "PLAY MÓVEL",
+  "slug": "playmovel",
+  "appTheme": {
+    "colors": {
+      "primary": "#cc3366",
+      "secondary": "#000000"
+    },
+    "darkLightMode": false
+  }
+}
+```
+
+### Como Adicionar Mais Cores do Backend
+
+**1. Adicione as cores no backend:**
+
+```json
+{
+  "appTheme": {
+    "colors": {
+      "primary": "#cc3366",
+      "secondary": "#000000",
+
+      // ✅ Adicione novas cores aqui
+      "accent": "#ff6b00",
+      "buttonBackground": "#1a73e8",
+      "headerBackground": "#2c2c2e"
+    }
+  }
+}
+```
+
+**2. Atualize o tipo TypeScript:**
+
+```typescript
+// contexts/theme-context/whitelabel-theme-context.tsx
+export interface ThemeColors {
+  primary: string
+  secondary: string
+  accent?: string              // ✅ Adicione aqui
+  buttonBackground?: string
+  headerBackground?: string
+}
+```
+
+**3. Use no hook:**
+
+```typescript
+// hooks/theme/useThemeLoader.ts
+export const useCompanyThemeSimple = () => {
+  const { theme } = useWhitelabelTheme()
+  const themeContext = useContext(ThemeContext)
+  const isDark = themeContext?.colorMode === 'dark'
+
+  const primaryColor = theme?.colors?.primary || '#cc3366'
+  const secondaryColor = theme?.colors?.secondary || '#000000'
+  const accentColor = theme?.colors?.accent || '#ff6b00' // ✅ Nova cor
+
+  return {
+    colors: {
+      primary: primaryColor,
+      secondary: secondaryColor,
+      accent: accentColor, // ✅ Expor para componentes
+
+      // Cores adaptadas ao dark mode
+      text: isDark ? '#ffffff' : '#1c1c22',
+      background: isDark ? '#1a1a1a' : '#ffffff',
+      // ... outras cores
+    }
+  }
+}
+```
+
+### Exemplo: Cores do Backend com Dark Mode
+
+```typescript
+export const useCompanyThemeSimple = () => {
+  const { theme } = useWhitelabelTheme()
+  const themeContext = useContext(ThemeContext)
+  const isDark = themeContext?.colorMode === 'dark'
+
+  // Cores do backend (whitelabel)
+  const primaryColor = theme?.colors?.primary || '#cc3366'
+  const secondaryColor = theme?.colors?.secondary || '#000000'
+  const accentColor = theme?.colors?.accent || '#ff6b00'
+
+  return {
+    isDark,
+    colors: {
+      // ✅ Cores do backend (não mudam com dark mode)
+      primary: primaryColor,
+      secondary: secondaryColor,
+      accent: accentColor,
+
+      // Variações da cor primária
+      primaryLight: lightenHexColor(primaryColor, 80),
+      primaryDark: lightenHexColor(primaryColor, -20),
+
+      // ✅ Cores que adaptam ao dark mode
+      text: isDark ? '#ffffff' : '#1c1c22',
+      textSecondary: isDark ? '#b0b0b0' : '#666666',
+
+      background: isDark ? '#1a1a1a' : '#ffffff',
+      backgroundCard: isDark ? '#2a2a2a' : '#f8f8f8',
+
+      border: isDark ? '#404040' : '#e0e0e0',
+      divider: isDark ? '#333333' : '#e0e0e0',
+
+      // ✅ Cores semânticas (fixas)
+      success: '#4caf50',
+      error: '#f44336',
+      warning: '#ff9800',
+      info: '#2196f3',
+    }
+  }
+}
+```
+
+### Exemplo Prático: Botão com Cor do Backend
+
+```typescript
+import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
+
+const BrandedButton = ({ children, onPress }) => {
+  const { colors } = useCompanyThemeSimple()
+
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      style={{
+        // Usa cor primária do backend (whitelabel)
+        backgroundColor: colors.primary,
+        paddingVertical: 14,
+        paddingHorizontal: 24,
+        borderRadius: 12,
+      }}
+    >
+      <Text style={{
+        color: '#ffffff',
+        fontWeight: '600',
+        textAlign: 'center'
+      }}>
+        {children}
+      </Text>
+    </TouchableOpacity>
+  )
+}
+```
+
+### Exemplo: Card com Cores Mistas (Backend + Dark Mode)
+
+```typescript
+const BrandedCard = ({ title, description }) => {
+  const { colors, isDark } = useCompanyThemeSimple()
+
+  return (
+    <Box
+      style={{
+        // Fundo adapta ao dark mode
+        backgroundColor: colors.backgroundCard,
+        borderRadius: 16,
+        padding: 16,
+        // Borda com cor primária do backend
+        borderWidth: 2,
+        borderColor: colors.primary,
+      }}
+    >
+      {/* Título com cor primária do backend */}
+      <Text style={{
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: colors.primary
+      }}>
+        {title}
+      </Text>
+
+      {/* Descrição adapta ao dark mode */}
+      <Text style={{
+        fontSize: 14,
+        marginTop: 8,
+        color: colors.textSecondary
+      }}>
+        {description}
+      </Text>
+    </Box>
+  )
+}
+```
+
+### Cenários de Uso
+
+#### Cenário 1: Parceiro A (Azul)
+```json
+{
+  "name": "Parceiro A",
+  "appTheme": {
+    "colors": {
+      "primary": "#1a73e8",  // Azul
+      "secondary": "#000000"
+    }
+  }
+}
+```
+
+**Resultado:**
+- Botões: Azul (#1a73e8)
+- Títulos principais: Azul (#1a73e8)
+- Fundos/textos: Adaptam ao dark/light mode
+
+#### Cenário 2: Parceiro B (Verde)
+```json
+{
+  "name": "Parceiro B",
+  "appTheme": {
+    "colors": {
+      "primary": "#00a86b",  // Verde
+      "secondary": "#333333"
+    }
+  }
+}
+```
+
+**Resultado:**
+- Botões: Verde (#00a86b)
+- Títulos principais: Verde (#00a86b)
+- Fundos/textos: Adaptam ao dark/light mode
+
+### Backend + Dark Mode na Prática
+
+```typescript
+const ProfileScreen = () => {
+  const { colors, isDark } = useCompanyThemeSimple()
+
+  return (
+    <VStack className="flex-1 bg-white dark:bg-gray-900">
+      {/* Header com cor do backend */}
+      <Box style={{
+        backgroundColor: colors.primary,  // Cor do parceiro
+        padding: 20
+      }}>
+        <Text style={{ color: '#ffffff', fontSize: 24 }}>
+          Meu Perfil
+        </Text>
+      </Box>
+
+      {/* Conteúdo adapta ao dark mode */}
+      <VStack className="p-4" style={{ gap: 16 }}>
+        <Box style={{
+          backgroundColor: colors.backgroundCard, // Adapta ao modo
+          padding: 16,
+          borderRadius: 12,
+          borderLeftWidth: 4,
+          borderLeftColor: colors.primary // Cor do parceiro
+        }}>
+          <Text style={{
+            color: colors.text,  // Adapta ao modo
+            fontSize: 16
+          }}>
+            Nome do Usuário
+          </Text>
+          <Text style={{
+            color: colors.textSecondary, // Adapta ao modo
+            fontSize: 14,
+            marginTop: 4
+          }}>
+            usuario@email.com
+          </Text>
+        </Box>
+
+        {/* Botão com cor do backend */}
+        <TouchableOpacity style={{
+          backgroundColor: colors.primary, // Cor do parceiro
+          padding: 14,
+          borderRadius: 12
+        }}>
+          <Text style={{
+            color: '#ffffff',
+            textAlign: 'center',
+            fontWeight: '600'
+          }}>
+            Editar Perfil
+          </Text>
+        </TouchableOpacity>
+      </VStack>
+    </VStack>
+  )
+}
+```
+
+### Testando Cores do Backend Localmente
+
+**1. Arquivo local do parceiro:**
+
+```json
+// partners/partner-46-playmovel/theme.json
+{
+  "colors": {
+    "primary": "#cc3366",
+    "secondary": "#000000",
+    "accent": "#ff6b00"
+  }
+}
+```
+
+**2. WhitelabelThemeProvider carrega automaticamente:**
+
+O provider já carrega as cores do arquivo local e depois busca da API para atualizar:
+
+```typescript
+// contexts/theme-context/whitelabel-theme-context.tsx
+export const WhitelabelThemeProvider = ({ children }) => {
+  useEffect(() => {
+    // 1. Carrega tema local (imediato)
+    loadLocalTheme()
+
+    // 2. Busca tema da API (assíncrono)
+    loadThemeFromAPI()
+  }, [])
+}
+```
+
+### Estrutura Completa de Cores Backend
+
+```json
+{
+  "appTheme": {
+    "colors": {
+      // Cores principais (obrigatórias)
+      "primary": "#cc3366",
+      "secondary": "#000000",
+
+      // Cores opcionais
+      "accent": "#ff6b00",
+      "success": "#4caf50",
+      "error": "#f44336",
+      "warning": "#ff9800",
+      "info": "#2196f3",
+
+      // Cores específicas do app
+      "headerBackground": "#cc3366",
+      "buttonBackground": "#cc3366",
+      "linkColor": "#1a73e8",
+      "badgeColor": "#ff6b00"
+    },
+
+    // Dark mode habilitado por padrão para este parceiro?
+    "darkLightMode": false
+  }
+}
+```
+
+### Checklist: Adicionar Nova Cor do Backend
+
+- [ ] Adicionar cor no backend (JSON de retorno da API)
+- [ ] Atualizar tipo TypeScript `ThemeColors`
+- [ ] Adicionar fallback no `useCompanyThemeSimple`
+- [ ] Usar a cor nos componentes via `colors.suaCor`
+- [ ] Testar com diferentes parceiros
+- [ ] Testar em dark e light mode
+
+---
+
 ## Conclusão
 
 O sistema de dark mode do app está totalmente centralizado em:

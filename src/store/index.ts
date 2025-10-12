@@ -13,11 +13,24 @@ export const store = configureStore({
     company: companyReducer,
     screenFlow: screenFlowReducer,
     ativarLinha: AtivalinhaReducer,
-    det2: det2Reducer, // Adicionar aqui
+    det2: det2Reducer,
     [apiPlay.reducerPath]: apiPlay.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(apiPlay.middleware),
+    getDefaultMiddleware({
+      // Configurações para melhor performance em dev
+      serializableCheck: {
+        // Ignora actions do RTK Query que podem ter dados não serializáveis
+        ignoredActions: [
+          'apiPlay/executeQuery/pending',
+          'apiPlay/executeQuery/fulfilled',
+          'apiPlay/executeMutation/pending',
+          'apiPlay/executeMutation/fulfilled',
+        ],
+      },
+    }).concat(apiPlay.middleware),
+  // Habilita Redux DevTools apenas em desenvolvimento
+  devTools: __DEV__,
 })
 
 export type RootState = ReturnType<typeof store.getState>

@@ -4,28 +4,32 @@ import RedirectCard from '@/components/screens/settings/redirect-card'
 import { RefreshCcw, Plus, Smartphone } from 'lucide-react-native'
 import CustomHeader from '@/components/shared/custom-header'
 import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
-import ActivateLineModal from '@/components/layout/ActivateLineModal'
+import ActivateLineBottomSheet from '@/components/layout/ActivateLineBottomSheet'
+import AdditionalRechargeBottomSheet from '@/components/layout/AdditionalRechargeBottomSheet'
 import { useAppSelector } from '@/src/store/hooks'
 import type { RootState } from '@/src/store'
 import { StatusBar } from 'expo-status-bar'
 import { ThemeContext } from '@/contexts/theme-context'
+import { useRouter } from 'expo-router'
 
 const Plans = () => {
   const { colors } = useCompanyThemeSimple()
   const { colorMode }: any = useContext(ThemeContext)
+  const router = useRouter()
   const [showPlansModal, setShowPlansModal] = useState(false)
+  const [showRechargeModal, setShowRechargeModal] = useState(false)
 
-  // Pegar ICCID do usuário para passar ao modal
+  // Pegar dados do usuário
   const user = useAppSelector((state: RootState) => state.auth.user)
   const iccid = user?.iccid || ''
+  const msisdn = user?.msisdn || ''
 
   const handleChangePlan = () => {
     setShowPlansModal(true)
   }
 
   const handleAdditionalRecharge = () => {
-    // TODO: Implementar funcionalidade de recarga adicional
-    console.log('Recarga adicional clicada')
+    setShowRechargeModal(true)
   }
 
   const handleActivateLine = () => {
@@ -36,9 +40,21 @@ const Plans = () => {
     setShowPlansModal(false)
   }
 
+  const handleRechargeModalClose = () => {
+    setShowRechargeModal(false)
+  }
+
   const handleActivationSuccess = () => {
-    // TODO: Atualizar dados do usuário após ativação bem-sucedida
     console.log('Linha ativada com sucesso!')
+  }
+
+  const handleRechargeSuccess = (payid?: string) => {
+    console.log('Recarga realizada com sucesso!')
+    // Se tiver payid, navegar para a tela de fatura
+    if (payid) {
+      // TODO: Implementar navegação para tela de fatura
+      console.log('Navegar para fatura:', payid)
+    }
   }
 
   return (
@@ -64,13 +80,22 @@ const Plans = () => {
         />
       </VStack>
 
-      {/* Modal de Planos */}
-      <ActivateLineModal
-        visible={showPlansModal}
+      {/* Bottom Sheet de Planos */}
+      <ActivateLineBottomSheet
+        isOpen={showPlansModal}
         onClose={handleModalClose}
         colors={colors}
         iccid={iccid}
         onSuccess={handleActivationSuccess}
+      />
+
+      {/* Bottom Sheet de Recarga Adicional */}
+      <AdditionalRechargeBottomSheet
+        isOpen={showRechargeModal}
+        onClose={handleRechargeModalClose}
+        colors={colors}
+        msisdn={msisdn}
+        onSuccess={handleRechargeSuccess}
       />
     </VStack>
   )

@@ -6,6 +6,7 @@ import { useFonts } from 'expo-font'
 import { StatusBar } from 'expo-status-bar'
 import { GluestackUIProvider } from '@gluestack-ui/themed'
 import { useColorScheme } from 'nativewind'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
 
 import { ThemeContext, ThemeProvider } from '@/contexts/theme-context'
 import {
@@ -26,6 +27,7 @@ import {
 } from '@/contexts/theme-context/whitelabel-the,e-context'
 import { PaperProvider } from 'react-native-paper'
 import AuthGuard from '@/src/components/auth/AuthGuard'
+import DevTools from '@/components/DevTools'
 
 // Componente para carregar tema da empresa
 const CompanyThemeLoader = ({ children }: { children: React.ReactNode }) => {
@@ -75,15 +77,18 @@ const MainLayout = () => {
 
 export default function RootLayout() {
   return (
-    <Provider store={store}>
-      <ThemeProvider>
-        <WhitelabelThemeProvider>
-          <PaperProvider>
-            <MainLayout />
-            <Toast />
-          </PaperProvider>
-        </WhitelabelThemeProvider>
-      </ThemeProvider>
-    </Provider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <Provider store={store}>
+        <ThemeProvider>
+          <WhitelabelThemeProvider>
+            <PaperProvider>
+              <MainLayout />
+              <Toast />
+              <DevTools />
+            </PaperProvider>
+          </WhitelabelThemeProvider>
+        </ThemeProvider>
+      </Provider>
+    </GestureHandlerRootView>
   )
 }

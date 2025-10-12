@@ -55,6 +55,36 @@ interface ResponseActiveLine {
   msg: string
 }
 
+interface AdditionalPlan {
+  id: number | string
+  descricao: string
+  value: string
+  gigas?: string
+  min?: string
+  sms?: string
+  mostraApp?: boolean
+}
+
+interface ResponseGetAdditionalPlans {
+  personalizado: AdditionalPlan[]
+}
+
+interface PayloadGetAdditionalPlans {
+  token: string
+  parceiro: string
+}
+
+interface PayloadAdditionalRecharge {
+  token: string
+  planid_pers: number | string
+  msisdn: string
+}
+
+interface ResponseAdditionalRecharge {
+  payid?: string
+  msg: string
+}
+
 const plansAPI = apiPlay.injectEndpoints({
   endpoints: (builder) => ({
     getPlans: builder.query<ResponseBuscaPlanos, PayloadBuscaPlanos>({
@@ -80,6 +110,39 @@ const plansAPI = apiPlay.injectEndpoints({
       }),
       invalidatesTags: ['Plans', 'UserLines'], // Invalida também UserLines para atualizar lista
     }),
+
+    // Endpoint para buscar planos adicionais
+    getAdditionalPlans: builder.query<
+      ResponseGetAdditionalPlans,
+      PayloadGetAdditionalPlans
+    >({
+      query: (payload) => ({
+        url: '/api/planos/adicional/visualiza',
+        method: 'POST',
+        data: payload,
+      }),
+      transformResponse: (response: any) => {
+        // Retornar apenas os planos adicionais que devem aparecer no app
+        const personalizado = (response.personalizado || []).filter(
+          (plan: AdditionalPlan) => plan.mostraApp === true,
+        )
+        return { personalizado }
+      },
+      providesTags: ['Plans'],
+    }),
+
+    // Endpoint para realizar recarga adicional
+    additionalRecharge: builder.mutation<
+      ResponseAdditionalRecharge,
+      PayloadAdditionalRecharge
+    >({
+      query: (payload) => ({
+        url: '/api/recarga/adicional',
+        method: 'POST',
+        data: payload,
+      }),
+      invalidatesTags: ['UserLines', 'Faturas'], // Invalida linhas e faturas após recarga
+    }),
   }),
 })
 
@@ -87,4 +150,7 @@ export const {
   useGetPlansQuery,
   useLazyGetPlansQuery,
   useActivateLineMutation,
+  useGetAdditionalPlansQuery,
+  useLazyGetAdditionalPlansQuery,
+  useAdditionalRechargeMutation,
 } = plansAPI

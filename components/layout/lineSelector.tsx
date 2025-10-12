@@ -69,7 +69,7 @@ const LineSelector = ({
               {selectedLine.plandescription}
             </Text>
           </VStack>
-          <Box
+          {/* <Box
             style={{
               paddingHorizontal: 8,
               paddingVertical: 4,
@@ -87,7 +87,7 @@ const LineSelector = ({
             >
               {selectedLine.rede}
             </Text>
-          </Box>
+          </Box> */}
         </HStack>
       </Box>
     ) : null
@@ -153,7 +153,7 @@ const LineSelector = ({
             </VStack>
 
             <HStack style={{ alignItems: 'center', gap: 8 }}>
-              <Box
+              {/* <Box
                 style={{
                   paddingHorizontal: 8,
                   paddingVertical: 4,
@@ -171,7 +171,7 @@ const LineSelector = ({
                 >
                   {selectedLine.rede}
                 </Text>
-              </Box>
+              </Box> */}
 
               {allLines.length > 1 && (
                 <Icon
@@ -294,7 +294,7 @@ const LineSelector = ({
                             </Text>
                           )}
                         </VStack>
-
+                        {/* 
                         <Box
                           style={{
                             paddingHorizontal: 8,
@@ -313,7 +313,7 @@ const LineSelector = ({
                           >
                             {line.rede}
                           </Text>
-                        </Box>
+                        </Box> */}
                       </HStack>
                     </TouchableOpacity>
                   ))}

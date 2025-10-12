@@ -1,7 +1,7 @@
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Pressable } from '@/components/ui/pressable'
 import { Text } from '@/components/ui/text'
-import { BottomTabBarProps } from '@react-navigation/bottom-tabs'
+import { useRouter, usePathname } from 'expo-router'
 
 import { HStack } from '@/components/ui/hstack'
 import { Box } from '@/components/ui/box'
@@ -56,9 +56,11 @@ const tabItems: TabItem[] = [
   },
 ]
 
-function BottomTabBar(props: BottomTabBarProps) {
+function BottomTabBar() {
   const insets = useSafeAreaInsets()
   const { colors } = useCompanyThemeSimple()
+  const router = useRouter()
+  const pathname = usePathname()
 
   const [tabLayouts, setTabLayouts] = useState<{ x: number; width: number }[]>(
     [],
@@ -66,9 +68,7 @@ function BottomTabBar(props: BottomTabBarProps) {
   const underlineAnim = useRef(new Animated.Value(0)).current
   const widthAnim = useRef(new Animated.Value(0)).current
 
-  // Mapeia o índice da rota do Expo Router para o índice visual da navbar
-  // Expo Router ordena alfabeticamente: (home), location, maps, plans, settings
-  // Nossa navbar mostra: home, plans, location, settings
+  // Mapeia o nome da rota para o índice visual da navbar
   const routeNameToIndex: Record<string, number> = {
     '(home)': 0,
     'plans': 1,
@@ -76,8 +76,17 @@ function BottomTabBar(props: BottomTabBarProps) {
     'settings': 3,
   }
 
-  const currentRouteName = props.state.routes[props.state.index]?.name || '(home)'
-  const activeIndex = routeNameToIndex[currentRouteName] ?? 0
+  // Determinar a rota ativa baseada no pathname
+  const getCurrentRoute = () => {
+    if (pathname.includes('(home)')) return '(home)'
+    if (pathname.includes('plans')) return 'plans'
+    if (pathname.includes('location')) return 'location'
+    if (pathname.includes('settings')) return 'settings'
+    return '(home)'
+  }
+
+  const currentRoute = getCurrentRoute()
+  const activeIndex = routeNameToIndex[currentRoute] ?? 0
 
   const shadowStyle =
     Platform.OS === 'ios'
@@ -128,7 +137,7 @@ function BottomTabBar(props: BottomTabBarProps) {
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
-              onPress={() => props.navigation.navigate(item.path)}
+              onPress={() => router.push(`/(tabs)/${item.path}` as any)}
               onLayout={(e: LayoutChangeEvent) => {
                 const layout = e.nativeEvent.layout
                 setTabLayouts((prev) => {
