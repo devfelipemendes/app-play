@@ -105,238 +105,241 @@ interface PlanCardProps {
   onBuy: () => void
 }
 
-const PlanCard: React.FC<PlanCardProps> = React.memo(({ plan, animationValue, onBuy }) => {
-  const { colors } = useCompanyThemeSimple()
+const PlanCard: React.FC<PlanCardProps> = React.memo(
+  ({ plan, animationValue, onBuy }) => {
+    const { colors } = useCompanyThemeSimple()
 
-  const animatedStyle = useAnimatedStyle(() => {
-    const scale = interpolate(
-      animationValue.value,
-      [-1, 0, 1],
-      [0.9, 1, 0.9],
-      Extrapolation.CLAMP,
-    )
+    const animatedStyle = useAnimatedStyle(() => {
+      const scale = interpolate(
+        animationValue.value,
+        [-1, 0, 1],
+        [0.9, 1, 0.9],
+        Extrapolation.CLAMP,
+      )
 
-    const opacity = interpolate(
-      animationValue.value,
-      [-1, 0, 1],
-      [0.7, 1, 0.7],
-      Extrapolation.CLAMP,
-    )
+      const opacity = interpolate(
+        animationValue.value,
+        [-1, 0, 1],
+        [0.7, 1, 0.7],
+        Extrapolation.CLAMP,
+      )
 
-    return {
-      transform: [{ scale }],
-      opacity,
-    }
-  })
+      return {
+        transform: [{ scale }],
+        opacity,
+      }
+    })
 
-  return (
-    <Box
-      style={[
-        {
-          width: CARD_WIDTH,
-          height: CARD_HEIGHT,
-          alignSelf: 'center',
-        },
-        animatedStyle,
-      ]}
-      backgroundColor="white"
-      borderRadius={20}
-      borderWidth={2}
-      borderColor={colors.primary}
-      padding={RESPONSIVE.spacing.cardPadding}
-      shadowColor="#000"
-      shadowOffset={{ width: 0, height: 2 }}
-      shadowOpacity={0.1}
-      shadowRadius={8}
-      elevation={4}
-    >
-      {/* Gigas - Destaque Principal */}
-      <VStack marginBottom={RESPONSIVE.spacing.sectionGap * 0.8}>
-        <HStack
-          alignItems="baseline"
-          justifyContent="center"
-          display="flex"
-          flexDirection="row"
-        >
-          <Text
-            style={{
-              fontSize: RESPONSIVE.fontSize.gigasNumber,
-              fontWeight: 'bold',
-              color: colors.primary,
-              textAlign: 'center',
-              lineHeight: RESPONSIVE.fontSize.gigasNumber * 1.1,
-            }}
-          >
-            {plan.gigas}
-          </Text>
-          <Text
-            style={{
-              fontSize: RESPONSIVE.fontSize.gigasUnit,
-              fontWeight: 'bold',
-              color: colors.primary,
-              marginLeft: 4,
-            }}
-          >
-            GB
-          </Text>
-        </HStack>
-      </VStack>
-
-      {/* Benefícios */}
-      <VStack marginBottom={RESPONSIVE.spacing.sectionGap * 0.8}>
-        <Text
-          style={{
-            fontSize: RESPONSIVE.fontSize.benefits,
-            color: colors.text,
-            fontWeight: '500',
-            textAlign: 'center',
-          }}
-        >
-          {plan.min} Minutos • {plan.sms} SMS
-        </Text>
-      </VStack>
-
-      {/* Apps Inclusos */}
-      <VStack
-        marginBottom={RESPONSIVE.spacing.sectionGap * 0.8}
-        flex={1}
-        minHeight={0}
+    return (
+      <Box
+        style={[
+          {
+            width: CARD_WIDTH,
+            height: CARD_HEIGHT,
+            alignSelf: 'center',
+          },
+          animatedStyle,
+        ]}
+        backgroundColor="white"
+        borderRadius={20}
+        borderWidth={2}
+        borderColor={colors.primary}
+        padding={RESPONSIVE.spacing.cardPadding}
+        shadowColor="#000"
+        shadowOffset={{ width: 0, height: 2 }}
+        shadowOpacity={0.1}
+        shadowRadius={8}
+        elevation={4}
       >
-        <Text
-          style={{
-            fontSize: RESPONSIVE.fontSize.appsTitle,
-            fontWeight: '600',
-            color: colors.text,
-            marginBottom: RESPONSIVE.spacing.sectionGap * 0.6,
-            textAlign: 'center',
-          }}
-        >
-          Apps inclusos:
-        </Text>
-
-        <View
-          style={{
-            flexDirection: 'row',
-            flexWrap: 'wrap',
-            justifyContent: 'center',
-            alignItems: 'center',
-            gap: 6,
-          }}
-        >
-          {mockApps.slice(0, 6).map((app, index) => (
-            <View
-              key={index}
+        {/* Gigas - Destaque Principal */}
+        <VStack marginBottom={RESPONSIVE.spacing.sectionGap * 0.8}>
+          <HStack
+            alignItems="baseline"
+            justifyContent="center"
+            display="flex"
+            flexDirection="row"
+          >
+            <Text
               style={{
-                width: RESPONSIVE.appIcon.size,
-                aspectRatio: 1,
-                borderRadius: 12,
-                backgroundColor: '#F8F9FA',
-                justifyContent: 'center',
-                alignItems: 'center',
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 1 },
-                shadowOpacity: 0.08,
-                shadowRadius: 2,
-                elevation: 2,
+                fontSize: RESPONSIVE.fontSize.gigasNumber,
+                fontWeight: 'bold',
+                color: colors.primary,
+                textAlign: 'center',
+                lineHeight: RESPONSIVE.fontSize.gigasNumber * 1.1,
               }}
             >
-              <Image
-                source={{ uri: app.icon }}
-                style={{
-                  width: '60%',
-                  height: '60%',
-                  borderRadius: 6,
-                }}
-                resizeMode="cover"
-              />
-              <Text
-                style={{
-                  fontSize: RESPONSIVE.fontSize.benefits * 0.65,
-                  color: colors.text,
-                  fontWeight: '500',
-                  marginTop: 2,
-                  textAlign: 'center',
-                }}
-                numberOfLines={1}
-              >
-                {app.name}
-              </Text>
-            </View>
-          ))}
-        </View>
-      </VStack>
+              {plan.gigas}
+            </Text>
+            <Text
+              style={{
+                fontSize: RESPONSIVE.fontSize.gigasUnit,
+                fontWeight: 'bold',
+                color: colors.primary,
+                marginLeft: 4,
+              }}
+            >
+              GB
+            </Text>
+          </HStack>
+        </VStack>
 
-      {/* Preço */}
-      <VStack
-        alignItems="center"
-        marginBottom={RESPONSIVE.spacing.sectionGap * 0.8}
-        marginTop={RESPONSIVE.spacing.sectionGap * 0.5}
-      >
-        <HStack alignItems="baseline" justifyContent="center">
+        {/* Benefícios */}
+        <VStack marginBottom={RESPONSIVE.spacing.sectionGap * 0.8}>
           <Text
             style={{
-              fontSize: RESPONSIVE.fontSize.priceSymbol,
+              fontSize: RESPONSIVE.fontSize.benefits,
+              color: colors.text,
+              fontWeight: '500',
+              textAlign: 'center',
+            }}
+          >
+            {plan.min} Minutos • {plan.sms} SMS
+          </Text>
+        </VStack>
+
+        {/* Apps Inclusos */}
+        <VStack
+          marginBottom={RESPONSIVE.spacing.sectionGap * 0.8}
+          flex={1}
+          minHeight={0}
+        >
+          <Text
+            style={{
+              fontSize: RESPONSIVE.fontSize.appsTitle,
+              fontWeight: '600',
+              color: colors.text,
+              marginBottom: RESPONSIVE.spacing.sectionGap * 0.6,
+              textAlign: 'center',
+            }}
+          >
+            Apps inclusos:
+          </Text>
+
+          <View
+            style={{
+              flexDirection: 'row',
+              flexWrap: 'wrap',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: 6,
+            }}
+          >
+            {mockApps.slice(0, 6).map((app, index) => (
+              <View
+                key={index}
+                style={{
+                  width: RESPONSIVE.appIcon.size,
+                  aspectRatio: 1,
+                  borderRadius: 12,
+                  backgroundColor: '#F8F9FA',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.08,
+                  shadowRadius: 2,
+                  elevation: 2,
+                }}
+              >
+                <Image
+                  source={{ uri: app.icon }}
+                  style={{
+                    width: '60%',
+                    height: '60%',
+                    borderRadius: 6,
+                  }}
+                  resizeMode="cover"
+                />
+                <Text
+                  style={{
+                    fontSize: RESPONSIVE.fontSize.benefits * 0.65,
+                    color: colors.text,
+                    fontWeight: '500',
+                    marginTop: 2,
+                    textAlign: 'center',
+                  }}
+                  numberOfLines={1}
+                >
+                  {app.name}
+                </Text>
+              </View>
+            ))}
+          </View>
+        </VStack>
+
+        {/* Preço */}
+        <VStack
+          alignItems="center"
+          marginBottom={RESPONSIVE.spacing.sectionGap * 0.8}
+          marginTop={RESPONSIVE.spacing.sectionGap * 0.5}
+        >
+          <HStack alignItems="baseline" justifyContent="center">
+            <Text
+              style={{
+                fontSize: RESPONSIVE.fontSize.priceSymbol,
+                color: colors.subTitle,
+                fontWeight: '500',
+              }}
+            >
+              R$
+            </Text>
+            <Text
+              style={{
+                fontSize: RESPONSIVE.fontSize.priceValue,
+                fontWeight: 'bold',
+                color: colors.text,
+                marginLeft: 4,
+                lineHeight: RESPONSIVE.fontSize.priceValue * 1.1,
+              }}
+            >
+              {plan.value}
+            </Text>
+          </HStack>
+          <Text
+            style={{
+              fontSize: RESPONSIVE.fontSize.priceLabel,
               color: colors.subTitle,
               fontWeight: '500',
             }}
           >
-            R$
+            por mês
           </Text>
+        </VStack>
+
+        {/* Botão de Compra */}
+        <Button
+          onPress={onBuy}
+          style={{
+            backgroundColor: colors.primary,
+            borderRadius: 16,
+            paddingVertical: screenHeight * 0.018,
+            paddingHorizontal: screenWidth * 0.06,
+            shadowColor: colors.primary,
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 6,
+          }}
+        >
           <Text
             style={{
-              fontSize: RESPONSIVE.fontSize.priceValue,
-              fontWeight: 'bold',
-              color: colors.text,
-              marginLeft: 4,
-              lineHeight: RESPONSIVE.fontSize.priceValue * 1.1,
+              color: colors.textButton,
+              fontSize: screenWidth * 0.04,
+              fontWeight: '600',
+              textAlign: 'center',
             }}
           >
-            {plan.value}
+            Contratar Plano
           </Text>
-        </HStack>
-        <Text
-          style={{
-            fontSize: RESPONSIVE.fontSize.priceLabel,
-            color: colors.subTitle,
-            fontWeight: '500',
-          }}
-        >
-          por mês
-        </Text>
-      </VStack>
-
-      {/* Botão de Compra */}
-      <Button
-        onPress={onBuy}
-        style={{
-          backgroundColor: colors.primary,
-          borderRadius: 16,
-          paddingVertical: screenHeight * 0.018,
-          paddingHorizontal: screenWidth * 0.06,
-          shadowColor: colors.primary,
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.3,
-          shadowRadius: 8,
-          elevation: 6,
-        }}
-      >
-        <Text
-          style={{
-            color: colors.textButton,
-            fontSize: screenWidth * 0.04,
-            fontWeight: '600',
-            textAlign: 'center',
-          }}
-        >
-          Contratar Plano
-        </Text>
-      </Button>
-    </Box>
-  )
-}, (prevProps, nextProps) => {
-  // Só re-renderizar se o planid mudar
-  return prevProps.plan.planid === nextProps.plan.planid
-})
+        </Button>
+      </Box>
+    )
+  },
+  (prevProps, nextProps) => {
+    // Só re-renderizar se o planid mudar
+    return prevProps.plan.planid === nextProps.plan.planid
+  },
+)
 
 const PlansCarousel: React.FC = () => {
   const carouselRef = useRef<ICarouselInstance>(null)
@@ -346,11 +349,7 @@ const PlansCarousel: React.FC = () => {
 
   // Buscar informações do usuário do Redux
   const userInfo = useAppSelector((state: RootState) => state.ativarLinha || {})
-  const {
-    cpf = '',
-    ddd = '',
-    iccid = '',
-  } = userInfo
+  const { cpf = '', ddd = '', iccid = '' } = userInfo
 
   // Query para buscar planos
   const {
@@ -367,62 +366,67 @@ const PlansCarousel: React.FC = () => {
   const canShowPlans = env.COMPANY_ID
 
   // Mostrar apenas planos personalizados com mostraApp: true
-  const allPlans = (plansData?.personalizado || []).filter(plan => plan.mostraApp === true)
+  const allPlans = (plansData?.personalizado || []).filter(
+    (plan) => plan.mostraApp === true,
+  )
 
-  const handleBuyPlan = useCallback(async (plan: Plan) => {
-    if (!cpf || !ddd || !iccid) {
-      Alert.alert(
-        'Dados Incompletos',
-        'Complete o cadastro antes de contratar um plano:\n\n' +
-          (!cpf ? '• CPF/CNPJ\n' : '') +
-          (!ddd ? '• Telefone\n' : '') +
-          (!iccid ? '• ICCID do SIM Card' : ''),
-        [{ text: 'OK', style: 'default' }],
-      )
-      return
-    }
+  const handleBuyPlan = useCallback(
+    async (plan: Plan) => {
+      if (!cpf || !ddd || !iccid) {
+        Alert.alert(
+          'Dados Incompletos',
+          'Complete o cadastro antes de contratar um plano:\n\n' +
+            (!cpf ? '• CPF/CNPJ\n' : '') +
+            (!ddd ? '• Telefone\n' : '') +
+            (!iccid ? '• ICCID do SIM Card' : ''),
+          [{ text: 'OK', style: 'default' }],
+        )
+        return
+      }
 
-    try {
-      Alert.alert(
-        'Confirmar Compra',
-        `Deseja contratar o plano de ${plan.gigas} por R$ ${plan.value}/mês?`,
-        [
-          { text: 'Cancelar', style: 'cancel' },
-          {
-            text: 'Confirmar',
-            style: 'default',
-            onPress: async () => {
-              const payload = {
-                cpf: cpf,
-                ddd: ddd,
-                iccid: iccid,
-                planid: plan.planid.toString(),
-                planid_personalizado: '',
-                isApp: true,
-                pospago: 'N',
-                userInfo: JSON.stringify(userInfo),
-              }
+      try {
+        Alert.alert(
+          'Confirmar Compra',
+          `Deseja contratar o plano de ${plan.gigas} por R$ ${plan.value}/mês?`,
+          [
+            { text: 'Cancelar', style: 'cancel' },
+            {
+              text: 'Confirmar',
+              style: 'default',
+              onPress: async () => {
+                const payload = {
+                  cpf: cpf,
+                  ddd: ddd,
+                  iccid: iccid,
+                  planid: plan.planid.toString(),
+                  planid_personalizado: '',
+                  isApp: true,
+                  pospago: 'N',
+                  userInfo: JSON.stringify(userInfo),
+                }
 
-              try {
-                const result = await activateLine(payload).unwrap()
-                Alert.alert('Sucesso! 🎉', result.msg, [
-                  { text: 'OK', style: 'default' },
-                ])
-              } catch (error: any) {
-                Alert.alert(
-                  'Erro ❌',
-                  error.data?.msg || 'Erro ao ativar linha',
-                  [{ text: 'OK', style: 'default' }],
-                )
-              }
+                try {
+                  const result = await activateLine(payload).unwrap()
+                  Alert.alert('Sucesso! 🎉', result.msg, [
+                    { text: 'OK', style: 'default' },
+                  ])
+                } catch (error: any) {
+                  Alert.alert(
+                    'Erro ❌',
+                    error.data?.msg || 'Erro ao ativar linha',
+                    [{ text: 'OK', style: 'default' }],
+                  )
+                }
+              },
             },
-          },
-        ],
-      )
-    } catch (error) {
-      console.error('Erro ao processar compra:', error)
-    }
-  }, [cpf, ddd, iccid, userInfo, activateLine])
+          ],
+        )
+      } catch (error) {
+        console.error('Erro ao processar compra:', error)
+      }
+    },
+    [cpf, ddd, iccid, userInfo, activateLine],
+  )
 
   const renderPlanCard = useCallback(
     ({ item, animationValue }: { item: Plan; animationValue: any }) => {

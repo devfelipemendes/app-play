@@ -1,12 +1,6 @@
 // components/layout/ActivateLineBottomSheet.tsx
 import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react'
-import {
-  TouchableOpacity,
-  Alert,
-  Image,
-  Dimensions,
-  View,
-} from 'react-native'
+import { TouchableOpacity, Alert, Image, Dimensions, View } from 'react-native'
 import { BottomSheetView } from '@gorhom/bottom-sheet'
 import { VStack } from '@/components/ui/vstack'
 import { HStack } from '@/components/ui/hstack'
@@ -211,7 +205,8 @@ const PlanCard: React.FC<PlanCardProps> = React.memo(
                 textAlign: 'center',
               }}
             >
-              {plan.min} Minutos • {plan.sms} SMS
+              {plan.min === '999' ? 'Ligações ilimitadas' : plan.min}{' '}
+              {plan.min !== '999' && 'Min'} • {plan.sms} SMS
             </Text>
           </VStack>
 
@@ -588,16 +583,7 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
               paddingVertical: 8,
               marginBottom: 8,
             }}
-          >
-            <View
-              style={{
-                width: 40,
-                height: 4,
-                borderRadius: 2,
-                backgroundColor: colors.secondary + '40',
-              }}
-            />
-          </View>
+          ></View>
 
           <HStack
             style={{
@@ -614,9 +600,6 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
             >
               Escolha seu Plano
             </Text>
-            <TouchableOpacity onPress={onClose}>
-              <Icon as={X} size="lg" style={{ color: colors.secondary }} />
-            </TouchableOpacity>
           </HStack>
         </View>
 
@@ -747,9 +730,9 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
                 }}
               >
                 {isActivating
-                  ? 'Ativando...'
+                  ? 'Alterando seu plano...'
                   : selectedPlan
-                  ? 'Ativar Linha'
+                  ? 'Alterar Plano'
                   : 'Selecione um Plano'}
               </Text>
             </TouchableOpacity>

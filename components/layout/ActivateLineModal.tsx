@@ -576,9 +576,6 @@ const ActivateLineModal: React.FC<ActivateLineModalProps> = ({
             >
               Escolha seu Plano
             </Text>
-            <TouchableOpacity onPress={onClose}>
-              <Icon as={X} size="lg" style={{ color: colors.secondary }} />
-            </TouchableOpacity>
           </HStack>
 
           {/* Content */}

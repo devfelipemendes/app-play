@@ -1,11 +1,10 @@
 // components/layout/AdditionalRechargeBottomSheet.tsx
-import React, { useRef, useMemo, useEffect, useCallback } from 'react'
+import React, { useState, useRef, useMemo, useEffect, useCallback } from 'react'
 import { TouchableOpacity, Alert, View, Dimensions } from 'react-native'
 import { VStack } from '@/components/ui/vstack'
 import { HStack } from '@/components/ui/hstack'
 import { Box } from '@/components/ui/box'
 import { Text } from '@/components/ui/text'
-import { ScrollView } from '@/components/ui/scroll-view'
 import { X } from 'lucide-react-native'
 import { Icon } from '@/components/ui/icon'
 import {
@@ -14,9 +13,44 @@ import {
 } from '@/src/api/endpoints/plansApi'
 import { useAuth } from '@/hooks/useAuth'
 import { env } from '@/config/env'
-import BottomSheet, { BottomSheetBackdrop, BottomSheetView } from '@gorhom/bottom-sheet'
+import BottomSheet, {
+  BottomSheetBackdrop,
+  BottomSheetView,
+} from '@gorhom/bottom-sheet'
+import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel'
+import {
+  useSharedValue,
+  useAnimatedStyle,
+  interpolate,
+  Extrapolation,
+} from 'react-native-reanimated'
 
-const { height: screenHeight } = Dimensions.get('window')
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window')
+
+// Dimensões do card do carousel
+const CARD_WIDTH = screenWidth * 0.88
+const CARD_HEIGHT = screenHeight * 0.52
+
+// Responsividade consistente com ActivateLineBottomSheet
+const RESPONSIVE = {
+  fontSize: {
+    title: screenWidth * 0.048,
+    price: screenWidth * 0.1,
+    priceSymbol: screenWidth * 0.045,
+    description: screenWidth * 0.042,
+    benefits: screenWidth * 0.036,
+    warning: screenWidth * 0.029,
+    button: screenWidth * 0.04,
+  },
+  spacing: {
+    cardPadding: screenWidth * 0.05,
+    cardMargin: screenHeight * 0.012,
+    sectionGap: screenHeight * 0.012,
+  },
+  card: {
+    borderRadius: 20,
+  },
+}
 
 interface AdditionalPlan {
   id: number | string
@@ -36,16 +70,178 @@ interface AdditionalRechargeBottomSheetProps {
   onSuccess?: (payid?: string) => void
 }
 
+// Componente do Card do Plano com Animação
+interface PlanCardProps {
+  plan: AdditionalPlan
+  animationValue: any
+  isSelected: boolean
+  onSelect: () => void
+  colors: any
+}
+
+const PlanCard: React.FC<PlanCardProps> = React.memo(
+  ({ plan, animationValue, isSelected, onSelect, colors }) => {
+    const animatedStyle = useAnimatedStyle(() => {
+      const scale = interpolate(
+        animationValue.value,
+        [-1, 0, 1],
+        [0.9, 1, 0.9],
+        Extrapolation.CLAMP,
+      )
+
+      const opacity = interpolate(
+        animationValue.value,
+        [-1, 0, 1],
+        [0.7, 1, 0.7],
+        Extrapolation.CLAMP,
+      )
+
+      return {
+        transform: [{ scale }],
+        opacity,
+      }
+    })
+
+    return (
+      <TouchableOpacity
+        onPress={onSelect}
+        activeOpacity={0.9}
+        style={[
+          {
+            width: CARD_WIDTH,
+            height: CARD_HEIGHT,
+            alignSelf: 'center',
+          },
+          animatedStyle,
+        ]}
+      >
+        <Box
+          style={{
+            flex: 1,
+            backgroundColor: 'white',
+            borderRadius: RESPONSIVE.card.borderRadius,
+            borderWidth: isSelected ? 3 : 2,
+            borderColor: isSelected ? colors.primary : colors.secondary + '20',
+            padding: RESPONSIVE.spacing.cardPadding,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.15,
+            shadowRadius: 12,
+            elevation: 6,
+            justifyContent: 'space-between',
+          }}
+        >
+          {/* Título do plano */}
+          <VStack style={{ marginBottom: RESPONSIVE.spacing.sectionGap }}>
+            <Text
+              style={{
+                fontSize: RESPONSIVE.fontSize.description,
+                fontWeight: 'bold',
+                color: colors.text,
+                textAlign: 'center',
+              }}
+            >
+              {plan.descricao}
+            </Text>
+          </VStack>
+
+          {/* Separador */}
+          <View
+            style={{
+              height: 1,
+              backgroundColor: colors.secondary + '20',
+              marginVertical: RESPONSIVE.spacing.sectionGap * 0.8,
+            }}
+          />
+
+          {/* Preço - Destaque Principal */}
+          <VStack style={{ flex: 1, justifyContent: 'center' }}>
+            <HStack
+              style={{
+                alignItems: 'baseline',
+                justifyContent: 'center',
+                marginBottom: RESPONSIVE.spacing.sectionGap,
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: RESPONSIVE.fontSize.priceSymbol,
+                  fontWeight: '600',
+                  color: colors.primary,
+                }}
+              >
+                R$
+              </Text>
+              <Text
+                style={{
+                  fontSize: RESPONSIVE.fontSize.price,
+                  fontWeight: 'bold',
+                  color: colors.primary,
+                  marginLeft: 6,
+                  lineHeight: RESPONSIVE.fontSize.price * 1.1,
+                }}
+              >
+                {plan.value.replace('.', ',')}
+              </Text>
+            </HStack>
+
+            {/* Informações adicionais - Benefícios */}
+            {(plan.gigas || plan.min || plan.sms) && (
+              <Text
+                style={{
+                  fontSize: RESPONSIVE.fontSize.benefits,
+                  color: colors.text,
+                  fontWeight: '500',
+                  textAlign: 'center',
+                }}
+              >
+                {plan.gigas && `${plan.gigas} GB`}
+                {plan.min && ` • ${plan.min} min`}
+                {plan.sms && ` • ${plan.sms} SMS`}
+              </Text>
+            )}
+          </VStack>
+
+          {/* Aviso */}
+          <Text
+            style={{
+              fontSize: RESPONSIVE.fontSize.warning,
+              color: colors.secondary,
+              textAlign: 'center',
+              fontStyle: 'italic',
+              lineHeight: RESPONSIVE.fontSize.warning * 1.5,
+              marginTop: RESPONSIVE.spacing.sectionGap,
+            }}
+          >
+            *Só é possível realizar uma recarga adicional se o plano estiver em
+            dia.
+          </Text>
+        </Box>
+      </TouchableOpacity>
+    )
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.plan.id === nextProps.plan.id &&
+      prevProps.isSelected === nextProps.isSelected
+    )
+  },
+)
+
 const AdditionalRechargeBottomSheet: React.FC<
   AdditionalRechargeBottomSheetProps
 > = ({ isOpen, onClose, colors, msisdn, onSuccess }) => {
   const { user } = useAuth()
+  const [selectedPlan, setSelectedPlan] = useState<AdditionalPlan | null>(null)
+  const carouselRef = useRef<ICarouselInstance>(null)
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const progressValue = useSharedValue<number>(0)
 
   // Ref do BottomSheet
   const bottomSheetRef = useRef<BottomSheet>(null)
 
-  // Snap points do bottom sheet (75% da tela)
-  const snapPoints = useMemo(() => ['75%'], [])
+  // Snap points do bottom sheet (80% da tela)
+  const snapPoints = useMemo(() => ['80%'], [])
 
   // Query para buscar planos adicionais
   const {
@@ -56,16 +252,25 @@ const AdditionalRechargeBottomSheet: React.FC<
   } = useGetAdditionalPlansQuery(
     {
       token: user?.token || '',
-      parceiro: env.PARCEIRO || '',
+      parceiro: user?.parceiro || '',
     },
     {
-      skip: !user?.token || !env.PARCEIRO, // Só executa se tiver token e parceiro
+      skip: !user?.token || !user?.parceiro, // Só executa se tiver token e parceiro
     },
   )
 
   // Mutation para realizar recarga adicional
   const [additionalRecharge, { isLoading: isRecharging }] =
     useAdditionalRechargeMutation()
+
+  const allPlans = plansData?.personalizado || []
+
+  // Auto-selecionar primeiro plano quando os planos carregarem
+  useEffect(() => {
+    if (allPlans.length > 0 && !selectedPlan) {
+      setSelectedPlan(allPlans[0])
+    }
+  }, [allPlans, selectedPlan])
 
   // Controlar abertura/fechamento do bottom sheet
   useEffect(() => {
@@ -75,6 +280,81 @@ const AdditionalRechargeBottomSheet: React.FC<
       bottomSheetRef.current?.close()
     }
   }, [isOpen])
+
+  const handleSelectPlan = (plan: AdditionalPlan) => {
+    setSelectedPlan(plan)
+  }
+
+  const renderPlanCard = useCallback(
+    ({
+      item,
+      animationValue,
+    }: {
+      item: AdditionalPlan
+      animationValue: any
+    }) => {
+      const handleSelect = () => setSelectedPlan(item)
+      const isSelected = selectedPlan?.id === item.id
+
+      return (
+        <PlanCard
+          plan={item}
+          animationValue={animationValue}
+          isSelected={isSelected}
+          onSelect={handleSelect}
+          colors={colors}
+        />
+      )
+    },
+    [selectedPlan?.id, colors],
+  )
+
+  const onProgressChange = (offsetProgress: number) => {
+    progressValue.value = offsetProgress
+  }
+
+  const onSnapToItem = (index: number) => {
+    setCurrentIndex(index)
+    const newPlan = allPlans[index]
+    if (newPlan && selectedPlan?.id !== newPlan.id) {
+      setSelectedPlan(newPlan)
+    }
+  }
+
+  const renderDots = () => {
+    if (allPlans.length <= 1) return null
+
+    return (
+      <HStack
+        style={{
+          justifyContent: 'center',
+          gap: 8,
+          marginTop: 12,
+          marginBottom: 8,
+        }}
+      >
+        {allPlans.map((_, index) => (
+          <TouchableOpacity
+            key={index}
+            onPress={() => {
+              carouselRef.current?.scrollTo({ index, animated: true })
+            }}
+            style={{ padding: 8 }}
+          >
+            <View
+              style={{
+                width: currentIndex === index ? 24 : 8,
+                height: 8,
+                borderRadius: 4,
+                backgroundColor:
+                  currentIndex === index ? colors.primary : colors.disabled,
+              }}
+            />
+          </TouchableOpacity>
+        ))}
+      </HStack>
+    )
+  }
 
   const handleRecharge = async (plan: AdditionalPlan) => {
     if (!msisdn) {
@@ -93,7 +373,9 @@ const AdditionalRechargeBottomSheet: React.FC<
     try {
       Alert.alert(
         'Confirmar Recarga',
-        `Deseja realizar a recarga adicional de:\n\n${plan.descricao}\nValor: R$ ${plan.value.replace('.', ',')}?`,
+        `Deseja realizar a recarga adicional de:\n\n${
+          plan.descricao
+        }\nValor: R$ ${plan.value.replace('.', ',')}?`,
         [
           { text: 'Cancelar', style: 'cancel' },
           {
@@ -165,7 +447,13 @@ const AdditionalRechargeBottomSheet: React.FC<
     [],
   )
 
-  const allPlans = plansData?.personalizado || []
+  const handleRechargeSelected = () => {
+    if (!selectedPlan) {
+      Alert.alert('Atenção', 'Selecione um plano para continuar')
+      return
+    }
+    handleRecharge(selectedPlan)
+  }
 
   return (
     <BottomSheet
@@ -205,14 +493,14 @@ const AdditionalRechargeBottomSheet: React.FC<
               marginBottom: 8,
             }}
           >
-            <View
+            {/* <View
               style={{
                 width: 40,
                 height: 4,
                 borderRadius: 2,
                 backgroundColor: colors.secondary + '40',
               }}
-            />
+            /> */}
           </View>
 
           <HStack
@@ -243,9 +531,6 @@ const AdditionalRechargeBottomSheet: React.FC<
                 </Text>
               )}
             </VStack>
-            <TouchableOpacity onPress={onClose}>
-              <Icon as={X} size="lg" style={{ color: colors.secondary }} />
-            </TouchableOpacity>
           </HStack>
         </View>
 
@@ -323,122 +608,75 @@ const AdditionalRechargeBottomSheet: React.FC<
               </Text>
             </VStack>
           ) : (
-            <ScrollView
-              style={{ flex: 1 }}
-              contentContainerStyle={{ padding: 16, gap: 12 }}
-              showsVerticalScrollIndicator={false}
-            >
-              {allPlans.map((plan, index) => (
-                <TouchableOpacity
-                  key={`${plan.id}-${index}`}
-                  onPress={() => handleRecharge(plan)}
-                  disabled={isRecharging}
-                  style={{
-                    backgroundColor: 'white',
-                    borderRadius: 16,
-                    padding: 20,
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.1,
-                    shadowRadius: 4,
-                    elevation: 3,
-                    borderWidth: 1,
-                    borderColor: colors.secondary + '20',
-                  }}
-                  activeOpacity={0.7}
-                >
-                  <VStack space="sm">
-                    {/* Título do plano */}
-                    <Text
-                      style={{
-                        fontSize: 18,
-                        fontWeight: 'bold',
-                        color: colors.text,
-                      }}
-                    >
-                      {plan.descricao}
-                    </Text>
-
-                    {/* Separador */}
-                    <View
-                      style={{
-                        height: 1,
-                        backgroundColor: colors.secondary + '20',
-                        marginVertical: 8,
-                      }}
-                    />
-
-                    {/* Preço */}
-                    <Text
-                      style={{
-                        fontSize: 32,
-                        fontWeight: 'bold',
-                        color: colors.primary,
-                      }}
-                    >
-                      R$ {plan.value.replace('.', ',')}
-                    </Text>
-
-                    {/* Informações adicionais */}
-                    {(plan.gigas || plan.min || plan.sms) && (
-                      <Text
-                        style={{
-                          fontSize: 14,
-                          color: colors.secondary,
-                          marginTop: 8,
-                        }}
-                      >
-                        {plan.gigas && `${plan.gigas} GB`}
-                        {plan.min && ` • ${plan.min} min`}
-                        {plan.sms && ` • ${plan.sms} SMS`}
-                      </Text>
-                    )}
-
-                    {/* Aviso */}
-                    <Text
-                      style={{
-                        fontSize: 11,
-                        color: colors.secondary,
-                        textAlign: 'center',
-                        marginTop: 12,
-                        fontStyle: 'italic',
-                      }}
-                    >
-                      *Só é possível realizar uma recarga adicional se o plano
-                      estiver em dia.
-                    </Text>
-
-                    {/* Botão */}
-                    <View
-                      style={{
-                        backgroundColor: colors.primary + '15',
-                        paddingVertical: 12,
-                        paddingHorizontal: 24,
-                        borderRadius: 10,
-                        alignItems: 'center',
-                        marginTop: 8,
-                        borderWidth: 1,
-                        borderColor: colors.primary + '30',
-                      }}
-                    >
-                      <Text
-                        style={{
-                          color: colors.primary,
-                          fontSize: 14,
-                          fontWeight: '600',
-                        }}
-                      >
-                        {isRecharging
-                          ? 'Processando...'
-                          : 'Realizar recarga adicional'}
-                      </Text>
-                    </View>
-                  </VStack>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
+            <Box style={{ flex: 1, justifyContent: 'center' }}>
+              <Carousel
+                ref={carouselRef}
+                loop={false}
+                width={screenWidth}
+                height={CARD_HEIGHT + 40}
+                data={allPlans}
+                renderItem={renderPlanCard}
+                onProgressChange={onProgressChange}
+                onSnapToItem={onSnapToItem}
+                mode="parallax"
+                modeConfig={{
+                  parallaxScrollingScale: 0.9,
+                  parallaxScrollingOffset: 40,
+                  parallaxAdjacentItemScale: 0.8,
+                }}
+                scrollAnimationDuration={400}
+                enabled={true}
+                pagingEnabled={true}
+              />
+              {renderDots()}
+            </Box>
           )}
         </Box>
+
+        {/* Footer com botão de ação */}
+        {allPlans.length > 0 && (
+          <Box
+            style={{
+              padding: 16,
+              borderTopWidth: 1,
+              borderTopColor: colors.secondary + '20',
+            }}
+          >
+            <TouchableOpacity
+              onPress={handleRechargeSelected}
+              disabled={!selectedPlan || isRecharging}
+              style={{
+                backgroundColor:
+                  !selectedPlan || isRecharging
+                    ? colors.disabled
+                    : colors.primary,
+                paddingVertical: 16,
+                paddingHorizontal: 24,
+                borderRadius: 12,
+                elevation: selectedPlan && !isRecharging ? 4 : 0,
+                shadowColor: colors.primary,
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.3,
+                shadowRadius: 4,
+              }}
+            >
+              <Text
+                style={{
+                  color: colors.textButton,
+                  fontSize: 16,
+                  fontWeight: '600',
+                  textAlign: 'center',
+                }}
+              >
+                {isRecharging
+                  ? 'Processando...'
+                  : selectedPlan
+                  ? 'Realizar Recarga Adicional'
+                  : 'Selecione um Plano'}
+              </Text>
+            </TouchableOpacity>
+          </Box>
+        )}
       </BottomSheetView>
     </BottomSheet>
   )

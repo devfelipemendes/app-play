@@ -85,19 +85,26 @@ interface ResponseAdditionalRecharge {
   msg: string
 }
 
+interface PayloadChangePlan {
+  token: string
+  planid: number | string
+  planid_personalizado: string
+  msisdn: string
+}
+
+interface ResponseChangePlan {
+  fatura?: string
+  msg: string
+}
+
 const plansAPI = apiPlay.injectEndpoints({
   endpoints: (builder) => ({
     getPlans: builder.query<ResponseBuscaPlanos, PayloadBuscaPlanos>({
-      query: (payload) => {
-        console.log('🎯 plansApi.ts - Payload recebido:', payload)
-        console.log('🎯 plansApi.ts - companyId:', payload.companyid)
-
-        return {
-          url: '/api/app/planos/visualizar',
-          method: 'POST',
-          data: payload,
-        }
-      },
+      query: (payload) => ({
+        url: '/api/app/planos/visualizar',
+        method: 'POST',
+        data: payload,
+      }),
       providesTags: ['Plans'],
     }),
 
@@ -143,6 +150,16 @@ const plansAPI = apiPlay.injectEndpoints({
       }),
       invalidatesTags: ['UserLines', 'Faturas'], // Invalida linhas e faturas após recarga
     }),
+
+    // Endpoint para alterar plano
+    changePlan: builder.mutation<ResponseChangePlan, PayloadChangePlan>({
+      query: (payload) => ({
+        url: '/api/mudaplano',
+        method: 'POST',
+        data: payload,
+      }),
+      invalidatesTags: ['UserLines', 'Plans', 'Faturas'], // Invalida linhas, planos e faturas após mudança
+    }),
   }),
 })
 
@@ -153,4 +170,5 @@ export const {
   useGetAdditionalPlansQuery,
   useLazyGetAdditionalPlansQuery,
   useAdditionalRechargeMutation,
+  useChangePlanMutation,
 } = plansAPI
