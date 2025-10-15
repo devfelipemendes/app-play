@@ -1,6 +1,6 @@
 // components/layout/ActivateLineBottomSheet.tsx
 import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react'
-import { TouchableOpacity, Alert, Image, Dimensions, View } from 'react-native'
+import { TouchableOpacity, Alert, Image, Dimensions, View, Keyboard } from 'react-native'
 import { BottomSheetView } from '@gorhom/bottom-sheet'
 import { VStack } from '@/components/ui/vstack'
 import { HStack } from '@/components/ui/hstack'
@@ -386,6 +386,7 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
     if (isOpen) {
       bottomSheetRef.current?.expand()
     } else {
+      Keyboard.dismiss()
       bottomSheetRef.current?.close()
     }
   }, [isOpen])

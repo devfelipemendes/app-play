@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react'
 import { VStack } from '@/components/ui/vstack'
 import RedirectCard from '@/components/screens/settings/redirect-card'
-import { RefreshCcw, Plus, Smartphone, Repeat } from 'lucide-react-native'
+import { RefreshCcw, Plus, Smartphone, Repeat, Box } from 'lucide-react-native'
 import CustomHeader from '@/components/shared/custom-header'
 import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
 import ActivateLineBottomSheet from '@/components/layout/ActivateLineBottomSheetWithSteps'
@@ -91,9 +91,13 @@ const Plans = () => {
   }
 
   return (
-    <VStack space="md" className="bg-white dark:bg-gray-900 flex-1">
-      <StatusBar style={colorMode === 'dark' ? 'light' : 'dark'} />
-      <CustomHeader variant="general" title="Planos" />
+    <VStack space="md" className=" dark:bg-gray-900 flex-1">
+      <StatusBar style="light" />
+      <CustomHeader
+        variant="general"
+        title="Sua Operadora"
+        description="Gerencie sua linha"
+      />
 
       <VStack className="px-4" space="md">
         <RedirectCard

@@ -11,7 +11,7 @@ import {
 interface IForeCastCard {
   time: string
   imgUrl: any
-  temperature: number
+  temperature: number | string
 }
 
 const ForeCastCard = ({ time, imgUrl, temperature }: IForeCastCard) => {
@@ -39,7 +39,7 @@ const ForeCastCard = ({ time, imgUrl, temperature }: IForeCastCard) => {
           fontSize: 12,
         }}
       >
-        {temperature}MB
+        {temperature}
       </Text>
     </VStack>
   )

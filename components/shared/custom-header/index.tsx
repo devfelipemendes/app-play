@@ -14,10 +14,12 @@ const CustomHeader = ({
   variant = 'general',
   title,
   label,
+  description,
 }: {
   variant: 'general' | 'search'
   title?: string
   label?: string
+  description?: string
 }) => {
   const { colorMode }: any = useContext(ThemeContext)
   return (
@@ -36,7 +38,7 @@ const CustomHeader = ({
                 {title}
               </Text>
               <Text className="text-white font-dm-sans-medium text-sm">
-                Gerencia seus planos
+                {description}
               </Text>
             </VStack>
           </HStack>

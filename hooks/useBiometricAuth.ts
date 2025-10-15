@@ -31,15 +31,31 @@ export const useBiometricAuth = () => {
       if (compatible && enrolled) {
         const types = await LocalAuthentication.supportedAuthenticationTypesAsync()
 
-        // Identifica o tipo de biometria
-        if (types.includes(LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION)) {
-          setBiometricType(Platform.OS === 'ios' ? 'Face ID' : 'Reconhecimento Facial')
-        } else if (types.includes(LocalAuthentication.AuthenticationType.FINGERPRINT)) {
-          setBiometricType(Platform.OS === 'ios' ? 'Touch ID' : 'Digital')
-        } else if (types.includes(LocalAuthentication.AuthenticationType.IRIS)) {
-          setBiometricType('Íris')
+        console.log('📱 Tipos de biometria detectados:', types)
+
+        // Identifica o tipo de biometria - PRIORIZA FINGERPRINT no Android
+        if (Platform.OS === 'android') {
+          // Android: prioriza digital se disponível
+          if (types.includes(LocalAuthentication.AuthenticationType.FINGERPRINT)) {
+            setBiometricType('Digital')
+          } else if (types.includes(LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION)) {
+            setBiometricType('Reconhecimento Facial')
+          } else if (types.includes(LocalAuthentication.AuthenticationType.IRIS)) {
+            setBiometricType('Íris')
+          } else {
+            setBiometricType('Biometria')
+          }
         } else {
-          setBiometricType('Biometria')
+          // iOS: Face ID tem prioridade
+          if (types.includes(LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION)) {
+            setBiometricType('Face ID')
+          } else if (types.includes(LocalAuthentication.AuthenticationType.FINGERPRINT)) {
+            setBiometricType('Touch ID')
+          } else if (types.includes(LocalAuthentication.AuthenticationType.IRIS)) {
+            setBiometricType('Íris')
+          } else {
+            setBiometricType('Biometria')
+          }
         }
       }
     } catch (error) {

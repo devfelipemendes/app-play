@@ -7,6 +7,7 @@ import {
   Dimensions,
   TextInput as RNTextInput,
   ActivityIndicator,
+  Keyboard,
 } from 'react-native'
 import { VStack } from '@/components/ui/vstack'
 import { HStack } from '@/components/ui/hstack'
@@ -102,8 +103,10 @@ const PortabilityBottomSheet: React.FC<PortabilityBottomSheetProps> = ({
     },
   ] = useLazyGetPortabilityStatusQuery()
 
-  const [getOperadora, { isLoading: loadingOperadora, isFetching: fetchingOperadora }] =
-    useLazyGetOperadoraQuery()
+  const [
+    getOperadora,
+    { isLoading: loadingOperadora, isFetching: fetchingOperadora },
+  ] = useLazyGetOperadoraQuery()
 
   const [requestPortability, { isLoading: loadingRequest }] =
     useRequestPortabilityMutation()
@@ -155,6 +158,7 @@ const PortabilityBottomSheet: React.FC<PortabilityBottomSheetProps> = ({
     if (isOpen) {
       bottomSheetRef.current?.expand()
     } else {
+      Keyboard.dismiss()
       bottomSheetRef.current?.close()
       setNumPort('')
       setOperadora({ name: '', cod: '' })
@@ -170,7 +174,10 @@ const PortabilityBottomSheet: React.FC<PortabilityBottomSheetProps> = ({
     }
 
     if (!isSameDdd) {
-      Alert.alert('Atenção', 'Os DDDs devem ser iguais para solicitar a portabilidade')
+      Alert.alert(
+        'Atenção',
+        'Os DDDs devem ser iguais para solicitar a portabilidade',
+      )
       return
     }
 
@@ -186,7 +193,9 @@ const PortabilityBottomSheet: React.FC<PortabilityBottomSheetProps> = ({
 
     Alert.alert(
       'Confirmar Portabilidade',
-      `Deseja portar o número ${formatPhone(cleanedNum)} para a linha ${currentLineFormatted}?`,
+      `Deseja portar o número ${formatPhone(
+        cleanedNum,
+      )} para a linha ${currentLineFormatted}?`,
       [
         { text: 'Cancelar', style: 'cancel' },
         {
@@ -218,7 +227,8 @@ const PortabilityBottomSheet: React.FC<PortabilityBottomSheetProps> = ({
                 Toast.show({
                   type: 'error',
                   text1: 'Solicitação Duplicada',
-                  text2: 'Já existe uma solicitação de portabilidade para este número.',
+                  text2:
+                    'Já existe uma solicitação de portabilidade para este número.',
                 })
               } else if (error.status === 521) {
                 Toast.show({
@@ -256,7 +266,10 @@ const PortabilityBottomSheet: React.FC<PortabilityBottomSheetProps> = ({
 
   // Renderizar status de portabilidade em andamento
   const renderPortabilityInProgress = () => {
-    if (!portabilityStatus || portabilityStatus.PortabilityStatus !== 'PENDENTE') {
+    if (
+      !portabilityStatus ||
+      portabilityStatus.PortabilityStatus !== 'PENDENTE'
+    ) {
       return null
     }
 
@@ -275,7 +288,9 @@ const PortabilityBottomSheet: React.FC<PortabilityBottomSheetProps> = ({
           >
             <HStack space="sm" style={{ alignItems: 'center' }}>
               <Icon as={Info} color={colors.info} size="lg" />
-              <Text style={{ fontSize: 16, fontWeight: '600', color: colors.info }}>
+              <Text
+                style={{ fontSize: 16, fontWeight: '600', color: colors.info }}
+              >
                 Portabilidade em andamento
               </Text>
             </HStack>
@@ -284,34 +299,63 @@ const PortabilityBottomSheet: React.FC<PortabilityBottomSheetProps> = ({
           {/* Informações da portabilidade */}
           <VStack space="md" style={{ paddingTop: 8 }}>
             <VStack space="xs">
-              <Text style={{ fontSize: 12, color: colors.subTitle, fontWeight: '500' }}>
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: colors.subTitle,
+                  fontWeight: '500',
+                }}
+              >
                 Número Novo
               </Text>
-              <Text style={{ fontSize: 18, color: colors.text, fontWeight: '600' }}>
+              <Text
+                style={{ fontSize: 18, color: colors.text, fontWeight: '600' }}
+              >
                 {tempMsisdn && formatPhone(tempMsisdn.slice(2))}
               </Text>
             </VStack>
 
             <VStack space="xs">
-              <Text style={{ fontSize: 12, color: colors.subTitle, fontWeight: '500' }}>
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: colors.subTitle,
+                  fontWeight: '500',
+                }}
+              >
                 Número Antigo
               </Text>
-              <Text style={{ fontSize: 18, color: colors.text, fontWeight: '600' }}>
+              <Text
+                style={{ fontSize: 18, color: colors.text, fontWeight: '600' }}
+              >
                 {msisdn && formatPhone(msisdn.slice(2))}
               </Text>
             </VStack>
 
             <VStack space="xs">
-              <Text style={{ fontSize: 12, color: colors.subTitle, fontWeight: '500' }}>
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: colors.subTitle,
+                  fontWeight: '500',
+                }}
+              >
                 Solicitado em
               </Text>
               <Text style={{ fontSize: 16, color: colors.text }}>
-                {portabilityStatus.Criado && formatDate(portabilityStatus.Criado)}
+                {portabilityStatus.Criado &&
+                  formatDate(portabilityStatus.Criado)}
               </Text>
             </VStack>
 
             <VStack space="xs">
-              <Text style={{ fontSize: 12, color: colors.subTitle, fontWeight: '500' }}>
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: colors.subTitle,
+                  fontWeight: '500',
+                }}
+              >
                 Encerra em
               </Text>
               <Text style={{ fontSize: 16, color: colors.text }}>
@@ -331,7 +375,8 @@ const PortabilityBottomSheet: React.FC<PortabilityBottomSheetProps> = ({
                 textDecorationLine: 'underline',
               }}
             >
-              Problemas com sua portabilidade?{'\n'}Entre em contato com nosso suporte.
+              Problemas com sua portabilidade?{'\n'}Entre em contato com nosso
+              suporte.
             </Text>
           </TouchableOpacity>
         </VStack>
@@ -356,7 +401,13 @@ const PortabilityBottomSheet: React.FC<PortabilityBottomSheetProps> = ({
 
           {/* Input do número a portar */}
           <VStack space="xs">
-            <Text style={{ fontSize: 14, color: colors.subTitle, fontWeight: '500' }}>
+            <Text
+              style={{
+                fontSize: 14,
+                color: colors.subTitle,
+                fontWeight: '500',
+              }}
+            >
               Número a portar
             </Text>
             <HStack space="sm" style={{ alignItems: 'center' }}>
@@ -374,7 +425,9 @@ const PortabilityBottomSheet: React.FC<PortabilityBottomSheetProps> = ({
                   style={{
                     borderWidth: 1,
                     borderColor:
-                      numPort.length >= 2 && !isSameDdd ? '#EF4444' : colors.border,
+                      numPort.length >= 2 && !isSameDdd
+                        ? '#EF4444'
+                        : colors.border,
                     borderRadius: 12,
                     paddingHorizontal: 16,
                     paddingVertical: 14,
@@ -387,7 +440,13 @@ const PortabilityBottomSheet: React.FC<PortabilityBottomSheetProps> = ({
 
             {/* Mostrar operadora */}
             {operadora.name && (
-              <Text style={{ fontSize: 14, color: colors.primary, fontWeight: '500' }}>
+              <Text
+                style={{
+                  fontSize: 14,
+                  color: colors.primary,
+                  fontWeight: '500',
+                }}
+              >
                 Operadora: {operadora.name}
               </Text>
             )}
@@ -421,7 +480,9 @@ const PortabilityBottomSheet: React.FC<PortabilityBottomSheetProps> = ({
             }
             style={{
               backgroundColor:
-                numPort.replace(/\D/g, '').length === 11 && operadora.cod && isSameDdd
+                numPort.replace(/\D/g, '').length === 11 &&
+                operadora.cod &&
+                isSameDdd
                   ? colors.primary
                   : colors.disabled,
               borderRadius: 12,
@@ -446,7 +507,8 @@ const PortabilityBottomSheet: React.FC<PortabilityBottomSheetProps> = ({
                 textDecorationLine: 'underline',
               }}
             >
-              Problemas com sua portabilidade?{'\n'}Entre em contato com nosso suporte.
+              Problemas com sua portabilidade?{'\n'}Entre em contato com nosso
+              suporte.
             </Text>
           </TouchableOpacity>
         </VStack>
@@ -474,12 +536,11 @@ const PortabilityBottomSheet: React.FC<PortabilityBottomSheetProps> = ({
             marginBottom: 16,
           }}
         >
-          <Text style={{ fontSize: 22, fontWeight: 'bold', color: colors.text }}>
+          <Text
+            style={{ fontSize: 22, fontWeight: 'bold', color: colors.text }}
+          >
             Portabilidade
           </Text>
-          <TouchableOpacity onPress={onClose} style={{ padding: 4 }}>
-            <Icon as={X} color={colors.text} size="xl" />
-          </TouchableOpacity>
         </HStack>
 
         {/* Subtítulo */}
@@ -496,7 +557,9 @@ const PortabilityBottomSheet: React.FC<PortabilityBottomSheetProps> = ({
 
         {/* Loading status */}
         {(loadingStatus || fetchingStatus) && (
-          <VStack style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <VStack
+            style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+          >
             <ActivityIndicator size="large" color={colors.primary} />
             <Text style={{ fontSize: 16, color: colors.text, marginTop: 16 }}>
               Verificando status...

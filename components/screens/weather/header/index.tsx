@@ -35,7 +35,7 @@ const Header = ({ height }: { height: number }) => {
     '✨ Comece sua jornada!',
     '🌟 Hora de se conectar!',
     '💫 Ative e aproveite!',
-    '🎯 Seu mundo aguarda!',
+
     '📱 Conecte-se agora!',
   ]
 

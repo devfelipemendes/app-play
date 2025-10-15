@@ -35,15 +35,15 @@ const tabItems: TabItem[] = [
   },
   {
     name: 'plans',
-    label: 'Planos',
+    label: 'Operadora',
     path: 'plans',
     inActiveIcon: SignalHigh,
     icon: SignalHigh,
   },
   {
-    name: 'location',
-    label: 'Chat',
-    path: 'location',
+    name: 'support',
+    label: 'Atendimento',
+    path: 'support',
     inActiveIcon: MessageCircle,
     icon: MessageCircle,
   },
@@ -71,16 +71,16 @@ function BottomTabBar() {
   // Mapeia o nome da rota para o índice visual da navbar
   const routeNameToIndex: Record<string, number> = {
     '(home)': 0,
-    'plans': 1,
-    'location': 2,
-    'settings': 3,
+    plans: 1,
+    support: 2,
+    settings: 3,
   }
 
   // Determinar a rota ativa baseada no pathname
   const getCurrentRoute = () => {
     if (pathname.includes('(home)')) return '(home)'
     if (pathname.includes('plans')) return 'plans'
-    if (pathname.includes('location')) return 'location'
+    if (pathname.includes('support')) return 'support'
     if (pathname.includes('settings')) return 'settings'
     return '(home)'
   }

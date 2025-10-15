@@ -7,7 +7,7 @@ import CustomHeader from '@/components/shared/custom-header'
 import { StatusBar } from 'expo-status-bar'
 import { MessageCircle, Headphones, Clock } from 'lucide-react-native'
 import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
-import { TouchableOpacity, Linking } from 'react-native'
+import { TouchableOpacity, Linking, ScrollView } from 'react-native'
 import { Icon } from '@/components/ui/icon'
 import { env } from '@/config/env'
 import { ThemeContext } from '@/contexts/theme-context'
@@ -32,11 +32,16 @@ const Support = () => {
   }
 
   return (
-    <VStack space="md" className="flex-1 bg-white dark:bg-gray-900">
-      <StatusBar style={colorMode === 'dark' ? 'light' : 'dark'} />
-      <CustomHeader variant="general" title="Atendimento" />
+    <VStack space="md" className="flex-1 dark:bg-gray-900">
+      <StatusBar style="light" />
+      <CustomHeader
+        variant="general"
+        title="Suporte"
+        description="Entre em contato com o suporte para mais resoluções"
+      />
 
-      <VStack className="px-6 pt-8" style={{ gap: 24 }}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <VStack className="px-6 pt-8 pb-6" style={{ gap: 24 }}>
         {/* Card de informações */}
         <Box
           style={{
@@ -204,7 +209,8 @@ const Support = () => {
             </Text>
           </VStack>
         </Box>
-      </VStack>
+        </VStack>
+      </ScrollView>
     </VStack>
   )
 }

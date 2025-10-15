@@ -1,6 +1,6 @@
 // components/layout/ChangePlanBottomSheet.tsx
 import React, { useState, useRef, useMemo, useEffect, useCallback } from 'react'
-import { TouchableOpacity, Alert, View, Dimensions } from 'react-native'
+import { TouchableOpacity, Alert, View, Dimensions, Keyboard } from 'react-native'
 import { VStack } from '@/components/ui/vstack'
 import { HStack } from '@/components/ui/hstack'
 import { Box } from '@/components/ui/box'
@@ -158,7 +158,9 @@ const PlanCard: React.FC<PlanCardProps> = React.memo(
 
           {/* Gigas */}
           <VStack style={{ marginBottom: RESPONSIVE.spacing.sectionGap * 0.8 }}>
-            <HStack style={{ alignItems: 'baseline', justifyContent: 'center' }}>
+            <HStack
+              style={{ alignItems: 'baseline', justifyContent: 'center' }}
+            >
               <Text
                 style={{
                   fontSize: RESPONSIVE.fontSize.gigasNumber,
@@ -199,7 +201,13 @@ const PlanCard: React.FC<PlanCardProps> = React.memo(
 
           {/* Apps */}
           {!plan.descricao_infiniti?.startsWith('(M2M)') && (
-            <VStack style={{ marginBottom: RESPONSIVE.spacing.sectionGap * 0.8, flex: 1, minHeight: 0 }}>
+            <VStack
+              style={{
+                marginBottom: RESPONSIVE.spacing.sectionGap * 0.8,
+                flex: 1,
+                minHeight: 0,
+              }}
+            >
               <Text
                 style={{
                   fontSize: RESPONSIVE.fontSize.appsTitle,
@@ -211,7 +219,14 @@ const PlanCard: React.FC<PlanCardProps> = React.memo(
               >
                 Apps inclusos:
               </Text>
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 6 }}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  flexWrap: 'wrap',
+                  justifyContent: 'center',
+                  gap: 6,
+                }}
+              >
                 {mockApps.map((app, index) => (
                   <View
                     key={index}
@@ -229,7 +244,11 @@ const PlanCard: React.FC<PlanCardProps> = React.memo(
                       elevation: 2,
                     }}
                   >
-                    <Text style={{ fontSize: RESPONSIVE.fontSize.benefits * 0.65 }}>{app.name}</Text>
+                    <Text
+                      style={{ fontSize: RESPONSIVE.fontSize.benefits * 0.65 }}
+                    >
+                      {app.name}
+                    </Text>
                   </View>
                 ))}
               </View>
@@ -237,9 +256,22 @@ const PlanCard: React.FC<PlanCardProps> = React.memo(
           )}
 
           {/* Preço */}
-          <VStack style={{ alignItems: 'center', marginTop: RESPONSIVE.spacing.sectionGap * 0.5 }}>
-            <HStack style={{ alignItems: 'baseline', justifyContent: 'center' }}>
-              <Text style={{ fontSize: RESPONSIVE.fontSize.priceSymbol, color: colors.subTitle, fontWeight: '500' }}>
+          <VStack
+            style={{
+              alignItems: 'center',
+              marginTop: RESPONSIVE.spacing.sectionGap * 0.5,
+            }}
+          >
+            <HStack
+              style={{ alignItems: 'baseline', justifyContent: 'center' }}
+            >
+              <Text
+                style={{
+                  fontSize: RESPONSIVE.fontSize.priceSymbol,
+                  color: colors.subTitle,
+                  fontWeight: '500',
+                }}
+              >
                 R$
               </Text>
               <Text
@@ -254,7 +286,13 @@ const PlanCard: React.FC<PlanCardProps> = React.memo(
                 {plan.value}
               </Text>
             </HStack>
-            <Text style={{ fontSize: RESPONSIVE.fontSize.priceLabel, color: colors.subTitle, fontWeight: '500' }}>
+            <Text
+              style={{
+                fontSize: RESPONSIVE.fontSize.priceLabel,
+                color: colors.subTitle,
+                fontWeight: '500',
+              }}
+            >
               por mês
             </Text>
           </VStack>
@@ -326,6 +364,7 @@ const ChangePlanBottomSheet: React.FC<ChangePlanBottomSheetProps> = ({
     if (isOpen) {
       bottomSheetRef.current?.expand()
     } else {
+      Keyboard.dismiss()
       bottomSheetRef.current?.close()
       setSelectedPlan(null)
     }
@@ -430,11 +469,20 @@ const ChangePlanBottomSheet: React.FC<ChangePlanBottomSheetProps> = ({
   const renderDots = () => {
     if (allPlans.length <= 1) return null
     return (
-      <HStack style={{ justifyContent: 'center', gap: 8, marginTop: 8, marginBottom: 4 }}>
+      <HStack
+        style={{
+          justifyContent: 'center',
+          gap: 8,
+          marginTop: 8,
+          marginBottom: 4,
+        }}
+      >
         {allPlans.map((_, index) => (
           <TouchableOpacity
             key={index}
-            onPress={() => carouselRef.current?.scrollTo({ index, animated: true })}
+            onPress={() =>
+              carouselRef.current?.scrollTo({ index, animated: true })
+            }
             style={{ padding: 8 }}
           >
             <View
@@ -442,7 +490,8 @@ const ChangePlanBottomSheet: React.FC<ChangePlanBottomSheetProps> = ({
                 width: currentIndex === index ? 24 : 8,
                 height: 8,
                 borderRadius: 4,
-                backgroundColor: currentIndex === index ? colors.primary : colors.disabled,
+                backgroundColor:
+                  currentIndex === index ? colors.primary : colors.disabled,
               }}
             />
           </TouchableOpacity>
@@ -484,29 +533,18 @@ const ChangePlanBottomSheet: React.FC<ChangePlanBottomSheetProps> = ({
             marginBottom: 16,
           }}
         >
-          <Text style={{ fontSize: 22, fontWeight: 'bold', color: colors.text }}>
+          <Text
+            style={{ fontSize: 22, fontWeight: 'bold', color: colors.text }}
+          >
             Alterar Plano
           </Text>
-          <TouchableOpacity onPress={onClose} style={{ padding: 4 }}>
-            <Icon as={X} color={colors.text} size="xl" />
-          </TouchableOpacity>
         </HStack>
-
-        {/* Subtítulo com número da linha */}
-        <Text
-          style={{
-            fontSize: 14,
-            color: colors.subTitle,
-            marginBottom: 16,
-            textAlign: 'center',
-          }}
-        >
-          Linha: {msisdn}
-        </Text>
 
         {/* Loading */}
         {loadingPlans && (
-          <VStack style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <VStack
+            style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+          >
             <Text style={{ fontSize: 16, color: colors.text }}>
               Carregando planos...
             </Text>
@@ -515,8 +553,17 @@ const ChangePlanBottomSheet: React.FC<ChangePlanBottomSheetProps> = ({
 
         {/* Erro */}
         {plansError && (
-          <VStack style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: 16 }}>
-            <Text style={{ fontSize: 16, color: colors.error, textAlign: 'center' }}>
+          <VStack
+            style={{
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: 16,
+            }}
+          >
+            <Text
+              style={{ fontSize: 16, color: colors.error, textAlign: 'center' }}
+            >
               Erro ao carregar planos
             </Text>
             <TouchableOpacity
@@ -537,7 +584,9 @@ const ChangePlanBottomSheet: React.FC<ChangePlanBottomSheetProps> = ({
 
         {/* Planos vazios */}
         {!loadingPlans && !plansError && allPlans.length === 0 && (
-          <VStack style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <VStack
+            style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+          >
             <Text style={{ fontSize: 16, color: colors.text }}>
               Nenhum plano disponível
             </Text>
@@ -579,7 +628,8 @@ const ChangePlanBottomSheet: React.FC<ChangePlanBottomSheetProps> = ({
                 }
                 style={{
                   backgroundColor:
-                    !selectedPlan || selectedPlan.id?.toString() === currentPlanId
+                    !selectedPlan ||
+                    selectedPlan.id?.toString() === currentPlanId
                       ? colors.disabled
                       : colors.primary,
                   borderRadius: 12,
@@ -588,7 +638,9 @@ const ChangePlanBottomSheet: React.FC<ChangePlanBottomSheetProps> = ({
                   opacity: isChanging ? 0.6 : 1,
                 }}
               >
-                <Text style={{ fontSize: 16, fontWeight: '600', color: 'white' }}>
+                <Text
+                  style={{ fontSize: 16, fontWeight: '600', color: 'white' }}
+                >
                   {isChanging ? 'Alterando...' : 'Alterar Plano'}
                 </Text>
               </TouchableOpacity>

@@ -6,6 +6,7 @@ import {
   View,
   Dimensions,
   TextInput as RNTextInput,
+  Keyboard,
 } from 'react-native'
 import { VStack } from '@/components/ui/vstack'
 import { HStack } from '@/components/ui/hstack'
@@ -269,8 +270,9 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
   const carouselRef = useRef<ICarouselInstance>(null)
   const iccidInputRef = useRef<RNTextInput>(null)
 
-  // Camera permissions
-  const [permission, requestPermission] = useCameraPermissions()
+  // Camera permissions - NÃO usar hook na raiz
+  // const [permission, requestPermission] = useCameraPermissions()
+  const [hasPermission, setHasPermission] = useState<boolean | null>(null)
 
   // Estados do fluxo
   const [currentStep, setCurrentStep] = useState<ActivationStep>(ActivationStep.ICCID_INPUT)
@@ -326,6 +328,8 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
       // Focar no input quando abrir
       setTimeout(() => iccidInputRef.current?.focus(), 300)
     } else {
+      // Fechar teclado quando modal fechar
+      Keyboard.dismiss()
       bottomSheetRef.current?.close()
       // Reset state quando fechar
       setCurrentStep(ActivationStep.ICCID_INPUT)
@@ -383,19 +387,42 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
     })
   }
 
-  const openScanner = async () => {
-    if (!permission?.granted) {
-      const { status } = await requestPermission()
-      if (status !== 'granted') {
+  const getCameraPermissions = async () => {
+    try {
+      // Usa API direta da Camera ao invés do hook
+      const { status } = await Camera.requestCameraPermissionsAsync()
+      setHasPermission(status === 'granted')
+
+      if (status === 'denied') {
         Toast.show({
-          type: 'error',
-          text1: 'Permissão negada',
-          text2: 'É necessário permitir o acesso à câmera',
+          type: 'info',
+          text1: 'Permissão de câmera negada',
+          text2: 'Você pode habilitar nas configurações do dispositivo',
         })
-        return
+        return false
       }
+
+      return status === 'granted'
+    } catch (error) {
+      console.error('Erro ao solicitar permissão de câmera:', error)
+      setHasPermission(false)
+      return false
     }
-    setShowScanner(true)
+  }
+
+  const openScanner = async () => {
+    // Solicita permissão e só abre se concedida
+    const granted = await getCameraPermissions()
+
+    if (granted) {
+      setShowScanner(true)
+    } else {
+      Toast.show({
+        type: 'error',
+        text1: 'Permissão necessária',
+        text2: 'Habilite a câmera nas configurações para escanear',
+      })
+    }
   }
 
   // Navegar para próximo step

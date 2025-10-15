@@ -1,6 +1,6 @@
 // components/layout/AdditionalRechargeBottomSheet.tsx
 import React, { useState, useRef, useMemo, useEffect, useCallback } from 'react'
-import { TouchableOpacity, Alert, View, Dimensions } from 'react-native'
+import { TouchableOpacity, Alert, View, Dimensions, Keyboard } from 'react-native'
 import { VStack } from '@/components/ui/vstack'
 import { HStack } from '@/components/ui/hstack'
 import { Box } from '@/components/ui/box'
@@ -277,6 +277,7 @@ const AdditionalRechargeBottomSheet: React.FC<
     if (isOpen) {
       bottomSheetRef.current?.expand()
     } else {
+      Keyboard.dismiss()
       bottomSheetRef.current?.close()
     }
   }, [isOpen])
@@ -466,11 +467,7 @@ const AdditionalRechargeBottomSheet: React.FC<
       backgroundStyle={{
         backgroundColor: colors.background,
       }}
-      handleIndicatorStyle={{
-        backgroundColor: colors.secondary,
-        width: 40,
-        height: 4,
-      }}
+      handleIndicatorStyle={{ backgroundColor: colors.disabled }}
       handleStyle={{
         paddingVertical: 12,
       }}

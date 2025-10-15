@@ -8,7 +8,7 @@ import { Box } from '@/components/ui/box'
 import { Text } from '@/components/ui/text'
 import ForeCastCard from '@/components/screens/weather/forecast-card'
 
-import Chart from '@/components/screens/weather/chart'
+import MonthlyChart from '@/components/screens/weather/monthly-chart'
 import { ScrollView } from '@/components/ui/scroll-view'
 import { useFocusEffect } from '@react-navigation/native'
 import { useCallback } from 'react'
@@ -50,10 +50,9 @@ import LineSelector from '@/components/layout/lineSelector'
 import { useDadosFormatter } from '@/src/utils/dadosFormatter'
 import { TouchableOpacity } from 'react-native'
 import ActivateLineModal from '@/components/layout/ActivateLineModal'
+import WeeklyConsumption from '@/components/screens/weather/weekly-consumption'
 
 const Home = () => {
-  // Ref para o Chart
-  const chartRef = useRef(null)
   // Ref para controlar se já inicializou (evitar múltiplas chamadas no useFocusEffect)
   const hasInitialized = useRef(false)
   const AnimatedVStack = Animated.createAnimatedComponent(VStack)
@@ -477,7 +476,7 @@ const Home = () => {
         gap: 16,
       }}
     >
-      <StatusBar style="dark" />
+      <StatusBar style="light" />
       {/* Seletor de linhas - Sempre mostrar se houver linhas */}
       {hasLines && (
         <LineSelector
@@ -609,71 +608,10 @@ const Home = () => {
           </AnimatedVStack>
 
           {/* Seção de consumo semanal */}
-          <VStack
-            style={{
-              paddingVertical: 12,
-              paddingHorizontal: 12,
-              borderRadius: 24,
-              backgroundColor: colors.background,
-              elevation: 2,
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 1 },
-              shadowOpacity: 0.24,
-              shadowRadius: 3,
-              gap: 12,
-            }}
-          >
-            <HStack style={{ gap: 8, alignItems: 'center' }}>
-              <Box
-                style={{
-                  width: 28,
-                  height: 28,
-                  backgroundColor: colors.primary,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  borderRadius: 14,
-                }}
-              >
-                <Icon
-                  as={ClockIcon}
-                  size="sm"
-                  style={{ color: colors.textButton }}
-                />
-              </Box>
-              <Text
-                style={{
-                  fontFamily: 'DM Sans',
-                  fontWeight: '400',
-                  color: colors.secondary,
-                }}
-              >
-                Consumo Semanal
-              </Text>
-            </HStack>
+          <WeeklyConsumption msisdn={selectedLine.msisdn} />
 
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ gap: 32, paddingHorizontal: 12 }}
-            >
-              {HourlyForecastData.map((card) => (
-                <ForeCastCard
-                  key={card.id}
-                  time={card.time}
-                  imgUrl={card.imgUrl}
-                  temperature={card.temperature}
-                />
-              ))}
-            </ScrollView>
-          </VStack>
-
-          {/* Chart com dados formatados */}
-          <Chart
-            chartRef={chartRef}
-            data={consumptionData}
-            selectedLine={selectedLine}
-            rawData={det2Data}
-          />
+          {/* Gráfico de consumo mensal */}
+          <MonthlyChart msisdn={selectedLine.msisdn} />
         </>
       )}
 

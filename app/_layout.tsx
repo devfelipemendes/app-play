@@ -59,7 +59,7 @@ const MainLayout = () => {
 
   return (
     <GluestackUIProvider config={createCustomConfig} colorMode={colorMode}>
-      <StatusBar style="auto" translucent />
+      <StatusBar style="light" translucent />
       <AuthProvider>
         <CompanyThemeLoader>
           <AuthGuard>

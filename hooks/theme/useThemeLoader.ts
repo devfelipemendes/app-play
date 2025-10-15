@@ -148,10 +148,18 @@ export const useCompanyThemeSimple = () => {
       background: isDark ? '#1a1a1a' : '#ffffff',
       backgroundSecondary: isDark ? '#2a2a2a' : '#f5f5f5',
 
-      shadow: isDark ? '0px 1px 3px rgba(255, 255, 255, 0.1)' : '0px 1px 3px rgba(0, 0, 0, 0.24)',
-      shadowLight: isDark ? '0px 1px 2px rgba(255, 255, 255, 0.05)' : '0px 1px 2px rgba(0, 0, 0, 0.12)',
-      shadowMedium: isDark ? '0px 2px 4px rgba(255, 255, 255, 0.08)' : '0px 2px 4px rgba(0, 0, 0, 0.16)',
-      shadowHeavy: isDark ? '0px 4px 8px rgba(255, 255, 255, 0.12)' : '0px 4px 8px rgba(0, 0, 0, 0.24)',
+      shadow: isDark
+        ? '0px 1px 3px rgba(255, 255, 255, 0.1)'
+        : '0px 1px 3px rgba(0, 0, 0, 0.24)',
+      shadowLight: isDark
+        ? '0px 1px 2px rgba(255, 255, 255, 0.05)'
+        : '0px 1px 2px rgba(0, 0, 0, 0.12)',
+      shadowMedium: isDark
+        ? '0px 2px 4px rgba(255, 255, 255, 0.08)'
+        : '0px 2px 4px rgba(0, 0, 0, 0.16)',
+      shadowHeavy: isDark
+        ? '0px 4px 8px rgba(255, 255, 255, 0.12)'
+        : '0px 4px 8px rgba(0, 0, 0, 0.24)',
     },
   }
 }

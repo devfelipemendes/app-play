@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Alert, Platform, Linking } from 'react-native'
+import { Alert, Platform, Linking, Pressable } from 'react-native'
 
 import { Text } from '@/components/ui/text'
 
@@ -81,6 +81,15 @@ export default function FormLogin() {
     saveCredentials,
     authenticateWithBiometric,
   } = useBiometricAuth()
+
+  // Debug - remover depois
+  useEffect(() => {
+    console.log('🔐 Biometric Debug:', {
+      isBiometricSupported,
+      biometricType,
+      hasStoredCredentials,
+    })
+  }, [isBiometricSupported, biometricType, hasStoredCredentials])
 
   const onSubmit = async (data: LoginFormData) => {
     // Validação com valibot
@@ -235,28 +244,39 @@ export default function FormLogin() {
 
       {/* Checkbox Salvar Biometria */}
       {isBiometricSupported && (
-        <Box
-          style={{
-            marginBottom: 16,
-            flexDirection: 'row',
-            alignItems: 'center',
-          }}
-        >
-          <Checkbox
-            value="biometric"
-            isChecked={saveBiometric}
-            onChange={setSaveBiometric}
-            aria-label="Salvar biometria"
+        <Box style={{ marginBottom: 16 }}>
+          <Pressable
+            onPress={() => {
+              const newValue = !saveBiometric
+              console.log('📦 Checkbox clicado! Mudando de', saveBiometric, 'para', newValue)
+              setSaveBiometric(newValue)
+            }}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+            }}
           >
-            <CheckboxIndicator>
-              <CheckboxIcon as={CheckIcon} />
-            </CheckboxIndicator>
-            <CheckboxLabel
-              style={{ marginLeft: 8, fontSize: 14, color: colors.text }}
+            <Box
+              style={{
+                width: 20,
+                height: 20,
+                borderRadius: 4,
+                borderWidth: 2,
+                borderColor: saveBiometric ? colors.primary : '#999',
+                backgroundColor: saveBiometric ? colors.primary : 'transparent',
+                justifyContent: 'center',
+                alignItems: 'center',
+                marginRight: 8,
+              }}
             >
-              Salvar e usar {biometricType} para login
-            </CheckboxLabel>
-          </Checkbox>
+              {saveBiometric && (
+                <CheckIcon size={16} color="white" />
+              )}
+            </Box>
+            <Text style={{ fontSize: 14, color: colors.text }}>
+              Salvar e usar {biometricType || 'Biometria'} para login
+            </Text>
+          </Pressable>
         </Box>
       )}
 

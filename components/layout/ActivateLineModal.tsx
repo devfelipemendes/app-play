@@ -1,5 +1,5 @@
 // components/layout/ActivateLineModal.tsx
-import React, { useState, useRef, useCallback } from 'react'
+import React, { useState, useRef, useCallback, useEffect } from 'react'
 import {
   Modal,
   TouchableOpacity,
@@ -7,6 +7,7 @@ import {
   Image,
   Dimensions,
   View,
+  Keyboard,
 } from 'react-native'
 import { VStack } from '@/components/ui/vstack'
 import { HStack } from '@/components/ui/hstack'
@@ -387,6 +388,13 @@ const ActivateLineModal: React.FC<ActivateLineModalProps> = ({
       setSelectedPlan(allPlans[0])
     }
   }, [allPlans, selectedPlan])
+
+  // Controlar abertura/fechamento do modal
+  useEffect(() => {
+    if (!visible) {
+      Keyboard.dismiss()
+    }
+  }, [visible])
 
   const handleSelectPlan = (plan: Plan) => {
     setSelectedPlan(plan)
