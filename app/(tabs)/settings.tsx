@@ -3,7 +3,15 @@ import { Text } from '@/components/ui/text'
 import { VStack } from '@/components/ui/vstack'
 import { HStack } from '@/components/ui/hstack'
 import InfoCard from '@/components/screens/settings/info-card'
-import { User, Mail, CreditCard, AlertCircle, LogOut, Fingerprint, ScanFace } from 'lucide-react-native'
+import {
+  User,
+  Mail,
+  CreditCard,
+  AlertCircle,
+  LogOut,
+  Fingerprint,
+  ScanFace,
+} from 'lucide-react-native'
 import { StatusBar } from 'expo-status-bar'
 import { Alert, TouchableOpacity, ScrollView, Switch } from 'react-native'
 import Countdown, { CountdownRenderProps } from 'react-countdown'
@@ -165,10 +173,7 @@ const Settings = () => {
   }
 
   return (
-    <ScrollView
-      style={{ flex: 1, backgroundColor: colors.background }}
-      showsVerticalScrollIndicator={false}
-    >
+    <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
       <VStack space="md" className=" dark:bg-gray-900 flex-1">
         <StatusBar style="light" />
         <CustomHeader
@@ -223,7 +228,12 @@ const Settings = () => {
                 elevation: 4,
               }}
             >
-              <HStack style={{ alignItems: 'center', justifyContent: 'space-between' }}>
+              <HStack
+                style={{
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
                 <HStack space="md" style={{ alignItems: 'center', flex: 1 }}>
                   <HStack
                     style={{
@@ -296,7 +306,10 @@ const Settings = () => {
               opacity: loadingDelete ? 0.6 : 1,
             }}
           >
-            <HStack style={{ alignItems: 'center', justifyContent: 'center' }} space="sm">
+            <HStack
+              style={{ alignItems: 'center', justifyContent: 'center' }}
+              space="sm"
+            >
               <AlertCircle size={20} color="white" />
               <Text
                 style={{
@@ -357,7 +370,10 @@ const Settings = () => {
               opacity: loadingAuth ? 0.6 : 1,
             }}
           >
-            <HStack style={{ alignItems: 'center', justifyContent: 'center' }} space="sm">
+            <HStack
+              style={{ alignItems: 'center', justifyContent: 'center' }}
+              space="sm"
+            >
               <LogOut size={20} color={colors.primary} />
               <Text
                 style={{

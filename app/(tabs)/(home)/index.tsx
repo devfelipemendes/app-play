@@ -1,22 +1,17 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { VStack } from '@/components/ui/vstack'
-import { Globe, Plus } from 'lucide-react-native'
-import { ClockIcon, Icon } from '@/components/ui/icon'
+import { Globe } from 'lucide-react-native'
+import { Icon } from '@/components/ui/icon'
 import { HStack } from '@/components/ui/hstack'
 import HourlyCard from '@/components/screens/weather/hourly-card'
 import { Box } from '@/components/ui/box'
 import { Text } from '@/components/ui/text'
-import ForeCastCard from '@/components/screens/weather/forecast-card'
 
 import MonthlyChart from '@/components/screens/weather/monthly-chart'
-import { ScrollView } from '@/components/ui/scroll-view'
+
 import { useFocusEffect } from '@react-navigation/native'
 import { useCallback } from 'react'
-import {
-  WindAndPrecipitationData,
-  PressureAndUVIndexData,
-  HourlyForecastData,
-} from '@/data/screens/weather/hourly-tab'
+
 import Animated, { FadeInDown } from 'react-native-reanimated'
 import { StatusBar } from 'expo-status-bar'
 import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
@@ -150,7 +145,13 @@ const Home = () => {
       if (err?.status === 401) {
         dispatch(setError('Sessão expirada. Faça login novamente.'))
       } else {
-        dispatch(setError(err?.data?.erro || err?.message || 'Erro ao carregar dados da linha'))
+        dispatch(
+          setError(
+            err?.data?.erro ||
+              err?.message ||
+              'Erro ao carregar dados da linha',
+          ),
+        )
       }
     }
   }
@@ -573,7 +574,9 @@ const Home = () => {
                   icon={Globe}
                   text="Dados Restantes"
                   currentUpdate={consumptionData?.dados.restante || 'Sem dados'}
-                  lastUpdate={`${consumptionData?.dados.percentage || 0}% usado`}
+                  lastUpdate={`${
+                    consumptionData?.dados.percentage || 0
+                  }% usado`}
                   arrowDownIcon={true}
                   arrowUpIcon={false}
                 />
@@ -590,7 +593,9 @@ const Home = () => {
                   currentUpdate={
                     consumptionData?.minutos.restante || 'Sem dados'
                   }
-                  lastUpdate={`${consumptionData?.minutos.percentage || 0}% usado`}
+                  lastUpdate={`${
+                    consumptionData?.minutos.percentage || 0
+                  }% usado`}
                   arrowDownIcon={true}
                   arrowUpIcon={false}
                 />

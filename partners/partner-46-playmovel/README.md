@@ -9,17 +9,25 @@
 
 ## Branding
 
-### Cores
+### Cores Principais
 - **Primary**: #007AFF
 - **Secondary**: #5856D6
 - **Accent**: #FF9500
 
+### Cores de Fundo (Assets)
+- **Splash Background**: #007AFF (definido em `app.config.json`)
+- **iOS Icon Background**: #007AFF (aplicado se o ícone tiver transparência)
+- **Android Adaptive Icon Background**: #007AFF (fundo do ícone adaptativo)
+
 ### Assets
-- Icon: `./assets/icon.png`
-- Adaptive Icon: `./assets/adaptive-icon.png`
-- Splash: `./assets/splash-icon.png`
-- Favicon: `./assets/favicon.png`
-- Logo: `./assets/logo.png`
+Todos os assets estão localizados em `./assets/`:
+
+- **icon.png** (1024x1024px) - Ícone principal do app
+- **adaptive-icon.png** (1024x1024px) - Foreground do ícone adaptativo Android
+- **splash-icon.png** (400x400px) - Logo exibido na tela splash
+- **favicon.png** (192x192px) - Favicon para versão web
+
+**Nota**: As cores de fundo são configuradas em `app.config.json` e aplicadas automaticamente durante o build.
 
 ## Configurações de Build
 

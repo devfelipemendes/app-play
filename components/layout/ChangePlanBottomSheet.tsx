@@ -1,6 +1,12 @@
 // components/layout/ChangePlanBottomSheet.tsx
 import React, { useState, useRef, useMemo, useEffect, useCallback } from 'react'
-import { TouchableOpacity, Alert, View, Dimensions, Keyboard } from 'react-native'
+import {
+  TouchableOpacity,
+  Alert,
+  View,
+  Dimensions,
+  Keyboard,
+} from 'react-native'
 import { VStack } from '@/components/ui/vstack'
 import { HStack } from '@/components/ui/hstack'
 import { Box } from '@/components/ui/box'
@@ -338,13 +344,18 @@ const ChangePlanBottomSheet: React.FC<ChangePlanBottomSheetProps> = ({
     refetch: refetchPlans,
   } = useGetPlansQuery({ companyid: env.COMPANY_ID }, { skip: !isOpen })
 
+  // Tipagem explícita para o erro
+  const hasPlansError = Boolean(plansError)
+
   const allPlans = React.useMemo(() => {
     if (!plansData) return []
     const personalizado = (plansData.personalizado || [])
-      .filter((plan) => plan.mostraApp === true)
-      .map((plan, index) => ({
+      .filter((plan: any) => plan.mostraApp === true)
+      .map((plan: any, index) => ({
         ...plan,
         uniqueId: `personalizado-${plan.planid}-${index}`,
+        // Adiciona propriedade id baseada no planid se não existir
+        id: plan.id || plan.planid,
       }))
     return personalizado
   }, [plansData])
@@ -540,10 +551,13 @@ const ChangePlanBottomSheet: React.FC<ChangePlanBottomSheetProps> = ({
           </Text>
         </HStack>
 
-        {/* Loading */}
         {loadingPlans && (
           <VStack
-            style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+            style={{
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
           >
             <Text style={{ fontSize: 16, color: colors.text }}>
               Carregando planos...
@@ -552,7 +566,7 @@ const ChangePlanBottomSheet: React.FC<ChangePlanBottomSheetProps> = ({
         )}
 
         {/* Erro */}
-        {plansError && (
+        {hasPlansError && (
           <VStack
             style={{
               flex: 1,
@@ -583,7 +597,7 @@ const ChangePlanBottomSheet: React.FC<ChangePlanBottomSheetProps> = ({
         )}
 
         {/* Planos vazios */}
-        {!loadingPlans && !plansError && allPlans.length === 0 && (
+        {!loadingPlans && !hasPlansError && allPlans.length === 0 && (
           <VStack
             style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
           >
@@ -594,7 +608,7 @@ const ChangePlanBottomSheet: React.FC<ChangePlanBottomSheetProps> = ({
         )}
 
         {/* Carousel de planos */}
-        {!loadingPlans && !plansError && allPlans.length > 0 && (
+        {!loadingPlans && !hasPlansError && allPlans.length > 0 && (
           <>
             <View style={{ flex: 1, alignItems: 'center' }}>
               <Carousel

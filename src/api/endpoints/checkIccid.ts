@@ -2,7 +2,7 @@
 import { apiPlay } from '../apiPlay'
 
 export type ChecaICCIDBody = {
-  token: string
+  companyid: string | number | null
   iccid: string
 }
 
@@ -17,9 +17,9 @@ export const checaICCIDApi = apiPlay.injectEndpoints({
   endpoints: (builder) => ({
     checaICCID: builder.mutation<ChecaIccidRes, ChecaICCIDBody>({
       query: (payload) => ({
-        url: '/api/planos/iccid',
+        url: '/api/app/planos/iccid',
         method: 'POST',
-        body: payload,
+        data: payload, // Mudando de 'body' para 'data' para compatibilidade com axiosBaseQuery
       }),
       // Invalidações de tags se necessário
       invalidatesTags: ['ICCID'],

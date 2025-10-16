@@ -13,7 +13,11 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated'
 import { useAppSelector } from '@/src/store/hooks'
-import { selectDet2Data, selectDet2Loading, selectDet2Error } from '@/src/store/slices/det2Slice'
+import {
+  selectDet2Data,
+  selectDet2Loading,
+  selectDet2Error,
+} from '@/src/store/slices/det2Slice'
 import { useDadosFormatter } from '@/src/utils/dadosFormatter'
 import { formatPhoneNumber } from '@/src/utils/PhoneFormatter'
 import { getCurrentFormattedDate } from '@/src/utils/getDateFormatter'
@@ -39,7 +43,10 @@ const Header = ({ height }: { height: number }) => {
     '📱 Conecte-se agora!',
   ]
 
-  const randomMessage = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)]
+  const randomMessage =
+    motivationalMessages[
+      Math.floor(Math.random() * motivationalMessages.length)
+    ]
 
   // Shared value para height suavizada
   const smoothHeight = useSharedValue(height)
@@ -191,7 +198,7 @@ const Header = ({ height }: { height: number }) => {
                     feelsLikeTextStyle,
                   ]}
                 >
-                  {randomMessage}
+                  🌟 Hora de se conectar!
                 </Animated.Text>
               </>
             ) : (

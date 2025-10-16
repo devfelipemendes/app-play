@@ -8,7 +8,7 @@ import { useAppDispatch } from '@/src/store/hooks'
 import { setMode } from '@/src/store/slices/screenFlowSlice'
 import { useForm, Controller } from 'react-hook-form'
 import { mask, unMask } from 'remask'
-import { Camera, CameraView, useCameraPermissions } from 'expo-camera'
+import { Camera, CameraView } from 'expo-camera'
 
 import * as v from 'valibot'
 import { valibotResolver } from '@hookform/resolvers/valibot'
@@ -39,9 +39,9 @@ import ThemeCard from '@/components/screens/settings/theme-card'
 import { VStack } from '@/components/ui/vstack'
 import { HStack } from '@/components/ui/hstack'
 import { IconButton } from '@/components/ui/iconButton'
-import { useCheckCpfMutation } from '@/src/api/endpoints/checkCpf'
+
 import Toast from 'react-native-toast-message'
-import { BackHandler, Dimensions, Platform, View } from 'react-native'
+import { BackHandler, Dimensions, View } from 'react-native'
 import { useCpfCnpjCheck } from '@/hooks/useCpfCnpjValidator'
 import { useCreateUserMutation } from '@/src/api/endpoints/cad'
 import { useCep } from '@/hooks/useGetCep'
@@ -56,6 +56,7 @@ import {
 import { useDebounce } from '@/hooks/useDebounce'
 import PlansCarousel from '@/components/layout/PlansCarousel'
 import { setUserInfo } from '@/src/store/slices/ativarLinhaSlice'
+import { useAuth } from '@/hooks/useAuth'
 
 const cadastroSchema = v.pipe(
   v.object({
@@ -186,6 +187,9 @@ export default function FormCadastro() {
   const [iccidValue, setIccidValue] = useState('')
   const [isIccidValid, setIsIccidValid] = useState<boolean | null>(null)
   const [lastValidatedIccid, setLastValidatedIccid] = useState('')
+  const [selectedDDD, setSelectedDDD] = useState('')
+
+  const { user } = useAuth()
 
   // NÃO chamar useCameraPermissions na raiz - só quando necessário
   // const [permission, requestPermission] = useCameraPermissions()
@@ -270,7 +274,7 @@ export default function FormCadastro() {
     }
   }
 
-  const formatDateForAPI = (dateString: string): string => {
+  const formatDateForAPI = (dateString: string | undefined): string => {
     if (!dateString) return ''
 
     // Se a data já está no formato DD-MM-YYYY, retorna como está
@@ -316,7 +320,7 @@ export default function FormCadastro() {
         cpf: documentValue,
         phone: unMask(data.phone),
         whats: unMask(data.whats || ''),
-        nivel: data.nivel || 1,
+        nivel: 1,
         cep: unMask(data.cep),
         uf: data.uf,
         cidade: data.cidade,
@@ -329,7 +333,8 @@ export default function FormCadastro() {
         porcentagem_ativacao: data.porcentagem_ativacao || 0,
         parentcompany: data.parentcompany || 0,
         password: data.password,
-        parceiro: env.COMPANY_ID,
+        companyid: env?.COMPANY_ID,
+        parceiro: env.PARCEIRO,
       }
 
       console.log('Dados a serem enviados:', payload)
@@ -354,7 +359,7 @@ export default function FormCadastro() {
       })
 
       // Redirecionar ou fazer algo após sucesso
-      dispatch(setMode('login'))
+      setStep(3)
     } catch (err: any) {
       console.error('Erro ao cadastrar:', err)
 
@@ -385,7 +390,7 @@ export default function FormCadastro() {
     setLastValidatedIccid(iccid)
 
     const result: any = await validateICCID({
-      token: '',
+      companyid: env.COMPANY_ID || '',
       iccid,
     })
 
@@ -396,6 +401,7 @@ export default function FormCadastro() {
         text1: 'ICCID válido',
         text2: `${result.data.descricao} - Rede: ${result.rede}`,
       })
+      setStep(4)
     } else {
       setIsIccidValid(false)
       Toast.show({
@@ -498,12 +504,6 @@ export default function FormCadastro() {
     const cleanedData = data.replace(/\D/g, '').trim()
     setIccidValue(cleanedData)
     setShowScan(false)
-
-    Toast.show({
-      type: 'success',
-      text1: 'ICCID escaneado!',
-      text2: `ICCID: ${cleanedData}`,
-    })
   }
 
   useEffect(() => {
@@ -564,14 +564,42 @@ export default function FormCadastro() {
 
   useEffect(() => {
     if (step === 4) {
+      // Coletar todos os dados do formulário dos steps anteriores
+      const formData = watch()
+
+      const documentValue = formData.cpf ? unMask(formData.cpf) : unMask(formData.cnpj || '')
+
       dispatch(
         setUserInfo({
+          // Dados pessoais
+          name: formData.name || '',
+          email: formData.email || '',
+          nascimento: formData.nascimento || '',
+          cpf: documentValue,
+          phone: unMask(formData.phone || ''),
+          whats: unMask(formData.whats || ''),
+
+          // Endereço
+          cep: unMask(formData.cep || ''),
+          uf: formData.uf || '',
+          cidade: formData.cidade || '',
+          district: formData.district || '',
+          street: formData.street || '',
+          number: formData.number || '',
+          complement: formData.complement || '',
+
+          // Dados da ativação
+          iccid: iccidValue,
+          tipoChip: activeTypeChipsTabs,
+
+          // Sistema
           parceiro: env.PARCEIRO || '46',
           token: '30684d5f2e7cfdd198e58f6a1efedf6f8da743c85ef0ef6558',
+          companyid: env.COMPANY_ID,
         }),
       )
     }
-  }, [step, dispatch])
+  }, [step, dispatch, watch, iccidValue, activeTypeChipsTabs])
 
   const handleCpfChange = async (text: string) => {
     const cleanText = unMask(text)
@@ -579,7 +607,8 @@ export default function FormCadastro() {
 
     if (cleanText.length === 11) {
       const result = await validateAndCheck(cleanText, 'cpf')
-      if (!result.isValid) Toast.show({ type: 'error', text1: result.error })
+      if (!result.isValid)
+        Toast.show({ type: 'info', text1: 'CPF ainda não possui cadastro' })
     }
   }
 

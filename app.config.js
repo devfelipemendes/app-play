@@ -111,6 +111,9 @@ module.exports = ({ config = {} }) => {
         supportsTablet: partnerConfig.ios?.supportsTablet ?? true,
         bundleIdentifier: partnerConfig.ios?.bundleIdentifier,
         buildNumber: partnerConfig.ios?.buildNumber,
+        icon: partnerConfig.ios?.icon?.backgroundColor
+          ? { backgroundColor: partnerConfig.ios.icon.backgroundColor }
+          : undefined,
         infoPlist: {
           ...(baseConfig.ios?.infoPlist || {}),
           ...(partnerConfig.ios?.infoPlist || {}),
@@ -145,6 +148,7 @@ module.exports = ({ config = {} }) => {
           ? path.join(partnerDir, 'assets/splash-icon.png')
           : baseConfig.splash?.image,
         backgroundColor: partnerConfig.splash?.backgroundColor || '#ffffff',
+        resizeMode: partnerConfig.splash?.resizeMode || baseConfig.splash?.resizeMode || 'contain',
       },
 
       // Web Config

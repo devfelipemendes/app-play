@@ -6,7 +6,10 @@
   "ios": {
     "supportsTablet": true,
     "bundleIdentifier": "com.playmovel.app",
-    "buildNumber": "1"
+    "buildNumber": "1",
+    "icon": {
+      "backgroundColor": "#007AFF"
+    }
   },
   "android": {
     "package": "com.playmovel.app",
@@ -16,7 +19,8 @@
     }
   },
   "splash": {
-    "backgroundColor": "#007AFF"
+    "backgroundColor": "#007AFF",
+    "resizeMode": "contain"
   },
   "extra": {
     "supportEmail": "suporte@playmovel.com.br",

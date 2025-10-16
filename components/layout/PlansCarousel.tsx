@@ -349,7 +349,9 @@ const PlansCarousel: React.FC = () => {
 
   // Buscar informações do usuário do Redux
   const userInfo = useAppSelector((state: RootState) => state.ativarLinha || {})
-  const { cpf = '', ddd = '', iccid = '' } = userInfo
+  const { cpf = '', phone = '', iccid = '' } = userInfo
+  // Extrair DDD do telefone (formato (99) 9 9999-9999)
+  const ddd = phone.replace(/\D/g, '').slice(0, 2)
 
   // Query para buscar planos
   const {

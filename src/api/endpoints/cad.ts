@@ -23,6 +23,7 @@ export interface CadastroRequest {
   porcentagem_recarga: number
   porcentagem_ativacao: number
   parentcompany: number
+  companyid: any
 }
 
 export interface CadastroResponse {
