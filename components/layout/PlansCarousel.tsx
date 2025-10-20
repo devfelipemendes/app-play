@@ -48,6 +48,7 @@ const RESPONSIVE = {
 }
 
 interface Plan {
+  id: number // ✅ ID do plano personalizado
   planid: number | string
   description: string
   bundle: number | string
@@ -349,9 +350,9 @@ const PlansCarousel: React.FC = () => {
 
   // Buscar informações do usuário do Redux
   const userInfo = useAppSelector((state: RootState) => state.ativarLinha || {})
-  const { cpf = '', phone = '', iccid = '' } = userInfo
-  // Extrair DDD do telefone (formato (99) 9 9999-9999)
-  const ddd = phone.replace(/\D/g, '').slice(0, 2)
+  const { cpf = '', phone = '', iccid = '', ddd = '' } = userInfo
+  // Usa o DDD selecionado ou extrai do telefone como fallback
+  const dddToUse = ddd || phone.replace(/\D/g, '').slice(0, 2)
 
   // Query para buscar planos
   const {
@@ -374,12 +375,12 @@ const PlansCarousel: React.FC = () => {
 
   const handleBuyPlan = useCallback(
     async (plan: Plan) => {
-      if (!cpf || !ddd || !iccid) {
+      if (!cpf || !dddToUse || !iccid) {
         Alert.alert(
           'Dados Incompletos',
           'Complete o cadastro antes de contratar um plano:\n\n' +
             (!cpf ? '• CPF/CNPJ\n' : '') +
-            (!ddd ? '• Telefone\n' : '') +
+            (!dddToUse ? '• DDD\n' : '') +
             (!iccid ? '• ICCID do SIM Card' : ''),
           [{ text: 'OK', style: 'default' }],
         )
@@ -398,27 +399,70 @@ const PlansCarousel: React.FC = () => {
               onPress: async () => {
                 const payload = {
                   cpf: cpf,
-                  ddd: ddd,
+                  ddd: dddToUse,
                   iccid: iccid,
                   planid: plan.planid.toString(),
-                  planid_personalizado: '',
+                  planid_personalizado: plan.id.toString(), // ✅ Usa o ID do plano personalizado
                   isApp: true,
-                  pospago: 'N',
+                  pospago: 'false', // ✅ String 'false' conforme esperado pela API
                   userInfo: JSON.stringify(userInfo),
                 }
 
-                try {
-                  const result = await activateLine(payload).unwrap()
-                  Alert.alert('Sucesso! 🎉', result.msg, [
-                    { text: 'OK', style: 'default' },
-                  ])
-                } catch (error: any) {
-                  Alert.alert(
-                    'Erro ❌',
-                    error.data?.msg || 'Erro ao ativar linha',
-                    [{ text: 'OK', style: 'default' }],
-                  )
-                }
+                // Debug visual - mostra o payload na tela
+                Alert.alert(
+                  '🔍 Debug - Payload',
+                  JSON.stringify(payload, null, 2),
+                  [
+                    { text: 'Cancelar', style: 'cancel' },
+                    {
+                      text: 'Enviar',
+                      onPress: async () => {
+                        try {
+                          const result = await activateLine(payload).unwrap()
+
+                          // Debug visual - mostra o resultado
+                          Alert.alert(
+                            '✅ Debug - Resposta',
+                            JSON.stringify(result, null, 2),
+                            [
+                              {
+                                text: 'OK',
+                                onPress: () => {
+                                  Alert.alert('Sucesso! 🎉', result.msg)
+                                },
+                              },
+                            ],
+                          )
+                        } catch (error: any) {
+                          // Debug visual - mostra o erro
+                          Alert.alert(
+                            '❌ Debug - Erro',
+                            JSON.stringify(
+                              {
+                                status: error.status,
+                                data: error.data,
+                                message: error.message,
+                              },
+                              null,
+                              2,
+                            ),
+                            [
+                              {
+                                text: 'OK',
+                                onPress: () => {
+                                  Alert.alert(
+                                    'Erro ❌',
+                                    error.data?.msg || 'Erro ao ativar linha',
+                                  )
+                                },
+                              },
+                            ],
+                          )
+                        }
+                      },
+                    },
+                  ],
+                )
               },
             },
           ],
@@ -427,7 +471,7 @@ const PlansCarousel: React.FC = () => {
         console.error('Erro ao processar compra:', error)
       }
     },
-    [cpf, ddd, iccid, userInfo, activateLine],
+    [cpf, dddToUse, iccid, userInfo, activateLine],
   )
 
   const renderPlanCard = useCallback(
@@ -457,7 +501,15 @@ const PlansCarousel: React.FC = () => {
     if (allPlans.length <= 1) return null
 
     return (
-      <HStack justifyContent="center" space={'sm'} marginTop={8}>
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginTop: 8,
+          gap: 8,
+        }}
+      >
         {allPlans.map((_, index) => (
           <TouchableOpacity
             key={index}
@@ -479,7 +531,7 @@ const PlansCarousel: React.FC = () => {
             />
           </TouchableOpacity>
         ))}
-      </HStack>
+      </View>
     )
   }
 
@@ -596,7 +648,7 @@ const PlansCarousel: React.FC = () => {
         ref={carouselRef}
         loop={false}
         width={screenWidth}
-        height={CARD_HEIGHT} // Altura do card + espaço para dots
+        height={CARD_HEIGHT}
         data={allPlans}
         renderItem={renderPlanCard}
         onProgressChange={onProgressChange}
@@ -611,6 +663,8 @@ const PlansCarousel: React.FC = () => {
         enabled={true}
         pagingEnabled={true}
       />
+
+      {renderDots()}
     </Box>
   )
 }

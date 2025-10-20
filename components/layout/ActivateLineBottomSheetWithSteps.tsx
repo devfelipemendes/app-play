@@ -63,6 +63,7 @@ const RESPONSIVE = {
 }
 
 interface Plan {
+  id: number // ✅ ID do plano personalizado
   planid: number | string
   description: string
   bundle: number | string
@@ -83,9 +84,18 @@ interface ActivateLineBottomSheetProps {
 
 // Mock de apps inclusos
 const mockApps = [
-  { name: 'WhatsApp', icon: 'https://via.placeholder.com/40x40/25D366/FFFFFF?text=W' },
-  { name: 'Instagram', icon: 'https://via.placeholder.com/40x40/E4405F/FFFFFF?text=I' },
-  { name: 'YouTube', icon: 'https://via.placeholder.com/40x40/FF0000/FFFFFF?text=Y' },
+  {
+    name: 'WhatsApp',
+    icon: 'https://via.placeholder.com/40x40/25D366/FFFFFF?text=W',
+  },
+  {
+    name: 'Instagram',
+    icon: 'https://via.placeholder.com/40x40/E4405F/FFFFFF?text=I',
+  },
+  {
+    name: 'YouTube',
+    icon: 'https://via.placeholder.com/40x40/FF0000/FFFFFF?text=Y',
+  },
 ]
 
 // Steps do fluxo
@@ -149,7 +159,9 @@ const PlanCard: React.FC<PlanCardProps> = React.memo(
         >
           {/* Gigas */}
           <VStack style={{ marginBottom: RESPONSIVE.spacing.sectionGap * 0.8 }}>
-            <HStack style={{ alignItems: 'baseline', justifyContent: 'center' }}>
+            <HStack
+              style={{ alignItems: 'baseline', justifyContent: 'center' }}
+            >
               <Text
                 style={{
                   fontSize: RESPONSIVE.fontSize.gigasNumber,
@@ -189,7 +201,13 @@ const PlanCard: React.FC<PlanCardProps> = React.memo(
           </VStack>
 
           {/* Apps */}
-          <VStack style={{ marginBottom: RESPONSIVE.spacing.sectionGap * 0.8, flex: 1, minHeight: 0 }}>
+          <VStack
+            style={{
+              marginBottom: RESPONSIVE.spacing.sectionGap * 0.8,
+              flex: 1,
+              minHeight: 0,
+            }}
+          >
             <Text
               style={{
                 fontSize: RESPONSIVE.fontSize.appsTitle,
@@ -201,7 +219,14 @@ const PlanCard: React.FC<PlanCardProps> = React.memo(
             >
               Apps inclusos:
             </Text>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 6 }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                flexWrap: 'wrap',
+                justifyContent: 'center',
+                gap: 6,
+              }}
+            >
               {mockApps.map((app, index) => (
                 <View
                   key={index}
@@ -219,16 +244,33 @@ const PlanCard: React.FC<PlanCardProps> = React.memo(
                     elevation: 2,
                   }}
                 >
-                  <Text style={{ fontSize: RESPONSIVE.fontSize.benefits * 0.65 }}>{app.name}</Text>
+                  <Text
+                    style={{ fontSize: RESPONSIVE.fontSize.benefits * 0.65 }}
+                  >
+                    {app.name}
+                  </Text>
                 </View>
               ))}
             </View>
           </VStack>
 
           {/* Preço */}
-          <VStack style={{ alignItems: 'center', marginTop: RESPONSIVE.spacing.sectionGap * 0.5 }}>
-            <HStack style={{ alignItems: 'baseline', justifyContent: 'center' }}>
-              <Text style={{ fontSize: RESPONSIVE.fontSize.priceSymbol, color: colors.subTitle, fontWeight: '500' }}>
+          <VStack
+            style={{
+              alignItems: 'center',
+              marginTop: RESPONSIVE.spacing.sectionGap * 0.5,
+            }}
+          >
+            <HStack
+              style={{ alignItems: 'baseline', justifyContent: 'center' }}
+            >
+              <Text
+                style={{
+                  fontSize: RESPONSIVE.fontSize.priceSymbol,
+                  color: colors.subTitle,
+                  fontWeight: '500',
+                }}
+              >
                 R$
               </Text>
               <Text
@@ -243,7 +285,13 @@ const PlanCard: React.FC<PlanCardProps> = React.memo(
                 {plan.value}
               </Text>
             </HStack>
-            <Text style={{ fontSize: RESPONSIVE.fontSize.priceLabel, color: colors.subTitle, fontWeight: '500' }}>
+            <Text
+              style={{
+                fontSize: RESPONSIVE.fontSize.priceLabel,
+                color: colors.subTitle,
+                fontWeight: '500',
+              }}
+            >
               por mês
             </Text>
           </VStack>
@@ -275,7 +323,9 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
   const [hasPermission, setHasPermission] = useState<boolean | null>(null)
 
   // Estados do fluxo
-  const [currentStep, setCurrentStep] = useState<ActivationStep>(ActivationStep.ICCID_INPUT)
+  const [currentStep, setCurrentStep] = useState<ActivationStep>(
+    ActivationStep.ICCID_INPUT,
+  )
   const [formData, setFormData] = useState({ iccid: '', ddd: '' })
   const [isIccidValid, setIsIccidValid] = useState<boolean | null>(null)
   const [iccidNetwork, setIccidNetwork] = useState<string>('')
@@ -286,7 +336,7 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
   const [currentIndex, setCurrentIndex] = useState(0)
   const progressValue = useSharedValue<number>(0)
 
-  const snapPoints = useMemo(() => ['85%'], [])
+  const snapPoints = useMemo(() => ['90%'], [])
 
   // Mutations e queries
   const [checkIccid, { isLoading: loadingIccid }] = useChecaICCIDMutation()
@@ -316,7 +366,11 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
 
   // Auto-selecionar primeiro plano
   useEffect(() => {
-    if (allPlans.length > 0 && !selectedPlan && currentStep === ActivationStep.PLAN_SELECT) {
+    if (
+      allPlans.length > 0 &&
+      !selectedPlan &&
+      currentStep === ActivationStep.PLAN_SELECT
+    ) {
       setSelectedPlan(allPlans[0])
     }
   }, [allPlans, selectedPlan, currentStep])
@@ -351,8 +405,8 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
   const handleValidateICCID = async () => {
     try {
       const result = await checkIccid({
-        token: user?.token || '',
         iccid: formData.iccid,
+        companyid: env.COMPANY_ID,
       }).unwrap()
 
       setIsIccidValid(true)
@@ -379,12 +433,6 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
     const cleanedData = data.replace(/\D/g, '').trim()
     setFormData((prev) => ({ ...prev, iccid: cleanedData }))
     setShowScanner(false)
-
-    Toast.show({
-      type: 'success',
-      text1: 'ICCID escaneado!',
-      text2: `ICCID: ${cleanedData}`,
-    })
   }
 
   const getCameraPermissions = async () => {
@@ -460,9 +508,9 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
         ddd: formData.ddd,
         iccid: formData.iccid,
         planid: selectedPlan.planid.toString(),
-        planid_personalizado: '',
+        planid_personalizado: selectedPlan.id.toString(), // ✅ Usa o ID do plano personalizado
         isApp: true,
-        pospago: 'N',
+        pospago: 'false', // ✅ String 'false' conforme esperado pela API
         userInfo: JSON.stringify({
           cpf: user?.cpf,
           name: user?.name,
@@ -470,12 +518,20 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
         }),
       }
 
+      console.log('🚀 Payload de ativação:', payload)
+      console.log('👤 User:', user)
+      console.log('📋 Selected Plan:', selectedPlan)
+
       const result = await activateLine(payload).unwrap()
+
+      console.log('✅ Resultado da ativação:', result)
 
       Toast.show({
         type: 'success',
         text1: 'Linha Ativada! 🎉',
-        text2: result.msg || 'Aguarde alguns minutos para o efetuamento da ativação.',
+        text2:
+          result.msg ||
+          'Aguarde alguns minutos para o efetuamento da ativação.',
       })
 
       onClose()
@@ -509,26 +565,40 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
     [selectedPlan?.planid, colors],
   )
 
-  const onProgressChange = (offsetProgress: number) => {
+  // ✅ Usa useCallback com 'worklet' para evitar warning do Reanimated
+  const onProgressChange = useCallback((offsetProgress: number) => {
+    'worklet'
     progressValue.value = offsetProgress
-  }
+  }, [])
 
-  const onSnapToItem = (index: number) => {
-    setCurrentIndex(index)
-    const newPlan = allPlans[index]
-    if (newPlan && selectedPlan?.planid !== newPlan.planid) {
-      setSelectedPlan(newPlan)
-    }
-  }
+  const onSnapToItem = useCallback(
+    (index: number) => {
+      setCurrentIndex(index)
+      const newPlan = allPlans[index]
+      if (newPlan && selectedPlan?.planid !== newPlan.planid) {
+        setSelectedPlan(newPlan)
+      }
+    },
+    [allPlans, selectedPlan?.planid],
+  )
 
   const renderDots = () => {
     if (allPlans.length <= 1) return null
     return (
-      <HStack style={{ justifyContent: 'center', gap: 8, marginTop: 8, marginBottom: 4 }}>
+      <HStack
+        style={{
+          justifyContent: 'center',
+          gap: 8,
+          marginTop: 8,
+          marginBottom: 4,
+        }}
+      >
         {allPlans.map((_, index) => (
           <TouchableOpacity
             key={index}
-            onPress={() => carouselRef.current?.scrollTo({ index, animated: true })}
+            onPress={() =>
+              carouselRef.current?.scrollTo({ index, animated: true })
+            }
             style={{ padding: 8 }}
           >
             <View
@@ -536,7 +606,8 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
                 width: currentIndex === index ? 24 : 8,
                 height: 8,
                 borderRadius: 4,
-                backgroundColor: currentIndex === index ? colors.primary : colors.disabled,
+                backgroundColor:
+                  currentIndex === index ? colors.primary : colors.disabled,
               }}
             />
           </TouchableOpacity>
@@ -565,7 +636,9 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
         return (
           <VStack space="lg" style={{ flex: 1 }}>
             <VStack space="sm">
-              <Text style={{ fontSize: 18, fontWeight: '600', color: colors.text }}>
+              <Text
+                style={{ fontSize: 18, fontWeight: '600', color: colors.text }}
+              >
                 Digite o ICCID do chip
               </Text>
               <Text style={{ fontSize: 14, color: colors.subTitle }}>
@@ -575,27 +648,91 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
 
             {/* Scanner de código */}
             {showScanner ? (
-              <View style={{ height: 400, borderRadius: 12, overflow: 'hidden' }}>
-                <CameraView
-                  style={{ flex: 1 }}
-                  onBarcodeScanned={handleScanCode}
-                  barcodeScannerSettings={{
-                    barcodeTypes: ['ean13', 'ean8', 'code128', 'code39'],
+              <View
+                style={{
+                  height: 400,
+                  borderRadius: 12,
+                  overflow: 'hidden',
+                  borderWidth: 4,
+                  borderColor: colors.primary,
+                  backgroundColor: 'black',
+                }}
+              >
+                {/* Linha horizontal de scan (igual FormCad) */}
+                <View
+                  style={{
+                    zIndex: 1,
+                    position: 'absolute',
+                    top: '50%',
+                    width: '80%',
+                    height: 2,
+                    backgroundColor: colors.primary,
+                    shadowColor: colors.primary,
+                    shadowOffset: { width: 0, height: 0 },
+                    shadowOpacity: 0.8,
+                    shadowRadius: 10,
+                    elevation: 5,
+                    alignSelf: 'center',
                   }}
                 />
-                <TouchableOpacity
-                  onPress={() => setShowScanner(false)}
+
+                <CameraView
                   style={{
                     position: 'absolute',
-                    top: 16,
-                    right: 16,
-                    backgroundColor: 'rgba(0,0,0,0.7)',
-                    borderRadius: 20,
-                    padding: 8,
+                    height: screenHeight,
+                    width: screenWidth,
+                  }}
+                  onBarcodeScanned={showScanner ? handleScanCode : undefined}
+                  barcodeScannerSettings={{
+                    barcodeTypes: ['code128', 'code39', 'ean13'],
+                  }}
+                />
+
+                {/* Botão fechar */}
+                <View
+                  style={{
+                    position: 'absolute',
+                    top: 20,
+                    right: 20,
+                    zIndex: 2,
                   }}
                 >
-                  <Icon as={X} color="white" size="lg" />
-                </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => setShowScanner(false)}
+                    style={{
+                      backgroundColor: 'rgba(0,0,0,0.5)',
+                      borderRadius: 20,
+                      padding: 8,
+                    }}
+                  >
+                    <Icon as={X} color="white" size="lg" />
+                  </TouchableOpacity>
+                </View>
+
+                {/* Texto instrucional */}
+                <View
+                  style={{
+                    position: 'absolute',
+                    bottom: 50,
+                    alignSelf: 'center',
+                    zIndex: 2,
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: 'white',
+                      fontSize: 16,
+                      fontWeight: 'bold',
+                      textAlign: 'center',
+                      backgroundColor: 'rgba(0,0,0,0.7)',
+                      paddingHorizontal: 20,
+                      paddingVertical: 10,
+                      borderRadius: 20,
+                    }}
+                  >
+                    Aponte para o código de barras do chip
+                  </Text>
+                </View>
               </View>
             ) : (
               <VStack space="md">
@@ -606,7 +743,10 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
                       ref={iccidInputRef}
                       value={formData.iccid}
                       onChangeText={(text) =>
-                        setFormData((prev) => ({ ...prev, iccid: text.replace(/\D/g, '') }))
+                        setFormData((prev) => ({
+                          ...prev,
+                          iccid: text.replace(/\D/g, ''),
+                        }))
                       }
                       placeholder="Digite o ICCID"
                       keyboardType="numeric"
@@ -617,8 +757,8 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
                           isIccidValid === true
                             ? '#10B981'
                             : isIccidValid === false
-                              ? '#EF4444'
-                              : colors.border,
+                            ? '#EF4444'
+                            : colors.border,
                         borderRadius: 12,
                         paddingHorizontal: 16,
                         paddingVertical: 14,
@@ -653,8 +793,14 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
                 {isIccidValid === true && (
                   <HStack space="xs" style={{ alignItems: 'center' }}>
                     <Icon as={Check} color="#10B981" size="sm" />
-                    <Text style={{ fontSize: 14, color: '#10B981', fontWeight: '500' }}>
-                      ICCID válido! Rede: {iccidNetwork}
+                    <Text
+                      style={{
+                        fontSize: 14,
+                        color: '#10B981',
+                        fontWeight: '500',
+                      }}
+                    >
+                      ICCID válido!
                     </Text>
                   </HStack>
                 )}
@@ -665,10 +811,20 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
 
       case ActivationStep.DDD_SELECT:
         return (
-          <BottomSheetScrollView style={{ flex: 1 }}>
+          <BottomSheetScrollView
+            style={{ flex: 1 }}
+            contentContainerStyle={{ paddingBottom: 20 }}
+            showsVerticalScrollIndicator={true}
+          >
             <VStack space="lg">
               <VStack space="sm">
-                <Text style={{ fontSize: 18, fontWeight: '600', color: colors.text }}>
+                <Text
+                  style={{
+                    fontSize: 18,
+                    fontWeight: '600',
+                    color: colors.text,
+                  }}
+                >
                   Selecione o DDD
                 </Text>
                 <Text style={{ fontSize: 14, color: colors.subTitle }}>
@@ -682,6 +838,7 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
                   flexDirection: 'row',
                   flexWrap: 'wrap',
                   gap: 10,
+                  paddingBottom: 20,
                 }}
               >
                 {listaDdd.map((ddd) => (
@@ -691,10 +848,12 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
                     style={{
                       width: (screenWidth - 80) / 5,
                       aspectRatio: 1,
-                      backgroundColor: formData.ddd === ddd ? colors.primary : 'white',
+                      backgroundColor:
+                        formData.ddd === ddd ? colors.primary : 'white',
                       borderRadius: 12,
                       borderWidth: 2,
-                      borderColor: formData.ddd === ddd ? colors.primary : colors.border,
+                      borderColor:
+                        formData.ddd === ddd ? colors.primary : colors.border,
                       justifyContent: 'center',
                       alignItems: 'center',
                     }}
@@ -718,52 +877,229 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
       case ActivationStep.PLAN_SELECT:
         if (loadingPlans) {
           return (
-            <VStack space="lg" style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-              <Text style={{ fontSize: 16, color: colors.text }}>Carregando planos...</Text>
+            <VStack
+              space="lg"
+              style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <Text style={{ fontSize: 16, color: colors.text }}>
+                Carregando planos...
+              </Text>
             </VStack>
           )
         }
 
         if (allPlans.length === 0) {
           return (
-            <VStack space="lg" style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-              <Text style={{ fontSize: 16, color: colors.text }}>Nenhum plano disponível</Text>
+            <VStack
+              space="lg"
+              style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <Text style={{ fontSize: 16, color: colors.text }}>
+                Nenhum plano disponível
+              </Text>
             </VStack>
           )
         }
 
         return (
-          <VStack space="md" style={{ flex: 1 }}>
-            <VStack space="sm">
-              <Text style={{ fontSize: 18, fontWeight: '600', color: colors.text }}>
-                Escolha seu plano
-              </Text>
-              <Text style={{ fontSize: 14, color: colors.subTitle }}>
-                Selecione o plano que mais combina com você
-              </Text>
-            </VStack>
+          <BottomSheetScrollView
+            style={{ flex: 1 }}
+            contentContainerStyle={{ paddingBottom: 20 }}
+            showsVerticalScrollIndicator={true}
+          >
+            <VStack space="md">
+              <VStack space="sm">
+                <Text
+                  style={{ fontSize: 18, fontWeight: '600', color: colors.text }}
+                >
+                  Escolha seu plano
+                </Text>
+                <Text style={{ fontSize: 14, color: colors.subTitle }}>
+                  Selecione o plano que mais combina com você
+                </Text>
+              </VStack>
 
-            {/* Carousel de planos */}
-            <View style={{ flex: 1 }}>
-              <Carousel
-                ref={carouselRef}
-                loop={false}
-                width={screenWidth}
-                height={CARD_HEIGHT + 40}
-                data={allPlans}
-                renderItem={renderPlanCard}
-                onProgressChange={onProgressChange}
-                onSnapToItem={onSnapToItem}
-                mode="parallax"
-                modeConfig={{
-                  parallaxScrollingScale: 0.9,
-                  parallaxScrollingOffset: 40,
-                  parallaxAdjacentItemScale: 0.8,
-                }}
-              />
-              {renderDots()}
-            </View>
-          </VStack>
+              {/* Lista de planos - versão simplificada sem Carousel */}
+              <VStack space="md">
+                {allPlans.map((plan) => (
+                  <TouchableOpacity
+                    key={plan.uniqueId}
+                    onPress={() => setSelectedPlan(plan)}
+                    activeOpacity={0.9}
+                  >
+                    <Box
+                      style={{
+                        backgroundColor: 'white',
+                        borderRadius: 20,
+                        borderWidth: selectedPlan?.planid === plan.planid ? 3 : 2,
+                        borderColor:
+                          selectedPlan?.planid === plan.planid
+                            ? colors.primary
+                            : colors.secondary + '20',
+                        padding: RESPONSIVE.spacing.cardPadding,
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 0.1,
+                        shadowRadius: 8,
+                        elevation: 4,
+                      }}
+                    >
+                      {/* Gigas */}
+                      <VStack
+                        style={{ marginBottom: RESPONSIVE.spacing.sectionGap * 0.8 }}
+                      >
+                        <HStack
+                          style={{ alignItems: 'baseline', justifyContent: 'center' }}
+                        >
+                          <Text
+                            style={{
+                              fontSize: RESPONSIVE.fontSize.gigasNumber,
+                              fontWeight: 'bold',
+                              color: colors.primary,
+                              textAlign: 'center',
+                              lineHeight: RESPONSIVE.fontSize.gigasNumber * 1.1,
+                            }}
+                          >
+                            {plan.gigas}
+                          </Text>
+                          <Text
+                            style={{
+                              fontSize: RESPONSIVE.fontSize.gigasUnit,
+                              fontWeight: 'bold',
+                              color: colors.primary,
+                              marginLeft: 4,
+                            }}
+                          >
+                            GB
+                          </Text>
+                        </HStack>
+                      </VStack>
+
+                      {/* Benefícios */}
+                      <VStack
+                        style={{ marginBottom: RESPONSIVE.spacing.sectionGap * 0.8 }}
+                      >
+                        <Text
+                          style={{
+                            fontSize: RESPONSIVE.fontSize.benefits,
+                            color: colors.text,
+                            fontWeight: '500',
+                            textAlign: 'center',
+                          }}
+                        >
+                          {plan.min} Minutos • {plan.sms} SMS
+                        </Text>
+                      </VStack>
+
+                      {/* Apps */}
+                      <VStack
+                        style={{
+                          marginBottom: RESPONSIVE.spacing.sectionGap * 0.8,
+                        }}
+                      >
+                        <Text
+                          style={{
+                            fontSize: RESPONSIVE.fontSize.appsTitle,
+                            fontWeight: '600',
+                            color: colors.text,
+                            marginBottom: RESPONSIVE.spacing.sectionGap * 0.6,
+                            textAlign: 'center',
+                          }}
+                        >
+                          Apps inclusos:
+                        </Text>
+                        <View
+                          style={{
+                            flexDirection: 'row',
+                            flexWrap: 'wrap',
+                            justifyContent: 'center',
+                            gap: 6,
+                          }}
+                        >
+                          {mockApps.map((app, index) => (
+                            <View
+                              key={index}
+                              style={{
+                                width: RESPONSIVE.appIcon.size,
+                                aspectRatio: 1,
+                                borderRadius: 12,
+                                backgroundColor: '#F8F9FA',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                shadowColor: '#000',
+                                shadowOffset: { width: 0, height: 1 },
+                                shadowOpacity: 0.08,
+                                shadowRadius: 2,
+                                elevation: 2,
+                              }}
+                            >
+                              <Text
+                                style={{
+                                  fontSize: RESPONSIVE.fontSize.benefits * 0.65,
+                                }}
+                              >
+                                {app.name}
+                              </Text>
+                            </View>
+                          ))}
+                        </View>
+                      </VStack>
+
+                      {/* Preço */}
+                      <VStack
+                        style={{
+                          alignItems: 'center',
+                          marginTop: RESPONSIVE.spacing.sectionGap * 0.5,
+                        }}
+                      >
+                        <HStack
+                          style={{ alignItems: 'baseline', justifyContent: 'center' }}
+                        >
+                          <Text
+                            style={{
+                              fontSize: RESPONSIVE.fontSize.priceSymbol,
+                              color: colors.subTitle,
+                              fontWeight: '500',
+                            }}
+                          >
+                            R$
+                          </Text>
+                          <Text
+                            style={{
+                              fontSize: RESPONSIVE.fontSize.priceValue,
+                              fontWeight: 'bold',
+                              color: colors.text,
+                              marginLeft: 4,
+                              lineHeight: RESPONSIVE.fontSize.priceValue * 1.1,
+                            }}
+                          >
+                            {plan.value}
+                          </Text>
+                        </HStack>
+                        <Text
+                          style={{
+                            fontSize: RESPONSIVE.fontSize.priceLabel,
+                            color: colors.subTitle,
+                            fontWeight: '500',
+                          }}
+                        >
+                          por mês
+                        </Text>
+                      </VStack>
+                    </Box>
+                  </TouchableOpacity>
+                ))}
+              </VStack>
+            </VStack>
+          </BottomSheetScrollView>
         )
 
       case ActivationStep.CONFIRMATION:
@@ -771,7 +1107,13 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
           <BottomSheetScrollView style={{ flex: 1 }}>
             <VStack space="lg">
               <VStack space="sm">
-                <Text style={{ fontSize: 18, fontWeight: '600', color: colors.text }}>
+                <Text
+                  style={{
+                    fontSize: 18,
+                    fontWeight: '600',
+                    color: colors.text,
+                  }}
+                >
                   Confirme os dados
                 </Text>
                 <Text style={{ fontSize: 14, color: colors.subTitle }}>
@@ -792,20 +1134,44 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
               >
                 {/* ICCID */}
                 <VStack space="xs">
-                  <Text style={{ fontSize: 12, color: colors.subTitle, fontWeight: '500' }}>
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      color: colors.subTitle,
+                      fontWeight: '500',
+                    }}
+                  >
                     ICCID
                   </Text>
-                  <Text style={{ fontSize: 16, color: colors.text, fontWeight: '600' }}>
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      color: colors.text,
+                      fontWeight: '600',
+                    }}
+                  >
                     {formData.iccid}
                   </Text>
                 </VStack>
 
                 {/* DDD */}
                 <VStack space="xs">
-                  <Text style={{ fontSize: 12, color: colors.subTitle, fontWeight: '500' }}>
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      color: colors.subTitle,
+                      fontWeight: '500',
+                    }}
+                  >
                     DDD
                   </Text>
-                  <Text style={{ fontSize: 16, color: colors.text, fontWeight: '600' }}>
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      color: colors.text,
+                      fontWeight: '600',
+                    }}
+                  >
                     {formData.ddd}
                   </Text>
                 </VStack>
@@ -813,10 +1179,22 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
                 {/* Plano */}
                 {selectedPlan && (
                   <VStack space="xs">
-                    <Text style={{ fontSize: 12, color: colors.subTitle, fontWeight: '500' }}>
+                    <Text
+                      style={{
+                        fontSize: 12,
+                        color: colors.subTitle,
+                        fontWeight: '500',
+                      }}
+                    >
                       Plano Selecionado
                     </Text>
-                    <Text style={{ fontSize: 16, color: colors.text, fontWeight: '600' }}>
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        color: colors.text,
+                        fontWeight: '600',
+                      }}
+                    >
                       {selectedPlan.gigas}GB por R$ {selectedPlan.value}/mês
                     </Text>
                     <Text style={{ fontSize: 14, color: colors.subTitle }}>
@@ -827,10 +1205,22 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
 
                 {/* Usuário */}
                 <VStack space="xs">
-                  <Text style={{ fontSize: 12, color: colors.subTitle, fontWeight: '500' }}>
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      color: colors.subTitle,
+                      fontWeight: '500',
+                    }}
+                  >
                     Usuário
                   </Text>
-                  <Text style={{ fontSize: 16, color: colors.text, fontWeight: '600' }}>
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      color: colors.text,
+                      fontWeight: '600',
+                    }}
+                  >
                     {user?.name}
                   </Text>
                   <Text style={{ fontSize: 14, color: colors.subTitle }}>
@@ -840,7 +1230,13 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
               </VStack>
 
               {/* Aviso */}
-              <Text style={{ fontSize: 12, color: colors.subTitle, textAlign: 'center' }}>
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: colors.subTitle,
+                  textAlign: 'center',
+                }}
+              >
                 Ao confirmar, você concorda com os termos de serviço
               </Text>
             </VStack>
@@ -892,6 +1288,9 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
       index={-1}
       backgroundStyle={{ backgroundColor: colors.background }}
       handleIndicatorStyle={{ backgroundColor: colors.disabled }}
+      enableContentPanningGesture={true}
+      enableOverDrag={false}
+      activeOffsetY={[-5, 5]}
     >
       <BottomSheetView style={{ flex: 1, paddingHorizontal: 20 }}>
         {/* Header */}
@@ -913,8 +1312,12 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
 
           {/* Título */}
           <VStack style={{ flex: 1, alignItems: 'center' }}>
-            <Text style={{ fontSize: 12, color: colors.subTitle }}>{getStepTitle()}</Text>
-            <Text style={{ fontSize: 18, fontWeight: '600', color: colors.text }}>
+            <Text style={{ fontSize: 12, color: colors.subTitle }}>
+              {getStepTitle()}
+            </Text>
+            <Text
+              style={{ fontSize: 18, fontWeight: '600', color: colors.text }}
+            >
               Ativar Linha
             </Text>
           </VStack>
@@ -981,7 +1384,9 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
                   opacity: isActivating ? 0.6 : 1,
                 }}
               >
-                <Text style={{ fontSize: 16, fontWeight: '600', color: 'white' }}>
+                <Text
+                  style={{ fontSize: 16, fontWeight: '600', color: 'white' }}
+                >
                   {isActivating ? 'Ativando...' : 'Confirmar Ativação'}
                 </Text>
               </TouchableOpacity>
@@ -990,13 +1395,17 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
                 onPress={handleNextStep}
                 disabled={!canGoNext()}
                 style={{
-                  backgroundColor: canGoNext() ? colors.primary : colors.disabled,
+                  backgroundColor: canGoNext()
+                    ? colors.primary
+                    : colors.disabled,
                   borderRadius: 12,
                   paddingVertical: 16,
                   alignItems: 'center',
                 }}
               >
-                <Text style={{ fontSize: 16, fontWeight: '600', color: 'white' }}>
+                <Text
+                  style={{ fontSize: 16, fontWeight: '600', color: 'white' }}
+                >
                   Continuar
                 </Text>
               </TouchableOpacity>

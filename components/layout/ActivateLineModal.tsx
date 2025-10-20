@@ -14,11 +14,12 @@ import { HStack } from '@/components/ui/hstack'
 import { Box } from '@/components/ui/box'
 import { Text } from '@/components/ui/text'
 import { ScrollView } from '@/components/ui/scroll-view'
-import { X } from 'lucide-react-native'
+import { X, ChevronLeft } from 'lucide-react-native'
 import { Icon } from '@/components/ui/icon'
 import {
   useGetPlansQuery,
   useActivateLineMutation,
+  type PlanPersonalizado,
 } from '@/src/api/endpoints/plansApi'
 import { useAuth } from '@/hooks/useAuth'
 import { env } from '@/config/env'
@@ -29,6 +30,7 @@ import {
   interpolate,
   Extrapolation,
 } from 'react-native-reanimated'
+import { listaDdd } from '@/utils/listaDdd'
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window')
 const CARD_WIDTH = screenWidth * 0.88
@@ -350,7 +352,11 @@ const ActivateLineModal: React.FC<ActivateLineModalProps> = ({
   onSuccess,
 }) => {
   const { user } = useAuth()
-  const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null)
+  const [selectedPlan, setSelectedPlan] = useState<PlanPersonalizado | null>(
+    null,
+  )
+  const [selectedDdd, setSelectedDdd] = useState<string>('')
+  const [showDddSelection, setShowDddSelection] = useState(true)
   const carouselRef = useRef<ICarouselInstance>(null)
   const [currentIndex, setCurrentIndex] = useState(0)
   const progressValue = useSharedValue<number>(0)
@@ -393,15 +399,25 @@ const ActivateLineModal: React.FC<ActivateLineModalProps> = ({
   useEffect(() => {
     if (!visible) {
       Keyboard.dismiss()
+      // Reset states quando fechar
+      setShowDddSelection(true)
+      setSelectedDdd('')
+      setSelectedPlan(null)
     }
   }, [visible])
 
-  const handleSelectPlan = (plan: Plan) => {
-    setSelectedPlan(plan)
-  }
+  // const handleSelectPlan = (plan: Plan) => {
+  //   setSelectedPlan(plan)
+  // }
 
   const renderPlanCard = useCallback(
-    ({ item, animationValue }: { item: Plan; animationValue: any }) => {
+    ({
+      item,
+      animationValue,
+    }: {
+      item: PlanPersonalizado
+      animationValue: any
+    }) => {
       const handleSelect = () => setSelectedPlan(item)
       const isSelected = selectedPlan?.planid === item.planid
 
@@ -472,6 +488,11 @@ const ActivateLineModal: React.FC<ActivateLineModalProps> = ({
       return
     }
 
+    if (!selectedDdd) {
+      Alert.alert('Atenção', 'Selecione um DDD para continuar')
+      return
+    }
+
     if (!iccid) {
       Alert.alert(
         'Erro',
@@ -483,46 +504,92 @@ const ActivateLineModal: React.FC<ActivateLineModalProps> = ({
     try {
       Alert.alert(
         'Confirmar Ativação',
-        `Deseja ativar o plano de ${selectedPlan.gigas}GB por R$ ${selectedPlan.value}/mês?`,
+        `Deseja ativar o plano de ${selectedPlan.gigas}GB por R$ ${selectedPlan.value}/mês com DDD ${selectedDdd}?`,
         [
           { text: 'Cancelar', style: 'cancel' },
           {
             text: 'Confirmar',
             style: 'default',
             onPress: async () => {
-              try {
-                const payload = {
-                  cpf: user?.cpf || '',
-                  ddd: '', // Será gerado no backend
-                  iccid: iccid,
-                  planid: selectedPlan.planid.toString(),
-                  planid_personalizado: '',
-                  isApp: true,
-                  pospago: 'N',
-                  userInfo: JSON.stringify({
-                    cpf: user?.cpf,
-                    name: user?.name,
-                    parceiro: user?.parceiro,
-                  }),
-                }
+              const payload = {
+                cpf: user?.cpf || '',
+                ddd: selectedDdd,
+                iccid: iccid,
+                planid: selectedPlan.planid.toString(),
+                planid_personalizado: selectedPlan.id.toString(), // ✅ Envia o planid como personalizado
+                isApp: true,
+                pospago: 'false', // ✅ Mudado de 'N' para 'false'
+                userInfo: JSON.stringify({
+                  cpf: user?.cpf,
+                  name: user?.name,
+                  parceiro: user?.parceiro,
+                }),
+              }
 
-                const result = await activateLine(payload).unwrap()
-                Alert.alert('Sucesso! 🎉', result.msg, [
+              // Debug visual - mostra o payload na tela
+              Alert.alert(
+                '🔍 Debug - Payload (Modal)',
+                JSON.stringify(payload, null, 2),
+                [
+                  { text: 'Cancelar', style: 'cancel' },
                   {
-                    text: 'OK',
-                    onPress: () => {
-                      onClose()
-                      onSuccess?.()
+                    text: 'Enviar',
+                    onPress: async () => {
+                      try {
+                        const result = await activateLine(payload).unwrap()
+
+                        // Debug visual - mostra o resultado
+                        Alert.alert(
+                          '✅ Debug - Resposta',
+                          JSON.stringify(result, null, 2),
+                          [
+                            {
+                              text: 'OK',
+                              onPress: () => {
+                                Alert.alert('Sucesso! 🎉', result.msg, [
+                                  {
+                                    text: 'OK',
+                                    onPress: () => {
+                                      onClose()
+                                      onSuccess?.()
+                                    },
+                                  },
+                                ])
+                              },
+                            },
+                          ],
+                        )
+                      } catch (error: any) {
+                        // Debug visual - mostra o erro
+                        Alert.alert(
+                          '❌ Debug - Erro',
+                          JSON.stringify(
+                            {
+                              status: error.status,
+                              data: error.data,
+                              message: error.message,
+                            },
+                            null,
+                            2,
+                          ),
+                          [
+                            {
+                              text: 'OK',
+                              onPress: () => {
+                                Alert.alert(
+                                  'Erro ❌',
+                                  error.data?.msg || 'Erro ao ativar linha',
+                                  [{ text: 'OK' }],
+                                )
+                              },
+                            },
+                          ],
+                        )
+                      }
                     },
                   },
-                ])
-              } catch (error: any) {
-                Alert.alert(
-                  'Erro ❌',
-                  error.data?.msg || 'Erro ao ativar linha',
-                  [{ text: 'OK' }],
-                )
-              }
+                ],
+              )
             },
           },
         ],
@@ -575,20 +642,82 @@ const ActivateLineModal: React.FC<ActivateLineModalProps> = ({
               borderBottomColor: colors.secondary + '20',
             }}
           >
+            {!showDddSelection && (
+              <TouchableOpacity
+                onPress={() => setShowDddSelection(true)}
+                style={{ padding: 4 }}
+              >
+                <Icon as={ChevronLeft} color={colors.text} size="xl" />
+              </TouchableOpacity>
+            )}
             <Text
               style={{
                 fontSize: 20,
                 fontWeight: 'bold',
                 color: colors.text,
+                flex: 1,
+                textAlign: showDddSelection ? 'left' : 'center',
               }}
             >
-              Escolha seu Plano
+              {showDddSelection ? 'Selecione o DDD' : 'Escolha seu Plano'}
             </Text>
           </HStack>
 
           {/* Content */}
           <Box style={{ flex: 1 }}>
-            {isLoading ? (
+            {showDddSelection ? (
+              <ScrollView style={{ flex: 1, padding: 16 }}>
+                <VStack space="md">
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      color: colors.subTitle,
+                      marginBottom: 8,
+                    }}
+                  >
+                    Escolha o código de área da linha
+                  </Text>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      flexWrap: 'wrap',
+                      gap: 10,
+                    }}
+                  >
+                    {listaDdd.map((ddd) => (
+                      <TouchableOpacity
+                        key={ddd}
+                        onPress={() => setSelectedDdd(ddd)}
+                        style={{
+                          width: (screenWidth - 80) / 5,
+                          aspectRatio: 1,
+                          backgroundColor:
+                            selectedDdd === ddd ? colors.primary : 'white',
+                          borderRadius: 12,
+                          borderWidth: 2,
+                          borderColor:
+                            selectedDdd === ddd
+                              ? colors.primary
+                              : colors.border,
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <Text
+                          style={{
+                            fontSize: 16,
+                            fontWeight: '600',
+                            color: selectedDdd === ddd ? 'white' : colors.text,
+                          }}
+                        >
+                          {ddd}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </VStack>
+              </ScrollView>
+            ) : isLoading ? (
               <VStack
                 style={{
                   flex: 1,
@@ -678,49 +807,70 @@ const ActivateLineModal: React.FC<ActivateLineModalProps> = ({
           </Box>
 
           {/* Footer com botão de ação */}
-          {allPlans.length > 0 && (
-            <Box
+          <Box
+            style={{
+              padding: 16,
+              borderTopWidth: 1,
+              borderTopColor: colors.secondary + '20',
+            }}
+          >
+            <TouchableOpacity
+              onPress={() => {
+                if (showDddSelection) {
+                  if (selectedDdd) {
+                    setShowDddSelection(false)
+                  } else {
+                    Alert.alert('Atenção', 'Selecione um DDD para continuar')
+                  }
+                } else {
+                  handleActivateLine()
+                }
+              }}
+              disabled={
+                showDddSelection ? !selectedDdd : !selectedPlan || isActivating
+              }
               style={{
-                padding: 16,
-                borderTopWidth: 1,
-                borderTopColor: colors.secondary + '20',
+                backgroundColor: showDddSelection
+                  ? selectedDdd
+                    ? colors.primary
+                    : colors.disabled
+                  : !selectedPlan || isActivating
+                  ? colors.disabled
+                  : colors.primary,
+                paddingVertical: 16,
+                paddingHorizontal: 24,
+                borderRadius: 12,
+                elevation: (
+                  showDddSelection ? selectedDdd : selectedPlan && !isActivating
+                )
+                  ? 4
+                  : 0,
+                shadowColor: colors.primary,
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.3,
+                shadowRadius: 4,
               }}
             >
-              <TouchableOpacity
-                onPress={handleActivateLine}
-                disabled={!selectedPlan || isActivating}
+              <Text
                 style={{
-                  backgroundColor:
-                    !selectedPlan || isActivating
-                      ? colors.disabled
-                      : colors.primary,
-                  paddingVertical: 16,
-                  paddingHorizontal: 24,
-                  borderRadius: 12,
-                  elevation: selectedPlan && !isActivating ? 4 : 0,
-                  shadowColor: colors.primary,
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.3,
-                  shadowRadius: 4,
+                  color: colors.textButton,
+                  fontSize: 16,
+                  fontWeight: '600',
+                  textAlign: 'center',
                 }}
               >
-                <Text
-                  style={{
-                    color: colors.textButton,
-                    fontSize: 16,
-                    fontWeight: '600',
-                    textAlign: 'center',
-                  }}
-                >
-                  {isActivating
-                    ? 'Ativando...'
-                    : selectedPlan
-                    ? 'Ativar Linha'
-                    : 'Selecione um Plano'}
-                </Text>
-              </TouchableOpacity>
-            </Box>
-          )}
+                {showDddSelection
+                  ? selectedDdd
+                    ? 'Continuar'
+                    : 'Selecione um DDD'
+                  : isActivating
+                  ? 'Ativando...'
+                  : selectedPlan
+                  ? 'Ativar Linha'
+                  : 'Selecione um Plano'}
+              </Text>
+            </TouchableOpacity>
+          </Box>
         </Box>
       </Box>
     </Modal>

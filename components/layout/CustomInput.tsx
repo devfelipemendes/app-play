@@ -5,6 +5,8 @@ import { Text } from '@gluestack-ui/themed'
 import { KeyboardTypeOptions } from 'react-native'
 import { any, boolean } from 'valibot'
 import { ArrowUpToLineIcon } from 'lucide-react-native'
+import { TYPOGRAPHY, BORDER_RADIUS } from '@/utils/responsive'
+import { INPUT } from '@/config/responsiveDimensions'
 
 interface CustomInputProps extends InputFieldProps {
   label?: string
@@ -47,9 +49,9 @@ export const CustomInput = ({
       className={`border-0 rounded-xl py-1 px-4 `}
       style={{
         borderColor: colors.primary,
-        borderWidth: 1,
+        borderWidth: INPUT.borderWidth,
         borderStyle: 'solid',
-        borderRadius: 8,
+        borderRadius: INPUT.borderRadius,
         // Muda aparência visual quando não editável
         backgroundColor: !editable ? colors.disabled + '20' : 'transparent',
       }}
@@ -70,7 +72,7 @@ export const CustomInput = ({
         placeholderTextColor="#eaeaea"
         style={{
           color: colors.text,
-          fontSize: 12,
+          fontSize: TYPOGRAPHY.bodySmall,
         }}
         secureTextEntry={secureTextEntry}
         keyboardType={keyboardType}

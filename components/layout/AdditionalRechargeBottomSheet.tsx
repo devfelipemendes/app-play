@@ -1,6 +1,12 @@
 // components/layout/AdditionalRechargeBottomSheet.tsx
 import React, { useState, useRef, useMemo, useEffect, useCallback } from 'react'
-import { TouchableOpacity, Alert, View, Dimensions, Keyboard } from 'react-native'
+import {
+  TouchableOpacity,
+  Alert,
+  View,
+  Dimensions,
+  Keyboard,
+} from 'react-native'
 import { VStack } from '@/components/ui/vstack'
 import { HStack } from '@/components/ui/hstack'
 import { Box } from '@/components/ui/box'
@@ -478,8 +484,8 @@ const AdditionalRechargeBottomSheet: React.FC<
           style={{
             paddingHorizontal: 16,
             paddingBottom: 16,
-            borderBottomWidth: 1,
-            borderBottomColor: colors.secondary + '20',
+            // borderBottomWidth: 1,
+            // borderBottomColor: colors.secondary + '20',
           }}
         >
           {/* Área de arrastar visual */}
@@ -635,8 +641,6 @@ const AdditionalRechargeBottomSheet: React.FC<
           <Box
             style={{
               padding: 16,
-              borderTopWidth: 1,
-              borderTopColor: colors.secondary + '20',
             }}
           >
             <TouchableOpacity

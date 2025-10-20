@@ -1,7 +1,37 @@
 // store/plansApi.ts
 import { apiPlay } from '../apiPlay'
 
-interface Plan {
+interface PlanOriginal {
+  id: number
+  planid: number | string
+  description: string // ✅ API usa 'description' não 'descricao'
+  bundle: number | string
+  value: string
+  qtdvideos?: number | null
+  gigas: string
+  min: string
+  sms: string
+  valor_surf?: string
+  modelo?: string
+  tipo?: string
+  parceiro?: string
+  valor_infiniti?: string
+  descricao_infiniti?: string
+  created_at?: string
+  updated_at?: string
+  mostraApp?: boolean
+  nivel?: number | null
+  identificador?: string | null
+  campanha?: string | null
+  franquiaid?: string | null
+  mostraappfranquia?: boolean | null
+  rede?: string
+  productid?: string | null
+  hlr_profile?: number | null
+  valor_telecall?: string | null
+}
+export interface PlanPersonalizado {
+  id: number
   planid: number | string
   description: string // ✅ API usa 'description' não 'descricao'
   bundle: number | string
@@ -31,8 +61,8 @@ interface Plan {
 }
 
 interface ResponseBuscaPlanos {
-  Original: Plan[]
-  personalizado: Plan[]
+  Original: PlanOriginal[]
+  personalizado: PlanPersonalizado[]
 }
 
 interface PayloadBuscaPlanos {
@@ -111,7 +141,7 @@ const plansAPI = apiPlay.injectEndpoints({
     // Endpoint para ativar linha (comprar plano)
     activateLine: builder.mutation<ResponseActiveLine, ActiveLineBody>({
       query: (payload) => ({
-        url: '/api/ativacao/ativar',
+        url: '/api/app/ativacao/ativar',
         method: 'POST',
         data: payload, // ✅ Mudança: 'data' em vez de 'body' (axios)
       }),

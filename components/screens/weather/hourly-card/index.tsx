@@ -14,6 +14,8 @@ import {
   Phone,
   Smartphone,
 } from 'lucide-react-native'
+import { TYPOGRAPHY, BORDER_RADIUS, moderateScale, scale } from '@/utils/responsive'
+import { CARD, ICON, SHADOW } from '@/config/responsiveDimensions'
 
 interface IHourlyCard {
   icon: any
@@ -37,13 +39,13 @@ const HourlyCard = ({
   return (
     <VStack
       style={{
-        padding: 12,
-        borderRadius: 24,
+        padding: CARD.paddingSmall,
+        borderRadius: BORDER_RADIUS.large,
         backgroundColor: colors.background,
         flex: 1,
         alignItems: 'flex-start',
-        gap: 16,
-        shadowRadius: 4,
+        gap: moderateScale(16),
+        ...SHADOW.small,
         boxShadow: colors.shadow,
         minWidth: 0,
         overflow: 'hidden',
@@ -51,7 +53,7 @@ const HourlyCard = ({
     >
       <HStack
         style={{
-          gap: 8,
+          gap: moderateScale(8),
           alignItems: 'center',
           width: '100%',
           minWidth: 0,
@@ -59,10 +61,10 @@ const HourlyCard = ({
       >
         <Box
           style={{
-            width: 28,
-            height: 28,
+            width: scale(28),
+            height: scale(28),
             backgroundColor: colors.primary,
-            borderRadius: 999,
+            borderRadius: BORDER_RADIUS.full,
             justifyContent: 'center',
             alignItems: 'center',
             flexShrink: 0,
@@ -77,7 +79,7 @@ const HourlyCard = ({
             color: colors.secondary,
             fontFamily: 'font-dm-sans-regular',
             fontWeight: '400',
-            fontSize: 14,
+            fontSize: TYPOGRAPHY.bodySmall,
             flex: 1,
             overflow: 'hidden',
             textOverflow: 'ellipsis',
@@ -91,7 +93,7 @@ const HourlyCard = ({
       <VStack
         style={{
           flex: 1,
-          gap: 8,
+          gap: moderateScale(8),
           width: '100%',
           minWidth: 0,
         }}
@@ -103,7 +105,7 @@ const HourlyCard = ({
             color: colors.secondary,
             fontFamily: 'font-dm-sans-regular',
             fontWeight: '400',
-            fontSize: 24,
+            fontSize: TYPOGRAPHY.h3,
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             flexWrap: 'nowrap',
@@ -114,7 +116,7 @@ const HourlyCard = ({
 
         <HStack
           style={{
-            gap: 4,
+            gap: moderateScale(4),
             alignItems: 'center',
             width: '100%',
             minWidth: 0,
@@ -147,7 +149,7 @@ const HourlyCard = ({
               color: colors.secondary,
               fontFamily: 'font-dm-sans-regular',
               fontWeight: '500',
-              fontSize: 12,
+              fontSize: TYPOGRAPHY.caption,
               flex: 1,
               overflow: 'hidden',
               textOverflow: 'ellipsis',

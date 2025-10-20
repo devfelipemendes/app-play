@@ -1,6 +1,6 @@
 // components/shared/BiometricLockScreen.tsx
 import React, { useEffect, useState } from 'react'
-import { View, StyleSheet, Platform, ActivityIndicator } from 'react-native'
+import { View, StyleSheet, ActivityIndicator } from 'react-native'
 import { Text } from '@/components/ui/text'
 import { VStack } from '@/components/ui/vstack'
 import { Icon } from '@/components/ui/icon'
@@ -10,6 +10,15 @@ import { useBiometricAuth } from '@/hooks/useBiometricAuth'
 import { Pressable } from '@/components/ui/pressable'
 import { useAuth } from '@/hooks/useAuth'
 import { useRouter } from 'expo-router'
+import {
+  TYPOGRAPHY,
+  SPACING,
+  BORDER_RADIUS,
+  moderateScale,
+  scale,
+  widthPercentage,
+} from '@/utils/responsive'
+import { BUTTON, ICON, ALERT } from '@/config/responsiveDimensions'
 
 const BiometricLockScreen = () => {
   const { colors } = useCompanyThemeSimple()
@@ -26,7 +35,7 @@ const BiometricLockScreen = () => {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    // Iniciar autenticaÁ„o automaticamente ao montar o componente
+    // Iniciar autentica√ß√£o automaticamente ao montar o componente
     if (isBiometricSupported && hasStoredCredentials) {
       handleBiometricAuth()
     }
@@ -40,15 +49,15 @@ const BiometricLockScreen = () => {
       const credentials = await authenticateWithBiometric()
 
       if (credentials) {
-        // AutenticaÁ„o bem-sucedida - navegar para o app
-        // O hook useAuth j· gerencia o login
+        // Autentica√ß√£o bem-sucedida - navegar para o app
+        // O hook useAuth j√° gerencia o login
         // Apenas navegar para a tela principal
         router.replace('/(tabs)/(home)')
       } else {
-        setError('Falha na autenticaÁ„o. Tente novamente.')
+        setError('Falha na autentica√ß√£o. Tente novamente.')
       }
     } catch (err) {
-      console.error('Erro na autenticaÁ„o biomÈtrica:', err)
+      console.error('Erro na autentica√ß√£o biom√©trica:', err)
       setError('Erro ao autenticar. Tente novamente.')
     } finally {
       setIsAuthenticating(false)
@@ -67,7 +76,7 @@ const BiometricLockScreen = () => {
   }
 
   if (!isBiometricSupported || !hasStoredCredentials) {
-    return null // N„o mostrar nada se n„o houver suporte ou credenciais
+    return null // N√£o mostrar nada se n√£o houver suporte ou credenciais
   }
 
   return (
@@ -78,7 +87,7 @@ const BiometricLockScreen = () => {
       ]}
     >
       <VStack space="xl" style={styles.content}>
-        {/* Õcone de biometria */}
+        {/* √çcone de biometria */}
         <View style={styles.iconContainer}>
           <View
             style={[
@@ -94,11 +103,11 @@ const BiometricLockScreen = () => {
           </View>
         </View>
 
-        {/* Texto de instruÁ„o */}
+        {/* Texto de instru√ß√£o */}
         <VStack space="sm" style={{ alignItems: 'center' }}>
           <Text
             style={{
-              fontSize: 24,
+              fontSize: TYPOGRAPHY.h3,
               fontWeight: 'bold',
               color: colors.text,
               textAlign: 'center',
@@ -108,7 +117,7 @@ const BiometricLockScreen = () => {
           </Text>
           <Text
             style={{
-              fontSize: 16,
+              fontSize: TYPOGRAPHY.body,
               color: colors.subTitle,
               textAlign: 'center',
             }}
@@ -117,21 +126,21 @@ const BiometricLockScreen = () => {
           </Text>
         </VStack>
 
-        {/* Bot„o de autenticar */}
+        {/* Bot√£o de autenticar */}
         {!isAuthenticating && (
           <Pressable
             onPress={handleBiometricAuth}
             style={{
               backgroundColor: colors.primary,
-              borderRadius: 12,
-              paddingVertical: 16,
-              paddingHorizontal: 32,
-              minWidth: 200,
+              borderRadius: BUTTON.borderRadiusLarge,
+              paddingVertical: BUTTON.padding.vertical,
+              paddingHorizontal: BUTTON.padding.horizontal,
+              minWidth: widthPercentage(50),
             }}
           >
             <Text
               style={{
-                fontSize: 16,
+                fontSize: TYPOGRAPHY.body,
                 fontWeight: '600',
                 color: 'white',
                 textAlign: 'center',
@@ -148,9 +157,9 @@ const BiometricLockScreen = () => {
             <ActivityIndicator size="large" color={colors.primary} />
             <Text
               style={{
-                fontSize: 14,
+                fontSize: TYPOGRAPHY.bodySmall,
                 color: colors.subTitle,
-                marginTop: 12,
+                marginTop: SPACING.half,
               }}
             >
               Autenticando...
@@ -163,8 +172,8 @@ const BiometricLockScreen = () => {
           <View
             style={{
               backgroundColor: '#FEE2E2',
-              borderRadius: 8,
-              padding: 12,
+              borderRadius: ALERT.borderRadius,
+              padding: ALERT.padding,
               flexDirection: 'row',
               alignItems: 'center',
             }}
@@ -172,9 +181,9 @@ const BiometricLockScreen = () => {
             <Icon as={AlertCircle} size="md" style={{ color: '#EF4444' }} />
             <Text
               style={{
-                fontSize: 14,
+                fontSize: TYPOGRAPHY.bodySmall,
                 color: '#EF4444',
-                marginLeft: 8,
+                marginLeft: SPACING.base,
                 flex: 1,
               }}
             >
@@ -183,17 +192,17 @@ const BiometricLockScreen = () => {
           </View>
         )}
 
-        {/* Bot„o de logout */}
+        {/* Bot√£o de logout */}
         <Pressable
           onPress={handleLogout}
           style={{
-            marginTop: 32,
-            paddingVertical: 12,
+            marginTop: SPACING.triple,
+            paddingVertical: SPACING.half,
           }}
         >
           <Text
             style={{
-              fontSize: 14,
+              fontSize: TYPOGRAPHY.bodySmall,
               color: colors.primary,
               textAlign: 'center',
               textDecorationLine: 'underline',
@@ -212,20 +221,20 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 24,
+    padding: moderateScale(24),
   },
   content: {
     width: '100%',
-    maxWidth: 400,
+    maxWidth: widthPercentage(90),
     alignItems: 'center',
   },
   iconContainer: {
-    marginBottom: 24,
+    marginBottom: moderateScale(24),
   },
   iconCircle: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+    width: scale(120),
+    height: scale(120),
+    borderRadius: scale(60),
     justifyContent: 'center',
     alignItems: 'center',
   },

@@ -2,7 +2,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Pressable } from '@/components/ui/pressable'
 import { Text } from '@/components/ui/text'
 import { useRouter, usePathname } from 'expo-router'
-
 import { HStack } from '@/components/ui/hstack'
 import { Box } from '@/components/ui/box'
 import { Animated, Platform, LayoutChangeEvent } from 'react-native'
@@ -16,6 +15,8 @@ import {
 } from 'lucide-react-native'
 import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
 import { useEffect, useRef, useState } from 'react'
+import { moderateScale, scaleHeight, scaleWidth } from '@/utils/responsive'
+import { TAB_BAR, SHADOW } from '@/config/responsiveDimensions'
 
 interface TabItem {
   name: string
@@ -91,7 +92,7 @@ function BottomTabBar() {
   const shadowStyle =
     Platform.OS === 'ios'
       ? { boxShadow: '0px -2px 6px 0px rgba(0, 0, 0, 0.182)' }
-      : { elevation: 4 }
+      : SHADOW.medium
 
   // Atualiza animação quando muda a aba ou layout
   useEffect(() => {
@@ -111,15 +112,15 @@ function BottomTabBar() {
   }, [activeIndex, tabLayouts])
 
   return (
-    <Box style={{ backgroundColor: ' #f2f2f2' }}>
+    <Box style={{ backgroundColor: '#f2f2f2' }}>
       <HStack
         style={[
           {
-            paddingBottom: Platform.OS === 'ios' ? insets.bottom : 16,
-            paddingTop: 16,
-            paddingHorizontal: 28,
-            borderTopLeftRadius: 24,
-            borderTopRightRadius: 24,
+            paddingBottom: Platform.OS === 'ios' ? insets.bottom : moderateScale(16),
+            paddingTop: TAB_BAR.padding.top,
+            paddingHorizontal: TAB_BAR.padding.horizontal,
+            borderTopLeftRadius: TAB_BAR.borderTopLeftRadius,
+            borderTopRightRadius: TAB_BAR.borderTopRightRadius,
             backgroundColor: colors.background,
           },
           shadowStyle,
@@ -155,7 +156,7 @@ function BottomTabBar() {
               <Text
                 size="xs"
                 style={{
-                  marginTop: 4,
+                  marginTop: moderateScale(4),
                   fontWeight: '500',
                   color: isActive ? colors.primary : colors.secondary,
                 }}
@@ -171,11 +172,11 @@ function BottomTabBar() {
           <Animated.View
             style={{
               position: 'absolute',
-              top: Platform.OS === 'ios' ? 62 : 60,
+              top: Platform.OS === 'ios' ? TAB_BAR.heightIOS : TAB_BAR.height,
               left: underlineAnim,
               width: widthAnim,
-              height: 3,
-              borderRadius: 2,
+              height: TAB_BAR.indicatorHeight,
+              borderRadius: TAB_BAR.indicatorBorderRadius,
               backgroundColor: colors.primary,
             }}
           />

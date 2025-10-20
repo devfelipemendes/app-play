@@ -4,11 +4,13 @@ import { View, TouchableOpacity, ScrollView, StyleSheet } from 'react-native'
 import { Text } from '@/components/ui/text'
 import { useAppSelector } from '@/src/store/hooks'
 import { apiPlay } from '@/src/api/apiPlay'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
+import { Trash2 } from 'lucide-react-native'
 
 const DevTools = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [selectedTab, setSelectedTab] = useState<'queries' | 'mutations' | 'state'>('queries')
+  const dispatch = useDispatch()
 
   // Pegar o estado do RTK Query
   const apiState = useSelector((state: any) => state.apiPlay)
@@ -22,8 +24,23 @@ const DevTools = () => {
   const mutations = apiState?.mutations || {}
   const subscriptions = apiState?.subscriptions || {}
 
-  const queryEntries = Object.entries(queries)
-  const mutationEntries = Object.entries(mutations)
+  // Inverter a ordem: mais recentes primeiro (baseado no timestamp)
+  const queryEntries = Object.entries(queries).sort(([, a]: any, [, b]: any) => {
+    const timeA = a.fulfilledTimeStamp || a.startedTimeStamp || 0
+    const timeB = b.fulfilledTimeStamp || b.startedTimeStamp || 0
+    return timeB - timeA // Ordem decrescente (mais recentes primeiro)
+  })
+
+  const mutationEntries = Object.entries(mutations).sort(([, a]: any, [, b]: any) => {
+    const timeA = a.fulfilledTimeStamp || a.startedTimeStamp || 0
+    const timeB = b.fulfilledTimeStamp || b.startedTimeStamp || 0
+    return timeB - timeA // Ordem decrescente (mais recentes primeiro)
+  })
+
+  // Função para limpar o cache do RTK Query
+  const handleClearCache = () => {
+    dispatch(apiPlay.util.resetApiState())
+  }
 
   return (
     <>
@@ -92,6 +109,15 @@ const DevTools = () => {
               >
                 State
               </Text>
+            </TouchableOpacity>
+
+            {/* Botão de Clear */}
+            <TouchableOpacity
+              style={styles.clearButton}
+              onPress={handleClearCache}
+              activeOpacity={0.7}
+            >
+              <Trash2 size={16} color="#ef4444" />
             </TouchableOpacity>
           </View>
 
@@ -308,6 +334,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#374151',
     backgroundColor: '#111827',
+    alignItems: 'center',
   },
   tab: {
     flex: 1,
@@ -326,6 +353,14 @@ const styles = StyleSheet.create({
   tabTextActive: {
     color: '#6366f1',
     fontWeight: '700',
+  },
+  clearButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderLeftWidth: 1,
+    borderLeftColor: '#374151',
   },
   content: {
     padding: 12,

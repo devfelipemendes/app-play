@@ -39,9 +39,10 @@ import ThemeCard from '@/components/screens/settings/theme-card'
 import { VStack } from '@/components/ui/vstack'
 import { HStack } from '@/components/ui/hstack'
 import { IconButton } from '@/components/ui/iconButton'
+import { listaDdd } from '@/utils/listaDdd'
 
 import Toast from 'react-native-toast-message'
-import { BackHandler, Dimensions, View } from 'react-native'
+import { BackHandler, Dimensions, View, TouchableOpacity } from 'react-native'
 import { useCpfCnpjCheck } from '@/hooks/useCpfCnpjValidator'
 import { useCreateUserMutation } from '@/src/api/endpoints/cad'
 import { useCep } from '@/hooks/useGetCep'
@@ -401,7 +402,7 @@ export default function FormCadastro() {
         text1: 'ICCID válido',
         text2: `${result.data.descricao} - Rede: ${result.rede}`,
       })
-      setStep(4)
+      setStep(4) // Vai para seleção de DDD
     } else {
       setIsIccidValid(false)
       Toast.show({
@@ -563,11 +564,13 @@ export default function FormCadastro() {
   }, [step])
 
   useEffect(() => {
-    if (step === 4) {
+    if (step === 5) {
       // Coletar todos os dados do formulário dos steps anteriores
       const formData = watch()
 
-      const documentValue = formData.cpf ? unMask(formData.cpf) : unMask(formData.cnpj || '')
+      const documentValue = formData.cpf
+        ? unMask(formData.cpf)
+        : unMask(formData.cnpj || '')
 
       dispatch(
         setUserInfo({
@@ -590,6 +593,7 @@ export default function FormCadastro() {
 
           // Dados da ativação
           iccid: iccidValue,
+          ddd: selectedDDD, // ✅ Adiciona DDD selecionado
           tipoChip: activeTypeChipsTabs,
 
           // Sistema
@@ -599,7 +603,7 @@ export default function FormCadastro() {
         }),
       )
     }
-  }, [step, dispatch, watch, iccidValue, activeTypeChipsTabs])
+  }, [step, dispatch, watch, iccidValue, selectedDDD, activeTypeChipsTabs])
 
   const handleCpfChange = async (text: string) => {
     const cleanText = unMask(text)
@@ -1458,9 +1462,98 @@ export default function FormCadastro() {
         )
       case 4:
         return (
+          <Box>
+            <Box>
+              <ArrowLeft color={colors.primary} onPress={() => setStep(3)} />
+            </Box>
+            <Box style={{ marginBottom: 32, alignItems: 'center' }}>
+              <Text
+                style={{ fontSize: 24, fontWeight: 'bold', color: colors.text }}
+              >
+                Selecione o DDD
+              </Text>
+              <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: '500',
+                  color: colors.subTitle,
+                }}
+              >
+                Escolha o código de área da linha
+              </Text>
+            </Box>
+            <View
+              style={{
+                flexDirection: 'row',
+                flexWrap: 'wrap',
+                gap: 10,
+                marginBottom: 20,
+                justifyContent: 'center',
+                alignItems: 'center',
+                display: 'flex',
+              }}
+            >
+              {listaDdd.map((ddd) => (
+                <TouchableOpacity
+                  key={ddd}
+                  onPress={() => setSelectedDDD(ddd)}
+                  style={{
+                    width: (width - 80) / 5,
+                    aspectRatio: 1,
+                    backgroundColor:
+                      selectedDDD === ddd ? colors.primary : 'white',
+                    borderRadius: 12,
+                    borderWidth: 2,
+                    borderColor:
+                      selectedDDD === ddd ? colors.primary : colors.border,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: '600',
+                      color: selectedDDD === ddd ? 'white' : colors.text,
+                    }}
+                  >
+                    {ddd}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            <Button
+              onPress={() => {
+                if (selectedDDD) {
+                  setStep(5)
+                } else {
+                  Toast.show({
+                    type: 'info',
+                    text1: 'Atenção',
+                    text2: 'Selecione um DDD para continuar',
+                  })
+                }
+              }}
+              style={{
+                borderRadius: 10,
+                backgroundColor: selectedDDD ? colors.primary : colors.disabled,
+                marginBottom: 24,
+              }}
+              disabled={!selectedDDD}
+            >
+              <ButtonText
+                style={{ color: 'white', fontSize: 16, fontWeight: '600' }}
+              >
+                Continuar
+              </ButtonText>
+            </Button>
+          </Box>
+        )
+      case 5:
+        return (
           <Box style={{ flex: 1 }}>
             <Box style={{ marginBottom: 20 }}>
-              <ArrowLeft color={colors.primary} onPress={() => setStep(1)} />
+              <ArrowLeft color={colors.primary} onPress={() => setStep(4)} />
             </Box>
             <Box style={{ alignItems: 'center' }}>
               <Text
