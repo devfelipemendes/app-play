@@ -7,6 +7,7 @@ import { StatusBar } from 'expo-status-bar'
 import { GluestackUIProvider } from '@gluestack-ui/themed'
 import { useColorScheme } from 'nativewind'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
 
 import { ThemeContext, ThemeProvider } from '@/contexts/theme-context'
 import {
@@ -59,18 +60,20 @@ const MainLayout = () => {
 
   return (
     <GluestackUIProvider config={createCustomConfig} colorMode={colorMode}>
-      <StatusBar style="light" translucent />
-      <AuthProvider>
-        <CompanyThemeLoader>
-          <AuthGuard>
-            <Stack>
-              <Stack.Screen name="index" options={{ headerShown: false }} />
-              <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            </Stack>
-          </AuthGuard>
-        </CompanyThemeLoader>
-      </AuthProvider>
+      <BottomSheetModalProvider>
+        <StatusBar style="light" translucent />
+        <AuthProvider>
+          <CompanyThemeLoader>
+            <AuthGuard>
+              <Stack>
+                <Stack.Screen name="index" options={{ headerShown: false }} />
+                <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              </Stack>
+            </AuthGuard>
+          </CompanyThemeLoader>
+        </AuthProvider>
+      </BottomSheetModalProvider>
     </GluestackUIProvider>
   )
 }

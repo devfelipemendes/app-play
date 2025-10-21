@@ -21,7 +21,7 @@ import {
   interpolate,
   Extrapolation,
 } from 'react-native-reanimated'
-import BottomSheet, { BottomSheetBackdrop } from '@gorhom/bottom-sheet'
+import { BottomSheetModal, BottomSheetBackdrop } from '@gorhom/bottom-sheet'
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window')
 const CARD_WIDTH = screenWidth * 0.88
@@ -348,8 +348,8 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
   const [currentIndex, setCurrentIndex] = useState(0)
   const progressValue = useSharedValue<number>(0)
 
-  // Ref do BottomSheet
-  const bottomSheetRef = useRef<BottomSheet>(null)
+  // Ref do BottomSheetModal
+  const bottomSheetRef = useRef<BottomSheetModal>(null)
 
   // Snap points do bottom sheet (85% da tela)
   const snapPoints = useMemo(() => ['85%'], [])
@@ -381,13 +381,13 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
     return personalizado
   }, [plansData])
 
-  // Controlar abertura/fechamento do bottom sheet
+  // Controlar abertura/fechamento do bottom sheet modal
   useEffect(() => {
     if (isOpen) {
-      bottomSheetRef.current?.expand()
+      bottomSheetRef.current?.present()
     } else {
       Keyboard.dismiss()
-      bottomSheetRef.current?.close()
+      bottomSheetRef.current?.dismiss()
     }
   }, [isOpen])
 
@@ -548,12 +548,11 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
   )
 
   return (
-    <BottomSheet
+    <BottomSheetModal
       ref={bottomSheetRef}
-      index={-1}
       snapPoints={snapPoints}
       enablePanDownToClose={true}
-      onClose={onClose}
+      onDismiss={onClose}
       backdropComponent={renderBackdrop}
       backgroundStyle={{
         backgroundColor: colors.background,
@@ -731,16 +730,16 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
                 }}
               >
                 {isActivating
-                  ? 'Alterando seu plano...'
+                  ? 'Ativando linha...'
                   : selectedPlan
-                  ? 'Alterar Plano'
+                  ? 'Ativar Linha'
                   : 'Selecione um Plano'}
               </Text>
             </TouchableOpacity>
           </Box>
         )}
       </BottomSheetView>
-    </BottomSheet>
+    </BottomSheetModal>
   )
 }
 

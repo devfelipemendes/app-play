@@ -127,6 +127,19 @@ interface ResponseChangePlan {
   msg: string
 }
 
+interface PayloadReactivateLine {
+  token: string
+  userInfo: string // JSON string: {cpf, name, parceiro}
+  planid: number | string
+  planid_personalizado?: string
+  msisdn: string
+}
+
+interface ResponseReactivateLine {
+  msg: string
+  fatura?: string
+}
+
 const plansAPI = apiPlay.injectEndpoints({
   endpoints: (builder) => ({
     getPlans: builder.query<ResponseBuscaPlanos, PayloadBuscaPlanos>({
@@ -190,6 +203,16 @@ const plansAPI = apiPlay.injectEndpoints({
       }),
       invalidatesTags: ['UserLines', 'Plans', 'Faturas'], // Invalida linhas, planos e faturas após mudança
     }),
+
+    // Endpoint para reativar linha (statusplan = 'EX')
+    reactivateLine: builder.mutation<ResponseReactivateLine, PayloadReactivateLine>({
+      query: (payload) => ({
+        url: '/api/reativar/linha',
+        method: 'POST',
+        data: payload,
+      }),
+      invalidatesTags: ['UserLines', 'Plans', 'Faturas'], // Invalida linhas, planos e faturas após reativação
+    }),
   }),
 })
 
@@ -201,4 +224,5 @@ export const {
   useLazyGetAdditionalPlansQuery,
   useAdditionalRechargeMutation,
   useChangePlanMutation,
+  useReactivateLineMutation,
 } = plansAPI

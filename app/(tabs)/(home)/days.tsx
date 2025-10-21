@@ -14,7 +14,8 @@ import { selectDet2Data, selectDet2Error } from '@/src/store/slices/det2Slice'
 import { useListarFaturasQuery } from '@/src/api/endpoints/faturasApi'
 
 const Days = () => {
-  const { hasDaysTabAnimated, registerRefreshCallback }: any = useContext(WeatherTabContext)
+  const { hasDaysTabAnimated, registerRefreshCallback }: any =
+    useContext(WeatherTabContext)
   const AnimatedVStack = Animated.createAnimatedComponent(VStack)
   const { colors } = useCompanyThemeSimple()
   const { user } = useAuth()

@@ -27,7 +27,7 @@ interface LoginResponse {
   name: string
   token: string
   parceiro: string
-  primeiroAcesso?: boolean
+  primeiroAcesso?: boolean | undefined
   [key: string]: any
 
   cnpj: string

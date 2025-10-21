@@ -29,8 +29,15 @@ const formatDate = (dateString: string): string => {
   }
 }
 
-const DaysCard = ({ name, created, highest, lowest, paymentStatus }: IDaysCard) => {
-  const formattedDate = formatDate(created)
+const DaysCard = ({
+  name,
+  created,
+  highest,
+  lowest,
+  paymentStatus,
+}: IDaysCard) => {
+  const formattedDateCreated = formatDate(created)
+
   const valorBruto = typeof highest === 'string' ? parseFloat(highest) : highest
   const valorLiquido = typeof lowest === 'string' ? parseFloat(lowest) : lowest
 
@@ -84,7 +91,7 @@ const DaysCard = ({ name, created, highest, lowest, paymentStatus }: IDaysCard) 
           {name}
         </Text>
         <Text className="text-typography-600 font-dm-sans-regular text-sm">
-          Gerada em: {formattedDate}
+          Gerada em {formattedDateCreated}
         </Text>
       </VStack>
 
@@ -106,7 +113,11 @@ const DaysCard = ({ name, created, highest, lowest, paymentStatus }: IDaysCard) 
             alignItems: 'center',
           }}
         >
-          <Icon as={StatusIcon} size="xl" style={{ color: statusConfig.color }} />
+          <Icon
+            as={StatusIcon}
+            size="xl"
+            style={{ color: statusConfig.color }}
+          />
         </Box>
       </HStack>
     </HStack>

@@ -12,6 +12,9 @@ import {
   setError,
   resetAuthState,
 } from '@/src/store/slices/authSlice'
+import { clearCompanyData } from '@/src/store/slices/companySlice'
+import { clearUserInfo } from '@/src/store/slices/ativarLinhaSlice'
+import { resetState as resetDet2State } from '@/src/store/slices/det2Slice'
 import {
   useLoginMutation,
   useLazyGetCompanyInfoQuery,
@@ -163,9 +166,32 @@ export function useAuth() {
 
       const userData = result.data
 
+      // Verificar se usuário está inativo
       if (userData.profileid === 5) {
         dispatch(setLoadingAuth(false))
         return showToast('Usuário inativo!', 'error')
+      }
+
+      // Verificar se o parceiro está bloqueado/inadimplente
+      if (userData.status_parceiro === 1) {
+        console.log('⚠️ Parceiro inadimplente - bloqueando acesso')
+
+        // Salvar dados básicos do usuário para mostrar nome/parceiro na tela de bloqueio
+        await SecureStorage.saveToken(userData.token)
+        await SecureStorage.saveUserData({
+          cpf: userData.cpf,
+          name: userData.name,
+          email: userData.email,
+          profileid: userData.profileid,
+          parceiro: userData.parceiro,
+        })
+
+        dispatch(setUser(userData))
+        dispatch(setLoadingAuth(false))
+
+        // Redirecionar para tela de bloqueio
+        router.replace('/(auth)/partner-blocked' as any)
+        return
       }
 
       // Salvar token de forma segura
@@ -224,13 +250,18 @@ export function useAuth() {
     try {
       await SecureStorage.clearAll()
 
-      // Limpar estado do Redux
-      dispatch(resetAuthState())
+      // Limpar TODOS os estados do Redux
+      dispatch(resetAuthState()) // Limpa authSlice
+      dispatch(clearCompanyData()) // Limpa companySlice
+      dispatch(clearUserInfo()) // Limpa ativarLinhaSlice
+      dispatch(resetDet2State()) // Limpa det2Slice (linhas, consumo, etc)
 
       // ✅ FORÇA todos os loadings como false
       dispatch(setCheckingAuth(false))
       dispatch(setLoadingSystem(false))
       dispatch(setLoadingAuth(false))
+
+      console.log('✅ Todos os states do Redux foram limpos')
 
       router.replace('/(auth)/entrar' as any)
     } catch (error) {

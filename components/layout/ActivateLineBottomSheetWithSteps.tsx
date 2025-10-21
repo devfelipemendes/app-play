@@ -21,7 +21,8 @@ import {
 import { useChecaICCIDMutation } from '@/src/api/endpoints/checkIccid'
 import { useAuth } from '@/hooks/useAuth'
 import { env } from '@/config/env'
-import BottomSheet, {
+import {
+  BottomSheetModal,
   BottomSheetBackdrop,
   BottomSheetView,
   BottomSheetScrollView,
@@ -107,7 +108,7 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
   onSuccess,
 }) => {
   const { user } = useAuth()
-  const bottomSheetRef = useRef<BottomSheet>(null)
+  const bottomSheetRef = useRef<BottomSheetModal>(null)
   const carouselRef = useRef<ICarouselInstance>(null)
   const iccidInputRef = useRef<RNTextInput>(null)
 
@@ -170,13 +171,13 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
   // Controlar abertura/fechamento
   useEffect(() => {
     if (isOpen) {
-      bottomSheetRef.current?.expand()
+      bottomSheetRef.current?.present()
       // Focar no input quando abrir
       setTimeout(() => iccidInputRef.current?.focus(), 300)
     } else {
       // Fechar teclado quando modal fechar
       Keyboard.dismiss()
-      bottomSheetRef.current?.close()
+      bottomSheetRef.current?.dismiss()
       // Reset state quando fechar
       setCurrentStep(ActivationStep.ICCID_INPUT)
       setFormData({ iccid: '', ddd: '' })
@@ -1092,13 +1093,12 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
   }
 
   return (
-    <BottomSheet
+    <BottomSheetModal
       ref={bottomSheetRef}
       snapPoints={snapPoints}
       enablePanDownToClose
-      onClose={onClose}
+      onDismiss={onClose}
       backdropComponent={renderBackdrop}
-      index={-1}
       backgroundStyle={{ backgroundColor: colors.background }}
       handleIndicatorStyle={{ backgroundColor: colors.disabled }}
       enableContentPanningGesture={true}
@@ -1223,7 +1223,7 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
           </VStack>
         )}
       </BottomSheetView>
-    </BottomSheet>
+    </BottomSheetModal>
   )
 }
 

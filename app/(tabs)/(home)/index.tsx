@@ -49,6 +49,9 @@ import LineSelector from '@/components/layout/lineSelector'
 import { useDadosFormatter } from '@/src/utils/dadosFormatter'
 import { TouchableOpacity } from 'react-native'
 import ActivateLineModal from '@/components/layout/ActivateLineModal'
+import ActivateLineBottomSheet from '@/components/layout/ActivateLineBottomSheet'
+import ActivateLineBottomSheetWithSteps from '@/components/layout/ActivateLineBottomSheetWithSteps'
+import ReactivateLineBottomSheet from '@/components/layout/ReactivateLineBottomSheet'
 import WeeklyConsumption from '@/components/screens/weather/weekly-consumption'
 
 const Home = () => {
@@ -63,6 +66,9 @@ const Home = () => {
   const det2Error = useAppSelector(selectDet2Error)
   const hasInitialized = useAppSelector(selectDet2HasInitialized)
   const reduxUserLines = useAppSelector(selectDet2UserLines)
+  const selectedLineIccid = useAppSelector(
+    (state) => state.det2.selectedLineIccid,
+  )
   const det2State = useAppSelector((state) => state.det2)
 
   const { colors } = useCompanyThemeSimple()
@@ -79,6 +85,9 @@ const Home = () => {
   const [loadingLines, setLoadingLines] = useState(false)
   const [loadingLineChange, setLoadingLineChange] = useState(false)
   const [showActivateModal, setShowActivateModal] = useState(false)
+  const [showActivateWithStepsBottomSheet, setShowActivateWithStepsBottomSheet] = useState(false) // Sem ICCID
+  const [showActivateWithIccidBottomSheet, setShowActivateWithIccidBottomSheet] = useState(false) // Com ICCID
+  const [showReactivateBottomSheet, setShowReactivateBottomSheet] = useState(false)
 
   // Hook do formatter
   const { formatConsumptionData } = useDadosFormatter()
@@ -152,6 +161,9 @@ const Home = () => {
       setLoadingLineChange(true)
       setSelectedLine(newLine)
 
+      // Limpar erro anterior ao trocar de linha
+      dispatch(setError(null))
+
       // Verificar se a linha tem MSISDN ativo
       const hasMsisdn = newLine.msisdn && newLine.msisdnstatus === 0
 
@@ -160,6 +172,8 @@ const Home = () => {
         await fetchLineData(newLine)
       } else {
         console.log('⚠️ Linha selecionada não tem MSISDN ativo')
+        // Salvar o ICCID da linha sem MSISDN no Redux
+        dispatch(setSelectedLineIccid(newLine.iccid))
         dispatch(setError('NO_MSISDN'))
       }
     } catch (err: any) {
@@ -215,6 +229,8 @@ const Home = () => {
           await fetchLineData(primaryLine)
         } else {
           console.log('⚠️ ICCID sem MSISDN ativo')
+          // Salvar o ICCID da linha sem MSISDN no Redux
+          dispatch(setSelectedLineIccid(primaryLine.iccid))
           // Não buscar dados, apenas marcar erro especial
           dispatch(setError('NO_MSISDN'))
         }
@@ -255,6 +271,8 @@ const Home = () => {
   useFocusEffect(
     useCallback(() => {
       console.log('🔍 Home - useFocusEffect executando...')
+      console.log('🔍 hasInitialized:', hasInitialized)
+      console.log('🔍 user:', { cpf: user?.cpf, token: !!user?.token })
 
       // Se já inicializou, restaurar do Redux
       if (hasInitialized) {
@@ -266,14 +284,45 @@ const Home = () => {
           setUserLines(reduxUserLines)
 
           // Restaurar linha selecionada
-          const selectedIccid = det2Data?.iccid
-          if (selectedIccid) {
-            const savedLine = reduxUserLines.find(
-              (line: any) => line.iccid === selectedIccid
+          // Se tem selectedLineIccid, buscar por ICCID
+          // Se não tem, pegar a primeira linha
+          let savedLine = null
+
+          if (selectedLineIccid) {
+            savedLine = reduxUserLines.find(
+              (line: any) => line.iccid === selectedLineIccid,
             )
-            if (savedLine) {
-              console.log('🎯 Restaurando linha selecionada:', savedLine.msisdn)
-              setSelectedLine(savedLine)
+          }
+
+          // Se não encontrou ou não tinha selectedLineIccid, pegar primeira linha
+          if (!savedLine && reduxUserLines.length > 0) {
+            savedLine = reduxUserLines[0]
+            console.log('📌 Usando primeira linha como padrão')
+          }
+
+          if (savedLine) {
+            console.log(
+              '🎯 Restaurando linha selecionada:',
+              savedLine.msisdn || savedLine.iccid || savedLine.id,
+            )
+            setSelectedLine(savedLine)
+
+            // Verificar se a linha restaurada tem MSISDN ativo
+            const hasMsisdn = savedLine.msisdn && savedLine.msisdnstatus === 0
+
+            // Se tem MSISDN ativo mas o erro está como NO_MSISDN, limpar o erro
+            if (hasMsisdn && det2Error === 'NO_MSISDN') {
+              console.log(
+                '🔄 Limpando erro NO_MSISDN pois linha restaurada tem MSISDN ativo',
+              )
+              dispatch(setError(null))
+            }
+            // Se NÃO tem MSISDN ativo mas não há erro, definir erro
+            else if (!hasMsisdn && det2Error !== 'NO_MSISDN') {
+              console.log(
+                '⚠️ Definindo erro NO_MSISDN pois linha restaurada não tem MSISDN ativo',
+              )
+              dispatch(setError('NO_MSISDN'))
             }
           }
         }
@@ -285,15 +334,26 @@ const Home = () => {
           cpf: user?.cpf,
           token: !!user?.token,
         })
-        dispatch(setError('Dados do usuário incompletos'))
+        // NÃO marcar como erro, apenas aguardar o user estar disponível
         return
       }
 
-      // Marcar como inicializado no Redux
+      // Marcar como inicializado no Redux E chamar fetchUserData
       console.log('🚀 Primeira inicialização, carregando dados...')
       dispatch(setHasInitialized(true))
       fetchUserData()
-    }, [hasInitialized, reduxUserLines, det2Data, user?.cpf, user?.parceiro, user?.token, user?.name, dispatch, fetchUserData]),
+    }, [
+      hasInitialized,
+      reduxUserLines,
+      selectedLineIccid,
+      det2Error,
+      user?.cpf,
+      user?.parceiro,
+      user?.token,
+      user?.name,
+      dispatch,
+      fetchUserData,
+    ]),
   )
 
   // Estado de carregamento
@@ -444,10 +504,43 @@ const Home = () => {
     selectedLine?.msisdn && selectedLine?.msisdnstatus === 0
   const isNoMsisdnError = det2Error === 'NO_MSISDN'
 
-  // Handler para sucesso na ativação
-  const handleActivationSuccess = () => {
-    // Recarregar as linhas após ativação bem-sucedida
-    console.log('🎉 Ativação bem-sucedida, recarregando dados...')
+  // Verificar se a linha está expirada (statusplan = 'EX')
+  const isLineExpired = det2Data?.statusplan === 'EX'
+
+  // Diferenciar os 3 casos de ativação:
+  // 1. Tem ICCID mas não tem MSISDN ativo → Mostrar modal simples de planos
+  // 2. Não tem ICCID → Mostrar modal com steps (digitar ICCID, DDD, plano)
+  const selectedLineHasIccid = Boolean(selectedLine?.iccid && selectedLine.iccid.trim().length > 0)
+  const needsActivationWithIccid = isNoMsisdnError && selectedLineHasIccid
+  const needsActivationWithSteps = isNoMsisdnError && !selectedLineHasIccid
+
+  console.log('🔍 DEBUG - Condições:', {
+    isNoMsisdnError,
+    selectedLineHasIccid,
+    needsActivationWithIccid,
+    needsActivationWithSteps,
+    selectedLineIccid: selectedLine?.iccid,
+  })
+
+  // Handler para sucesso na ativação (com ICCID)
+  const handleActivationWithIccidSuccess = () => {
+    console.log('🎉 Ativação com ICCID bem-sucedida, recarregando dados...')
+    setShowActivateWithIccidBottomSheet(false)
+    fetchUserData()
+  }
+
+  // Handler para sucesso na ativação (com steps - sem ICCID)
+  const handleActivationWithStepsSuccess = () => {
+    console.log('🎉 Ativação com steps bem-sucedida, recarregando dados...')
+    setShowActivateWithStepsBottomSheet(false)
+    fetchUserData()
+  }
+
+  // Handler para sucesso na reativação
+  const handleReactivationSuccess = () => {
+    // Recarregar as linhas após reativação bem-sucedida
+    console.log('🎉 Reativação bem-sucedida, recarregando dados...')
+    setShowReactivateBottomSheet(false)
     fetchUserData()
   }
 
@@ -472,8 +565,8 @@ const Home = () => {
         />
       )}
 
-      {/* Mensagem quando ICCID não tem MSISDN ativo */}
-      {isNoMsisdnError && selectedLine && (
+      {/* CASO 1: Tem ICCID mas não tem MSISDN ativo */}
+      {needsActivationWithIccid && selectedLine && (
         <VStack
           style={{
             padding: 32,
@@ -507,9 +600,19 @@ const Home = () => {
             Este ICCID ainda não possui uma linha ativa. Deseja ativar uma linha
             para este chip?
           </Text>
+          <Text
+            style={{
+              fontSize: 12,
+              color: colors.subTitle,
+              textAlign: 'center',
+              fontStyle: 'italic',
+            }}
+          >
+            ICCID: {selectedLine.iccid}
+          </Text>
 
           <TouchableOpacity
-            onPress={() => setShowActivateModal(true)}
+            onPress={() => setShowActivateWithIccidBottomSheet(true)}
             style={{
               marginTop: 8,
               paddingVertical: 14,
@@ -530,14 +633,141 @@ const Home = () => {
                 fontWeight: '600',
               }}
             >
-              Ativar Linha
+              Ativar linha para este ICCID
             </Text>
           </TouchableOpacity>
         </VStack>
       )}
 
-      {/* Mostrar dados apenas se linha selecionada tiver MSISDN */}
-      {selectedLineHasMsisdn && (
+      {/* CASO 2: Não tem ICCID (precisa digitar) */}
+      {needsActivationWithSteps && selectedLine && (
+        <VStack
+          style={{
+            padding: 32,
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: 16,
+            backgroundColor: colors.background,
+            borderRadius: 16,
+            elevation: 2,
+          }}
+        >
+          <Icon as={Globe} size="xl" style={{ color: colors.primary }} />
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: 'bold',
+              color: colors.text,
+              textAlign: 'center',
+            }}
+          >
+            Nenhuma linha ativa
+          </Text>
+          <Text
+            style={{
+              fontSize: 14,
+              color: colors.secondary,
+              textAlign: 'center',
+              lineHeight: 20,
+            }}
+          >
+            Você ainda não possui uma linha ativa. Deseja ativar uma nova linha?
+          </Text>
+
+          <TouchableOpacity
+            onPress={() => setShowActivateWithStepsBottomSheet(true)}
+            style={{
+              marginTop: 8,
+              paddingVertical: 14,
+              paddingHorizontal: 32,
+              backgroundColor: colors.primary,
+              borderRadius: 12,
+              elevation: 4,
+              shadowColor: colors.primary,
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.3,
+              shadowRadius: 4,
+            }}
+          >
+            <Text
+              style={{
+                color: colors.textButton,
+                fontSize: 16,
+                fontWeight: '600',
+              }}
+            >
+              Ativar Nova Linha
+            </Text>
+          </TouchableOpacity>
+        </VStack>
+      )}
+
+      {/* Mensagem quando linha está expirada (statusplan = 'EX') */}
+      {isLineExpired && selectedLineHasMsisdn && (
+        <VStack
+          style={{
+            padding: 32,
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: 16,
+            backgroundColor: colors.background,
+            borderRadius: 16,
+            elevation: 2,
+          }}
+        >
+          <Icon as={Globe} size="xl" style={{ color: colors.error }} />
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: 'bold',
+              color: colors.text,
+              textAlign: 'center',
+            }}
+          >
+            Linha Expirada
+          </Text>
+          <Text
+            style={{
+              fontSize: 14,
+              color: colors.secondary,
+              textAlign: 'center',
+              lineHeight: 20,
+            }}
+          >
+            Esta linha está expirada. Escolha um plano para reativar sua linha e
+            voltar a usar os serviços.
+          </Text>
+
+          <TouchableOpacity
+            onPress={() => setShowReactivateBottomSheet(true)}
+            style={{
+              marginTop: 8,
+              paddingVertical: 14,
+              paddingHorizontal: 32,
+              backgroundColor: colors.primary,
+              borderRadius: 12,
+              elevation: 4,
+              shadowColor: colors.primary,
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.3,
+              shadowRadius: 4,
+            }}
+          >
+            <Text
+              style={{
+                color: colors.textButton,
+                fontSize: 16,
+                fontWeight: '600',
+              }}
+            >
+              Reativar Linha
+            </Text>
+          </TouchableOpacity>
+        </VStack>
+      )}
+
+      {/* Mostrar dados apenas se linha selecionada tiver MSISDN e NÃO estiver expirada */}
+      {selectedLineHasMsisdn && !isLineExpired && (
         <>
           <AnimatedVStack style={{ gap: 16 }}>
             {/* Cards com dados formatados de consumo */}
@@ -603,13 +833,30 @@ const Home = () => {
         </>
       )}
 
-      {/* Modal de ativação de linha */}
-      <ActivateLineModal
-        visible={showActivateModal}
-        onClose={() => setShowActivateModal(false)}
+      {/* BottomSheet de ativação COM ICCID (quando tem ICCID mas não tem MSISDN) */}
+      <ActivateLineBottomSheet
+        isOpen={showActivateWithIccidBottomSheet}
+        onClose={() => setShowActivateWithIccidBottomSheet(false)}
         colors={colors}
-        iccid={selectedLine?.iccid || userLines[0]?.iccid} // Usar ICCID da linha selecionada
-        onSuccess={handleActivationSuccess}
+        iccid={selectedLine?.iccid || ''}
+        onSuccess={handleActivationWithIccidSuccess}
+      />
+
+      {/* BottomSheet de ativação SEM ICCID (quando não tem MSISDN e não tem ICCID) - Com steps */}
+      <ActivateLineBottomSheetWithSteps
+        isOpen={showActivateWithStepsBottomSheet}
+        onClose={() => setShowActivateWithStepsBottomSheet(false)}
+        colors={colors}
+        onSuccess={handleActivationWithStepsSuccess}
+      />
+
+      {/* BottomSheet de reativação de linha (quando statusplan = 'EX') */}
+      <ReactivateLineBottomSheet
+        isOpen={showReactivateBottomSheet}
+        onClose={() => setShowReactivateBottomSheet(false)}
+        colors={colors}
+        msisdn={selectedLine?.msisdn || ''}
+        onSuccess={handleReactivationSuccess}
       />
     </VStack>
   )
