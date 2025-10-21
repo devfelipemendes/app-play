@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState } from 'react'
 import { VStack } from '@/components/ui/vstack'
 import { Globe } from 'lucide-react-native'
 import { Icon } from '@/components/ui/icon'
@@ -30,9 +30,13 @@ import {
   setError,
   loadFromCache,
   setSelectedLineIccid,
+  setHasInitialized,
+  setUserLines as setReduxUserLines,
   selectDet2Data,
   selectDet2Loading,
   selectDet2Error,
+  selectDet2HasInitialized,
+  selectDet2UserLines,
   selectHasCacheForIccid,
 } from '@/src/store/slices/det2Slice'
 
@@ -48,8 +52,6 @@ import ActivateLineModal from '@/components/layout/ActivateLineModal'
 import WeeklyConsumption from '@/components/screens/weather/weekly-consumption'
 
 const Home = () => {
-  // Ref para controlar se já inicializou (evitar múltiplas chamadas no useFocusEffect)
-  const hasInitialized = useRef(false)
   const AnimatedVStack = Animated.createAnimatedComponent(VStack)
 
   // Contexto das tabs internas
@@ -59,6 +61,9 @@ const Home = () => {
   const det2Data = useAppSelector(selectDet2Data)
   const det2Loading = useAppSelector(selectDet2Loading)
   const det2Error = useAppSelector(selectDet2Error)
+  const hasInitialized = useAppSelector(selectDet2HasInitialized)
+  const reduxUserLines = useAppSelector(selectDet2UserLines)
+  const det2State = useAppSelector((state) => state.det2)
 
   const { colors } = useCompanyThemeSimple()
   const { user } = useAuth()
@@ -88,23 +93,6 @@ const Home = () => {
     try {
       dispatch(setLoading(true))
       dispatch(setSelectedLineIccid(line.iccid))
-
-      // Verificar se existe cache para esta linha
-      const hasCache = selectHasCacheForIccid(line.iccid)({
-        det2: {
-          cache: {},
-          data: null,
-          loading: false,
-          error: null,
-          lastUpdated: null,
-          selectedLineIccid: null,
-        },
-      })
-
-      if (hasCache) {
-        dispatch(loadFromCache(line.iccid))
-        return
-      }
 
       console.log('🎯 Buscando dados para linha:', {
         msisdn: line.msisdn,
@@ -182,7 +170,7 @@ const Home = () => {
   }
 
   // Função para buscar todos os dados (usada no pull-to-refresh e na inicialização)
-  const fetchUserData = async () => {
+  const fetchUserData = useCallback(async () => {
     try {
       setLoadingLines(true)
       dispatch(setError(null))
@@ -206,7 +194,12 @@ const Home = () => {
       console.log('✅ Linhas encontradas:', linesResult.length, 'linhas')
       console.log('📋 Primeira linha:', linesResult[0])
 
+      console.log('🔄 Salvando linhas no state local...')
       setUserLines(linesResult)
+
+      console.log('🔄 Salvando linhas no Redux...')
+      dispatch(setReduxUserLines(linesResult))
+      console.log('✅ Dispatch de setReduxUserLines executado com sucesso')
 
       if (linesResult && linesResult.length > 0) {
         // 2. Selecionar primeira linha (pode ter ou não MSISDN ativo)
@@ -247,7 +240,8 @@ const Home = () => {
       setLoadingLines(false)
       console.log('🏁 Fluxo finalizado')
     }
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.parceiro, user?.token, user?.cpf, getUserLines])
 
   // Registrar função de refresh no contexto (tab 0 = home)
   useEffect(() => {
@@ -255,16 +249,34 @@ const Home = () => {
       registerRefreshCallback(0, fetchUserData)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [registerRefreshCallback])
+  }, [registerRefreshCallback, fetchUserData])
 
   // Carregar dados apenas na primeira vez que a tela é focada
   useFocusEffect(
     useCallback(() => {
       console.log('🔍 Home - useFocusEffect executando...')
 
-      // Se já inicializou, não executar novamente
-      if (hasInitialized.current) {
-        console.log('✅ Já inicializado, pulando...')
+      // Se já inicializou, restaurar do Redux
+      if (hasInitialized) {
+        console.log('✅ Já inicializado, restaurando do Redux...')
+
+        // Restaurar linhas do Redux se existirem
+        if (reduxUserLines.length > 0) {
+          console.log('📦 Restaurando linhas do Redux:', reduxUserLines.length)
+          setUserLines(reduxUserLines)
+
+          // Restaurar linha selecionada
+          const selectedIccid = det2Data?.iccid
+          if (selectedIccid) {
+            const savedLine = reduxUserLines.find(
+              (line: any) => line.iccid === selectedIccid
+            )
+            if (savedLine) {
+              console.log('🎯 Restaurando linha selecionada:', savedLine.msisdn)
+              setSelectedLine(savedLine)
+            }
+          }
+        }
         return
       }
 
@@ -277,10 +289,11 @@ const Home = () => {
         return
       }
 
-      // Marcar como inicializado
-      hasInitialized.current = true
+      // Marcar como inicializado no Redux
+      console.log('🚀 Primeira inicialização, carregando dados...')
+      dispatch(setHasInitialized(true))
       fetchUserData()
-    }, [user?.cpf, user?.parceiro, user?.token, user?.name]),
+    }, [hasInitialized, reduxUserLines, det2Data, user?.cpf, user?.parceiro, user?.token, user?.name, dispatch, fetchUserData]),
   )
 
   // Estado de carregamento
@@ -434,37 +447,7 @@ const Home = () => {
   // Handler para sucesso na ativação
   const handleActivationSuccess = () => {
     // Recarregar as linhas após ativação bem-sucedida
-    const fetchUserData = async () => {
-      try {
-        setLoadingLines(true)
-        const linesRequest = {
-          parceiro: user?.parceiro || 'PLAY MÓVEL',
-          token: user?.token || '',
-          cpf: user?.cpf || '',
-          franquiado: 0,
-          isApp: true,
-          usuario_atual: user?.cpf || '',
-        }
-
-        const linesResult = await getUserLines(linesRequest).unwrap()
-        setUserLines(linesResult)
-
-        const activeLines = linesResult.filter(
-          (line: any) => line.msisdnstatus === 0 && line.msisdn,
-        )
-
-        if (activeLines.length > 0) {
-          const primaryLine = activeLines[0]
-          setSelectedLine(primaryLine)
-          await fetchLineData(primaryLine)
-        }
-      } catch (err: any) {
-        console.log('❌ Erro ao recarregar linhas:', err)
-      } finally {
-        setLoadingLines(false)
-      }
-    }
-
+    console.log('🎉 Ativação bem-sucedida, recarregando dados...')
     fetchUserData()
   }
 

@@ -27,12 +27,6 @@ import BottomSheet, {
   BottomSheetScrollView,
 } from '@gorhom/bottom-sheet'
 import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel'
-import {
-  useSharedValue,
-  useAnimatedStyle,
-  interpolate,
-  Extrapolation,
-} from 'react-native-reanimated'
 import Toast from 'react-native-toast-message'
 import { listaDdd } from '@/utils/listaDdd'
 import { Camera, CameraView, useCameraPermissions } from 'expo-camera'
@@ -106,207 +100,6 @@ enum ActivationStep {
   CONFIRMATION = 'confirmation',
 }
 
-// Componente do Card do Plano (mesmo do original)
-interface PlanCardProps {
-  plan: Plan
-  animationValue: any
-  isSelected: boolean
-  onSelect: () => void
-  colors: any
-}
-
-const PlanCard: React.FC<PlanCardProps> = React.memo(
-  ({ plan, animationValue, isSelected, onSelect, colors }) => {
-    const animatedStyle = useAnimatedStyle(() => {
-      const scale = interpolate(
-        animationValue.value,
-        [-1, 0, 1],
-        [0.9, 1, 0.9],
-        Extrapolation.CLAMP,
-      )
-      const opacity = interpolate(
-        animationValue.value,
-        [-1, 0, 1],
-        [0.7, 1, 0.7],
-        Extrapolation.CLAMP,
-      )
-      return { transform: [{ scale }], opacity }
-    })
-
-    return (
-      <TouchableOpacity
-        onPress={onSelect}
-        activeOpacity={0.9}
-        style={[
-          { width: CARD_WIDTH, height: CARD_HEIGHT, alignSelf: 'center' },
-          animatedStyle,
-        ]}
-      >
-        <Box
-          style={{
-            flex: 1,
-            backgroundColor: 'white',
-            borderRadius: 20,
-            borderWidth: isSelected ? 3 : 2,
-            borderColor: isSelected ? colors.primary : colors.secondary + '20',
-            padding: RESPONSIVE.spacing.cardPadding,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 8,
-            elevation: 4,
-          }}
-        >
-          {/* Gigas */}
-          <VStack style={{ marginBottom: RESPONSIVE.spacing.sectionGap * 0.8 }}>
-            <HStack
-              style={{ alignItems: 'baseline', justifyContent: 'center' }}
-            >
-              <Text
-                style={{
-                  fontSize: RESPONSIVE.fontSize.gigasNumber,
-                  fontWeight: 'bold',
-                  color: colors.primary,
-                  textAlign: 'center',
-                  lineHeight: RESPONSIVE.fontSize.gigasNumber * 1.1,
-                }}
-              >
-                {plan.gigas}
-              </Text>
-              <Text
-                style={{
-                  fontSize: RESPONSIVE.fontSize.gigasUnit,
-                  fontWeight: 'bold',
-                  color: colors.primary,
-                  marginLeft: 4,
-                }}
-              >
-                GB
-              </Text>
-            </HStack>
-          </VStack>
-
-          {/* Benefícios */}
-          <VStack style={{ marginBottom: RESPONSIVE.spacing.sectionGap * 0.8 }}>
-            <Text
-              style={{
-                fontSize: RESPONSIVE.fontSize.benefits,
-                color: colors.text,
-                fontWeight: '500',
-                textAlign: 'center',
-              }}
-            >
-              {plan.min} Minutos • {plan.sms} SMS
-            </Text>
-          </VStack>
-
-          {/* Apps */}
-          <VStack
-            style={{
-              marginBottom: RESPONSIVE.spacing.sectionGap * 0.8,
-              flex: 1,
-              minHeight: 0,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: RESPONSIVE.fontSize.appsTitle,
-                fontWeight: '600',
-                color: colors.text,
-                marginBottom: RESPONSIVE.spacing.sectionGap * 0.6,
-                textAlign: 'center',
-              }}
-            >
-              Apps inclusos:
-            </Text>
-            <View
-              style={{
-                flexDirection: 'row',
-                flexWrap: 'wrap',
-                justifyContent: 'center',
-                gap: 6,
-              }}
-            >
-              {mockApps.map((app, index) => (
-                <View
-                  key={index}
-                  style={{
-                    width: RESPONSIVE.appIcon.size,
-                    aspectRatio: 1,
-                    borderRadius: 12,
-                    backgroundColor: '#F8F9FA',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 1 },
-                    shadowOpacity: 0.08,
-                    shadowRadius: 2,
-                    elevation: 2,
-                  }}
-                >
-                  <Text
-                    style={{ fontSize: RESPONSIVE.fontSize.benefits * 0.65 }}
-                  >
-                    {app.name}
-                  </Text>
-                </View>
-              ))}
-            </View>
-          </VStack>
-
-          {/* Preço */}
-          <VStack
-            style={{
-              alignItems: 'center',
-              marginTop: RESPONSIVE.spacing.sectionGap * 0.5,
-            }}
-          >
-            <HStack
-              style={{ alignItems: 'baseline', justifyContent: 'center' }}
-            >
-              <Text
-                style={{
-                  fontSize: RESPONSIVE.fontSize.priceSymbol,
-                  color: colors.subTitle,
-                  fontWeight: '500',
-                }}
-              >
-                R$
-              </Text>
-              <Text
-                style={{
-                  fontSize: RESPONSIVE.fontSize.priceValue,
-                  fontWeight: 'bold',
-                  color: colors.text,
-                  marginLeft: 4,
-                  lineHeight: RESPONSIVE.fontSize.priceValue * 1.1,
-                }}
-              >
-                {plan.value}
-              </Text>
-            </HStack>
-            <Text
-              style={{
-                fontSize: RESPONSIVE.fontSize.priceLabel,
-                color: colors.subTitle,
-                fontWeight: '500',
-              }}
-            >
-              por mês
-            </Text>
-          </VStack>
-        </Box>
-      </TouchableOpacity>
-    )
-  },
-  (prevProps, nextProps) => {
-    return (
-      prevProps.plan.planid === nextProps.plan.planid &&
-      prevProps.isSelected === nextProps.isSelected
-    )
-  },
-)
-
 const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
   isOpen,
   onClose,
@@ -334,7 +127,6 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
   // Estados do carousel de planos
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null)
   const [currentIndex, setCurrentIndex] = useState(0)
-  const progressValue = useSharedValue<number>(0)
 
   const snapPoints = useMemo(() => ['90%'], [])
 
@@ -393,21 +185,50 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
     }
   }, [isOpen])
 
-  // Validar ICCID automaticamente
+  // Validar ICCID automaticamente com debounce
   useEffect(() => {
     if (formData.iccid.length >= 19 && formData.iccid.length <= 20) {
-      handleValidateICCID()
+      // Adiciona um pequeno delay para garantir que o valor está estável
+      const timeoutId = setTimeout(() => {
+        handleValidateICCID()
+      }, 500)
+
+      return () => clearTimeout(timeoutId)
     } else {
       setIsIccidValid(null)
     }
   }, [formData.iccid])
 
   const handleValidateICCID = async () => {
+    // Validação extra para garantir que o ICCID tem o tamanho correto
+    if (
+      !formData.iccid ||
+      formData.iccid.length < 19 ||
+      formData.iccid.length > 20
+    ) {
+      console.log(
+        '❌ ICCID inválido (tamanho):',
+        formData.iccid,
+        'Length:',
+        formData.iccid?.length,
+      )
+      return
+    }
+
+    console.log(
+      '🔍 Validando ICCID:',
+      formData.iccid,
+      'CompanyID:',
+      env.COMPANY_ID,
+    )
+
     try {
       const result = await checkIccid({
         iccid: formData.iccid,
         companyid: env.COMPANY_ID,
       }).unwrap()
+
+      console.log('✅ ICCID válido:', result)
 
       setIsIccidValid(true)
       setIccidNetwork(result.rede || '')
@@ -418,13 +239,23 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
         text2: `${result.descricao} - Rede: ${result.rede}`,
       })
     } catch (error: any) {
+      console.error('❌ Erro ao validar ICCID:', error)
+
       setIsIccidValid(false)
       setIccidNetwork('')
 
+      // Mensagem específica para erro 404
+      const errorMessage =
+        error?.data?.detalhes ||
+        error?.data?.erro ||
+        error?.data?.message ||
+        'Verifique o ICCID e tente novamente'
+
       Toast.show({
         type: 'error',
-        text1: 'ICCID inválido',
-        text2: error?.data?.message || 'Verifique o ICCID e tente novamente',
+        text1:
+          error?.status === 404 ? 'ICCID não encontrado' : 'ICCID inválido',
+        text2: errorMessage,
       })
     }
   }
@@ -547,29 +378,194 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
     }
   }
 
-  // Renderizar carousel
+  // Renderizar carousel - versão simplificada sem animações Reanimated
   const renderPlanCard = useCallback(
-    ({ item, animationValue }: { item: Plan; animationValue: any }) => {
+    ({ item }: { item: Plan }) => {
       const handleSelect = () => setSelectedPlan(item)
       const isSelected = selectedPlan?.planid === item.planid
+
       return (
-        <PlanCard
-          plan={item}
-          animationValue={animationValue}
-          isSelected={isSelected}
-          onSelect={handleSelect}
-          colors={colors}
-        />
+        <View
+          style={{
+            width: screenWidth - 40,
+            height: CARD_HEIGHT,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <TouchableOpacity
+            onPress={handleSelect}
+            activeOpacity={0.9}
+            style={{ width: CARD_WIDTH, height: CARD_HEIGHT }}
+          >
+            <Box
+              style={{
+                flex: 1,
+                backgroundColor: 'white',
+                borderRadius: 20,
+                borderWidth: isSelected ? 3 : 2,
+                borderColor: isSelected
+                  ? colors.primary
+                  : colors.secondary + '20',
+                padding: RESPONSIVE.spacing.cardPadding,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 8,
+                elevation: 4,
+              }}
+            >
+              {/* Gigas */}
+              <VStack
+                style={{ marginBottom: RESPONSIVE.spacing.sectionGap * 0.8 }}
+              >
+                <HStack
+                  style={{ alignItems: 'baseline', justifyContent: 'center' }}
+                >
+                  <Text
+                    style={{
+                      fontSize: RESPONSIVE.fontSize.gigasNumber,
+                      fontWeight: 'bold',
+                      color: colors.primary,
+                      textAlign: 'center',
+                      lineHeight: RESPONSIVE.fontSize.gigasNumber * 1.1,
+                    }}
+                  >
+                    {item.gigas}
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: RESPONSIVE.fontSize.gigasUnit,
+                      fontWeight: 'bold',
+                      color: colors.primary,
+                      marginLeft: 4,
+                    }}
+                  >
+                    GB
+                  </Text>
+                </HStack>
+              </VStack>
+
+              {/* Benefícios */}
+              <VStack
+                style={{ marginBottom: RESPONSIVE.spacing.sectionGap * 0.8 }}
+              >
+                <Text
+                  style={{
+                    fontSize: RESPONSIVE.fontSize.benefits,
+                    color: colors.text,
+                    fontWeight: '500',
+                    textAlign: 'center',
+                  }}
+                >
+                  {item.min} Minutos • {item.sms} SMS
+                </Text>
+              </VStack>
+
+              {/* Apps */}
+              <VStack
+                style={{
+                  marginBottom: RESPONSIVE.spacing.sectionGap * 0.8,
+                  flex: 1,
+                  minHeight: 0,
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: RESPONSIVE.fontSize.appsTitle,
+                    fontWeight: '600',
+                    color: colors.text,
+                    marginBottom: RESPONSIVE.spacing.sectionGap * 0.6,
+                    textAlign: 'center',
+                  }}
+                >
+                  Apps inclusos:
+                </Text>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    flexWrap: 'wrap',
+                    justifyContent: 'center',
+                    gap: 6,
+                  }}
+                >
+                  {mockApps.map((app, index) => (
+                    <View
+                      key={index}
+                      style={{
+                        width: RESPONSIVE.appIcon.size,
+                        aspectRatio: 1,
+                        borderRadius: 12,
+                        backgroundColor: '#F8F9FA',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 1 },
+                        shadowOpacity: 0.08,
+                        shadowRadius: 2,
+                        elevation: 2,
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: RESPONSIVE.fontSize.benefits * 0.65,
+                        }}
+                      >
+                        {app.name}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              </VStack>
+
+              {/* Preço */}
+              <VStack
+                style={{
+                  alignItems: 'center',
+                  marginTop: RESPONSIVE.spacing.sectionGap * 0.5,
+                }}
+              >
+                <HStack
+                  style={{ alignItems: 'baseline', justifyContent: 'center' }}
+                >
+                  <Text
+                    style={{
+                      fontSize: RESPONSIVE.fontSize.priceSymbol,
+                      color: colors.subTitle,
+                      fontWeight: '500',
+                    }}
+                  >
+                    R$
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: RESPONSIVE.fontSize.priceValue,
+                      fontWeight: 'bold',
+                      color: colors.text,
+                      marginLeft: 4,
+                      lineHeight: RESPONSIVE.fontSize.priceValue * 1.1,
+                    }}
+                  >
+                    {item.value}
+                  </Text>
+                </HStack>
+                <Text
+                  style={{
+                    fontSize: RESPONSIVE.fontSize.priceLabel,
+                    color: colors.subTitle,
+                    fontWeight: '500',
+                  }}
+                >
+                  por mês
+                </Text>
+              </VStack>
+            </Box>
+          </TouchableOpacity>
+        </View>
       )
     },
     [selectedPlan?.planid, colors],
   )
-
-  // ✅ Usa useCallback com 'worklet' para evitar warning do Reanimated
-  const onProgressChange = useCallback((offsetProgress: number) => {
-    'worklet'
-    progressValue.value = offsetProgress
-  }, [])
 
   const onSnapToItem = useCallback(
     (index: number) => {
@@ -687,27 +683,6 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
                     barcodeTypes: ['code128', 'code39', 'ean13'],
                   }}
                 />
-
-                {/* Botão fechar */}
-                <View
-                  style={{
-                    position: 'absolute',
-                    top: 20,
-                    right: 20,
-                    zIndex: 2,
-                  }}
-                >
-                  <TouchableOpacity
-                    onPress={() => setShowScanner(false)}
-                    style={{
-                      backgroundColor: 'rgba(0,0,0,0.5)',
-                      borderRadius: 20,
-                      padding: 8,
-                    }}
-                  >
-                    <Icon as={X} color="white" size="lg" />
-                  </TouchableOpacity>
-                </View>
 
                 {/* Texto instrucional */}
                 <View
@@ -910,196 +885,34 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
         }
 
         return (
-          <BottomSheetScrollView
-            style={{ flex: 1 }}
-            contentContainerStyle={{ paddingBottom: 20 }}
-            showsVerticalScrollIndicator={true}
-          >
-            <VStack space="md">
-              <VStack space="sm">
-                <Text
-                  style={{ fontSize: 18, fontWeight: '600', color: colors.text }}
-                >
-                  Escolha seu plano
-                </Text>
-                <Text style={{ fontSize: 14, color: colors.subTitle }}>
-                  Selecione o plano que mais combina com você
-                </Text>
-              </VStack>
-
-              {/* Lista de planos - versão simplificada sem Carousel */}
-              <VStack space="md">
-                {allPlans.map((plan) => (
-                  <TouchableOpacity
-                    key={plan.uniqueId}
-                    onPress={() => setSelectedPlan(plan)}
-                    activeOpacity={0.9}
-                  >
-                    <Box
-                      style={{
-                        backgroundColor: 'white',
-                        borderRadius: 20,
-                        borderWidth: selectedPlan?.planid === plan.planid ? 3 : 2,
-                        borderColor:
-                          selectedPlan?.planid === plan.planid
-                            ? colors.primary
-                            : colors.secondary + '20',
-                        padding: RESPONSIVE.spacing.cardPadding,
-                        shadowColor: '#000',
-                        shadowOffset: { width: 0, height: 2 },
-                        shadowOpacity: 0.1,
-                        shadowRadius: 8,
-                        elevation: 4,
-                      }}
-                    >
-                      {/* Gigas */}
-                      <VStack
-                        style={{ marginBottom: RESPONSIVE.spacing.sectionGap * 0.8 }}
-                      >
-                        <HStack
-                          style={{ alignItems: 'baseline', justifyContent: 'center' }}
-                        >
-                          <Text
-                            style={{
-                              fontSize: RESPONSIVE.fontSize.gigasNumber,
-                              fontWeight: 'bold',
-                              color: colors.primary,
-                              textAlign: 'center',
-                              lineHeight: RESPONSIVE.fontSize.gigasNumber * 1.1,
-                            }}
-                          >
-                            {plan.gigas}
-                          </Text>
-                          <Text
-                            style={{
-                              fontSize: RESPONSIVE.fontSize.gigasUnit,
-                              fontWeight: 'bold',
-                              color: colors.primary,
-                              marginLeft: 4,
-                            }}
-                          >
-                            GB
-                          </Text>
-                        </HStack>
-                      </VStack>
-
-                      {/* Benefícios */}
-                      <VStack
-                        style={{ marginBottom: RESPONSIVE.spacing.sectionGap * 0.8 }}
-                      >
-                        <Text
-                          style={{
-                            fontSize: RESPONSIVE.fontSize.benefits,
-                            color: colors.text,
-                            fontWeight: '500',
-                            textAlign: 'center',
-                          }}
-                        >
-                          {plan.min} Minutos • {plan.sms} SMS
-                        </Text>
-                      </VStack>
-
-                      {/* Apps */}
-                      <VStack
-                        style={{
-                          marginBottom: RESPONSIVE.spacing.sectionGap * 0.8,
-                        }}
-                      >
-                        <Text
-                          style={{
-                            fontSize: RESPONSIVE.fontSize.appsTitle,
-                            fontWeight: '600',
-                            color: colors.text,
-                            marginBottom: RESPONSIVE.spacing.sectionGap * 0.6,
-                            textAlign: 'center',
-                          }}
-                        >
-                          Apps inclusos:
-                        </Text>
-                        <View
-                          style={{
-                            flexDirection: 'row',
-                            flexWrap: 'wrap',
-                            justifyContent: 'center',
-                            gap: 6,
-                          }}
-                        >
-                          {mockApps.map((app, index) => (
-                            <View
-                              key={index}
-                              style={{
-                                width: RESPONSIVE.appIcon.size,
-                                aspectRatio: 1,
-                                borderRadius: 12,
-                                backgroundColor: '#F8F9FA',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                shadowColor: '#000',
-                                shadowOffset: { width: 0, height: 1 },
-                                shadowOpacity: 0.08,
-                                shadowRadius: 2,
-                                elevation: 2,
-                              }}
-                            >
-                              <Text
-                                style={{
-                                  fontSize: RESPONSIVE.fontSize.benefits * 0.65,
-                                }}
-                              >
-                                {app.name}
-                              </Text>
-                            </View>
-                          ))}
-                        </View>
-                      </VStack>
-
-                      {/* Preço */}
-                      <VStack
-                        style={{
-                          alignItems: 'center',
-                          marginTop: RESPONSIVE.spacing.sectionGap * 0.5,
-                        }}
-                      >
-                        <HStack
-                          style={{ alignItems: 'baseline', justifyContent: 'center' }}
-                        >
-                          <Text
-                            style={{
-                              fontSize: RESPONSIVE.fontSize.priceSymbol,
-                              color: colors.subTitle,
-                              fontWeight: '500',
-                            }}
-                          >
-                            R$
-                          </Text>
-                          <Text
-                            style={{
-                              fontSize: RESPONSIVE.fontSize.priceValue,
-                              fontWeight: 'bold',
-                              color: colors.text,
-                              marginLeft: 4,
-                              lineHeight: RESPONSIVE.fontSize.priceValue * 1.1,
-                            }}
-                          >
-                            {plan.value}
-                          </Text>
-                        </HStack>
-                        <Text
-                          style={{
-                            fontSize: RESPONSIVE.fontSize.priceLabel,
-                            color: colors.subTitle,
-                            fontWeight: '500',
-                          }}
-                        >
-                          por mês
-                        </Text>
-                      </VStack>
-                    </Box>
-                  </TouchableOpacity>
-                ))}
-              </VStack>
+          <VStack space="md" style={{ flex: 1 }}>
+            <VStack space="sm">
+              <Text
+                style={{ fontSize: 18, fontWeight: '600', color: colors.text }}
+              >
+                Escolha seu plano
+              </Text>
+              <Text style={{ fontSize: 14, color: colors.subTitle }}>
+                Selecione o plano que mais combina com você
+              </Text>
             </VStack>
-          </BottomSheetScrollView>
+
+            {/* Carousel de planos - versão compatível com BottomSheet */}
+            <View style={{ flex: 1, alignItems: 'center' }}>
+              <Carousel
+                ref={carouselRef}
+                loop={false}
+                width={screenWidth - 40}
+                height={CARD_HEIGHT + 40}
+                data={allPlans}
+                renderItem={renderPlanCard}
+                onSnapToItem={onSnapToItem}
+                windowSize={2}
+                style={{ width: screenWidth - 40 }}
+              />
+              {renderDots()}
+            </View>
+          </VStack>
         )
 
       case ActivationStep.CONFIRMATION:
@@ -1323,9 +1136,6 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
           </VStack>
 
           {/* Botão fechar */}
-          <TouchableOpacity onPress={onClose} style={{ padding: 4 }}>
-            <Icon as={X} color={colors.text} size="xl" />
-          </TouchableOpacity>
         </HStack>
 
         {/* Indicador de progresso */}

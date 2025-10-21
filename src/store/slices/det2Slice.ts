@@ -16,6 +16,10 @@ interface Det2State {
   lastUpdated: string | null
   selectedLineIccid: string | null
 
+  // Controle de inicialização
+  hasInitialized: boolean
+  userLines: any[] // Linhas do usuário
+
   // Cache para evitar chamadas desnecessárias
   cache: {
     [iccid: string]: {
@@ -31,6 +35,8 @@ const initialState: Det2State = {
   error: null,
   lastUpdated: null,
   selectedLineIccid: null,
+  hasInitialized: false,
+  userLines: [],
   cache: {},
 }
 
@@ -105,6 +111,16 @@ const det2Slice = createSlice({
       state.selectedLineIccid = action.payload
     },
 
+    // Marcar como inicializado
+    setHasInitialized: (state, action: PayloadAction<boolean>) => {
+      state.hasInitialized = action.payload
+    },
+
+    // Salvar linhas do usuário
+    setUserLines: (state, action: PayloadAction<any[]>) => {
+      state.userLines = action.payload
+    },
+
     // Reset completo
     resetState: () => initialState,
   },
@@ -119,6 +135,10 @@ export const selectDet2LastUpdated = (state: { det2: Det2State }) =>
   state.det2.lastUpdated
 export const selectDet2SelectedIccid = (state: { det2: Det2State }) =>
   state.det2.selectedLineIccid
+export const selectDet2HasInitialized = (state: { det2: Det2State }) =>
+  state.det2.hasInitialized
+export const selectDet2UserLines = (state: { det2: Det2State }) =>
+  state.det2.userLines
 
 // Seletor para verificar se existe cache para um ICCID
 export const selectHasCacheForIccid =
@@ -161,6 +181,8 @@ export const {
   clearCache,
   loadFromCache,
   setSelectedLineIccid,
+  setHasInitialized,
+  setUserLines,
   resetState,
 } = det2Slice.actions
 

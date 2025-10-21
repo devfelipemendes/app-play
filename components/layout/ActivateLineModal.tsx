@@ -14,7 +14,7 @@ import { HStack } from '@/components/ui/hstack'
 import { Box } from '@/components/ui/box'
 import { Text } from '@/components/ui/text'
 import { ScrollView } from '@/components/ui/scroll-view'
-import { X, ChevronLeft } from 'lucide-react-native'
+import { ChevronLeft } from 'lucide-react-native'
 import { Icon } from '@/components/ui/icon'
 import {
   useGetPlansQuery,
