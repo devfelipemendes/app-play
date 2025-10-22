@@ -24,8 +24,10 @@ const RedirectCard = ({ title, icon, onPress }: RedirectCardProps) => {
         backgroundColor: '#ffffff', // bg-background-100 (substitua pelo valor do seu theme)
         borderRadius: 18, // rounded-[18px]
         gap: 12, // gap-3
-
-        boxShadow: ' 0px 1px 3px rgba(0, 0, 0, 0.24)',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.24,
+        shadowRadius: 3,
         elevation: 4,
       }}
     >

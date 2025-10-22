@@ -8,7 +8,7 @@ import { Box } from '@/components/ui/box'
 import { CustomInput } from '@/components/layout/CustomInput'
 import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
 import { useAuth } from '@/hooks/useAuth'
-import { useAppDispatch } from '@/src/store/hooks'
+import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { setMode } from '@/src/store/slices/screenFlowSlice'
 import { useForm, Controller } from 'react-hook-form'
 import { mask, unMask } from 'remask'
@@ -32,6 +32,7 @@ import { useBiometricAuth } from '@/hooks/useBiometricAuth'
 
 import { IconButton } from '@/components/ui/iconButton'
 import { env } from '@/config/env'
+import { useGetCompanyInfoQuery } from '@/src/api/endpoints/companyInfoApi'
 
 const loginSchema = v.object({
   cpfCnpj: v.pipe(v.string('CPF/CPNJ é obrigatório')),
@@ -46,9 +47,13 @@ const loginSchema = v.object({
 type LoginFormData = v.InferInput<typeof loginSchema>
 
 export default function FormLogin() {
-  const { signIn, loadingAuth } = useAuth()
+  const { signIn, loadingAuth, user: userInfo } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [saveBiometric, setSaveBiometric] = useState(false)
+  const [loginSuccess, setLoginSuccess] = useState(false)
+
+  // Pegar companyInfo do authSlice (onde está sendo salvo)
+  const companyInfo = useAppSelector((state) => state.auth.companyInfo)
 
   const {
     control,
@@ -85,6 +90,17 @@ export default function FormLogin() {
     })
   }, [isBiometricSupported, biometricType, hasStoredCredentials])
 
+  // Debug companyInfo
+  useEffect(() => {
+    console.log('🏢 Company Info Debug:', {
+      companyInfo,
+      link_chat: companyInfo?.link_chat,
+      link_website: companyInfo?.link_website,
+      isNull: companyInfo === null,
+      isUndefined: companyInfo === undefined,
+    })
+  }, [companyInfo])
+
   const onSubmit = async (data: LoginFormData) => {
     // Validação com valibot
     try {
@@ -101,10 +117,12 @@ export default function FormLogin() {
         'app',
       )
 
+      setLoginSuccess(true)
+
       // Se o checkbox de biometria estiver marcado, salva as credenciais
       if (saveBiometric && isBiometricSupported) {
         const saved = await saveCredentials(UnMaskData, data.password)
-        if (saved) {
+        if (saved && loginSuccess) {
           Alert.alert(
             'Biometria Configurada',
             `Você pode fazer login com ${biometricType} na próxima vez!`,
@@ -147,13 +165,21 @@ export default function FormLogin() {
   // Função para abrir chat de suporte
   const handleOpenSupportChat = async () => {
     try {
-      const supported = await Linking.canOpenURL(env.SUPPORT_CHAT_URL)
+      const chatUrl = companyInfo?.link_chat || env.SUPPORT_CHAT_URL
+
+      if (!chatUrl) {
+        Alert.alert('Erro', 'Link de suporte não configurado')
+        return
+      }
+
+      const supported = await Linking.canOpenURL(chatUrl)
       if (supported) {
-        await Linking.openURL(env.SUPPORT_CHAT_URL)
+        await Linking.openURL(chatUrl)
       } else {
         Alert.alert('Erro', 'Não foi possível abrir o chat de suporte')
       }
     } catch (error) {
+      console.error('Erro ao abrir chat:', error)
       Alert.alert('Erro', 'Não foi possível abrir o chat de suporte')
     }
   }
@@ -161,13 +187,21 @@ export default function FormLogin() {
   // Função para abrir site de compra de chip
   const handleOpenChipPurchase = async () => {
     try {
-      const supported = await Linking.canOpenURL(env.CHIP_PURCHASE_URL)
+      const websiteUrl = companyInfo?.link_website || env.CHIP_PURCHASE_URL
+
+      if (!websiteUrl) {
+        Alert.alert('Erro', 'Link de compra não configurado')
+        return
+      }
+
+      const supported = await Linking.canOpenURL(websiteUrl)
       if (supported) {
-        await Linking.openURL(env.CHIP_PURCHASE_URL)
+        await Linking.openURL(websiteUrl)
       } else {
         Alert.alert('Erro', 'Não foi possível abrir o site de compra')
       }
     } catch (error) {
+      console.error('Erro ao abrir site:', error)
       Alert.alert('Erro', 'Não foi possível abrir o site de compra')
     }
   }
@@ -236,8 +270,8 @@ export default function FormLogin() {
         )}
       </Box>
 
-      {/* Checkbox Salvar Biometria */}
-      {isBiometricSupported && (
+      {/* Checkbox Salvar Biometria - só mostra se biometria estiver disponível E não tiver credenciais salvas */}
+      {isBiometricSupported && !hasStoredCredentials && (
         <Box style={{ marginBottom: 16 }}>
           <Pressable
             onPress={() => {

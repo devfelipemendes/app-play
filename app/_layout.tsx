@@ -29,12 +29,44 @@ import {
 import { PaperProvider } from 'react-native-paper'
 import AuthGuard from '@/src/components/auth/AuthGuard'
 import DevTools from '@/components/DevTools'
+import { useAuth } from '@/hooks/useAuth'
+import { ActivityIndicator, View } from 'react-native'
 
-// Componente para carregar tema da empresa
-const CompanyThemeLoader = ({ children }: { children: React.ReactNode }) => {
-  const { loadTheme } = useWhitelabelTheme()
+// Componente para carregar informações da empresa ANTES de tudo
+const CompanyInfoLoader = ({ children }: { children: React.ReactNode }) => {
+  const [isLoading, setIsLoading] = useState(true)
+  const { getCompanyInfo } = useAuth()
 
-  useEffect(() => {}, [])
+  useEffect(() => {
+    const loadCompanyInfo = async () => {
+      try {
+        console.log('🏢 Carregando informações da empresa (whitelabel)...')
+        await getCompanyInfo()
+        console.log('✅ Informações da empresa carregadas com sucesso')
+      } catch (error) {
+        console.error('❌ Erro ao carregar informações da empresa:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadCompanyInfo()
+  }, [])
+
+  if (isLoading) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: '#fff',
+        }}
+      >
+        <ActivityIndicator size="large" color="#6366f1" />
+      </View>
+    )
+  }
 
   return <>{children}</>
 }
@@ -63,7 +95,7 @@ const MainLayout = () => {
       <BottomSheetModalProvider>
         <StatusBar style="light" translucent />
         <AuthProvider>
-          <CompanyThemeLoader>
+          <CompanyInfoLoader>
             <AuthGuard>
               <Stack>
                 <Stack.Screen name="index" options={{ headerShown: false }} />
@@ -71,7 +103,7 @@ const MainLayout = () => {
                 <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               </Stack>
             </AuthGuard>
-          </CompanyThemeLoader>
+          </CompanyInfoLoader>
         </AuthProvider>
       </BottomSheetModalProvider>
     </GluestackUIProvider>

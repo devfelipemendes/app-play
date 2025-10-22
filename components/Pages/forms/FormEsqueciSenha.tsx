@@ -1,20 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Alert } from 'react-native'
+import { Alert, Pressable, View } from 'react-native'
 import { Box } from '@/components/ui/box'
 import { Text } from '@/components/ui/text'
 import { Button, ButtonText } from '@/components/ui/button'
 import { CustomInput } from '@/components/layout/CustomInput'
-import {
-  Radio,
-  RadioGroup,
-  RadioIcon,
-  RadioIndicator,
-  RadioLabel,
-} from '@/components/ui/radio'
 import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
 import { useRequestPasswordTokenMutation } from '@/src/api/endpoints/forgotPasswordApi'
 import { mask, unMask } from 'remask'
-import { User, CircleIcon, ArrowLeft, Clock } from 'lucide-react-native'
+import { User, ArrowLeft, Clock } from 'lucide-react-native'
 import { ButtonSpinner } from '@gluestack-ui/themed'
 import { useAppDispatch } from '@/src/store/hooks'
 import {
@@ -179,40 +172,139 @@ export default function FormEsqueciSenha() {
           Como deseja receber o token?
         </Text>
 
-        <RadioGroup value={tipoEnvio} onChange={setTipoEnvio}>
-          <Box style={{ marginBottom: 12 }}>
-            <Radio value="email">
-              <RadioIndicator>
-                <RadioIcon as={CircleIcon} />
-              </RadioIndicator>
-              <RadioLabel style={{ color: colors.text, marginLeft: 8 }}>
-                E-mail
-              </RadioLabel>
-            </Radio>
-          </Box>
+        <View style={{ gap: 16 }}>
+          {/* Email */}
+          <Pressable
+            onPress={() => setTipoEnvio('email')}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 12,
+            }}
+          >
+            <View
+              style={{
+                width: 22,
+                height: 22,
+                borderRadius: 11,
+                borderWidth: 2,
+                borderColor:
+                  tipoEnvio === 'email' ? colors.primary : '#D1D5DB',
+                justifyContent: 'center',
+                alignItems: 'center',
+                backgroundColor: 'transparent',
+              }}
+            >
+              {tipoEnvio === 'email' && (
+                <View
+                  style={{
+                    width: 12,
+                    height: 12,
+                    borderRadius: 6,
+                    backgroundColor: colors.primary,
+                  }}
+                />
+              )}
+            </View>
+            <Text
+              style={{
+                color: colors.text,
+                fontSize: 16,
+                fontWeight: tipoEnvio === 'email' ? '600' : '400',
+              }}
+            >
+              E-mail
+            </Text>
+          </Pressable>
 
-          <Box style={{ marginBottom: 12 }}>
-            <Radio value="sms">
-              <RadioIndicator>
-                <RadioIcon as={CircleIcon} />
-              </RadioIndicator>
-              <RadioLabel style={{ color: colors.text, marginLeft: 8 }}>
-                SMS
-              </RadioLabel>
-            </Radio>
-          </Box>
+          {/* SMS */}
+          <Pressable
+            onPress={() => setTipoEnvio('sms')}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 12,
+            }}
+          >
+            <View
+              style={{
+                width: 22,
+                height: 22,
+                borderRadius: 11,
+                borderWidth: 2,
+                borderColor:
+                  tipoEnvio === 'sms' ? colors.primary : '#D1D5DB',
+                justifyContent: 'center',
+                alignItems: 'center',
+                backgroundColor: 'transparent',
+              }}
+            >
+              {tipoEnvio === 'sms' && (
+                <View
+                  style={{
+                    width: 12,
+                    height: 12,
+                    borderRadius: 6,
+                    backgroundColor: colors.primary,
+                  }}
+                />
+              )}
+            </View>
+            <Text
+              style={{
+                color: colors.text,
+                fontSize: 16,
+                fontWeight: tipoEnvio === 'sms' ? '600' : '400',
+              }}
+            >
+              SMS
+            </Text>
+          </Pressable>
 
-          <Box style={{ marginBottom: 12 }}>
-            <Radio value="whatsapp">
-              <RadioIndicator>
-                <RadioIcon as={CircleIcon} />
-              </RadioIndicator>
-              <RadioLabel style={{ color: colors.text, marginLeft: 8 }}>
-                WhatsApp
-              </RadioLabel>
-            </Radio>
-          </Box>
-        </RadioGroup>
+          {/* WhatsApp */}
+          <Pressable
+            onPress={() => setTipoEnvio('whatsapp')}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 12,
+            }}
+          >
+            <View
+              style={{
+                width: 22,
+                height: 22,
+                borderRadius: 11,
+                borderWidth: 2,
+                borderColor:
+                  tipoEnvio === 'whatsapp' ? colors.primary : '#D1D5DB',
+                justifyContent: 'center',
+                alignItems: 'center',
+                backgroundColor: 'transparent',
+              }}
+            >
+              {tipoEnvio === 'whatsapp' && (
+                <View
+                  style={{
+                    width: 12,
+                    height: 12,
+                    borderRadius: 6,
+                    backgroundColor: colors.primary,
+                  }}
+                />
+              )}
+            </View>
+            <Text
+              style={{
+                color: colors.text,
+                fontSize: 16,
+                fontWeight: tipoEnvio === 'whatsapp' ? '600' : '400',
+              }}
+            >
+              WhatsApp
+            </Text>
+          </Pressable>
+        </View>
       </Box>
 
       {/* CPF/CNPJ Input */}
@@ -223,7 +315,10 @@ export default function FormEsqueciSenha() {
         <CustomInput
           placeholder="000.000.000-00 / 00.000.000/0000-00"
           value={mask(cpf, ['999.999.999-99', '99.999.999/9999-99'])}
-          onChangeText={(text: string) => setCpf(text)}
+          onChangeText={(text: string) => {
+            const unmasked = unMask(text)
+            setCpf(unmasked)
+          }}
           leftIcon={User}
           keyboardType="number-pad"
         />

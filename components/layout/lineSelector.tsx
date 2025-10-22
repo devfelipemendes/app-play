@@ -43,6 +43,10 @@ const LineSelector = ({
           padding: 12,
           borderRadius: 12,
           backgroundColor: colors.background,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.24,
+          shadowRadius: 3,
           elevation: 2,
         }}
       >
@@ -69,25 +73,6 @@ const LineSelector = ({
               {selectedLine.plandescription}
             </Text>
           </VStack>
-          {/* <Box
-            style={{
-              paddingHorizontal: 8,
-              paddingVertical: 4,
-              borderRadius: 8,
-              backgroundColor:
-                selectedLine.rede === 'TIM' ? '#0066CC' : '#6A0DAD',
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 10,
-                fontWeight: 'bold',
-                color: 'white',
-              }}
-            >
-              {selectedLine.rede}
-            </Text>
-          </Box> */}
         </HStack>
       </Box>
     ) : null
@@ -108,8 +93,11 @@ const LineSelector = ({
             padding: 12,
             borderRadius: 12,
             backgroundColor: colors.background,
-
-            boxShadow: ' 0px 1px 3px rgba(0, 0, 0, 0.24)',
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 0.24,
+            shadowRadius: 3,
+            elevation: 2,
           }}
         >
           <HStack

@@ -78,6 +78,7 @@ interface ActiveLineBody {
   isApp: boolean
   pospago: string
   userInfo: string
+  esim: boolean
 }
 
 interface ResponseActiveLine {
@@ -205,7 +206,10 @@ const plansAPI = apiPlay.injectEndpoints({
     }),
 
     // Endpoint para reativar linha (statusplan = 'EX')
-    reactivateLine: builder.mutation<ResponseReactivateLine, PayloadReactivateLine>({
+    reactivateLine: builder.mutation<
+      ResponseReactivateLine,
+      PayloadReactivateLine
+    >({
       query: (payload) => ({
         url: '/api/reativar/linha',
         method: 'POST',

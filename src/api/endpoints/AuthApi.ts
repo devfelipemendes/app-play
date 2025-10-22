@@ -8,11 +8,11 @@ interface LoginRequest {
   password: string
   expoPushToken?: string
   modelName?: string
-  companyid: number
-  latitude: string
-  longitude: string
-  acao_realizada: string
-  tipo_login: string
+  companyid?: number
+  latitude?: string
+  longitude?: string
+  acao_realizada?: string
+  tipo_login?: string
 }
 
 interface Fatura {

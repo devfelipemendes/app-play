@@ -23,18 +23,12 @@ export default function AuthGuard({ children }: AuthGuardProps) {
   const hasLoggedOut = useRef(false)
 
   // Verificar autenticação ao montar o componente - APENAS UMA VEZ
+  // Nota: getCompanyInfo já foi chamado no CompanyInfoLoader
   useEffect(() => {
     if (hasInitialized.current) return
     hasInitialized.current = true
 
-    const initializeAuth = async () => {
-      // Primeiro carrega informações da empresa
-      await getCompanyInfo()
-      // Depois verifica autenticação
-      await checkAuthentication()
-    }
-
-    initializeAuth()
+    checkAuthentication()
   }, [])
 
   // Gerenciar redirecionamento baseado no estado de autenticação

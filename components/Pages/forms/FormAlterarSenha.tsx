@@ -28,8 +28,8 @@ export default function FormAlterarSenha() {
 
   const handleChangePassword = async () => {
     // Validações
-    if (newPassword.length < 5) {
-      Alert.alert('Erro', 'A senha deve ter pelo menos 5 caracteres')
+    if (newPassword.length < 6) {
+      Alert.alert('Erro', 'A senha deve ter pelo menos 6 caracteres')
       return
     }
 
@@ -71,7 +71,7 @@ export default function FormAlterarSenha() {
     }
   }
 
-  const isPasswordValid = newPassword.length >= 5
+  const isPasswordValid = newPassword.length >= 6
   const doPasswordsMatch =
     newPassword === confirmPassword && confirmPassword.length > 0
 
@@ -111,11 +111,11 @@ export default function FormAlterarSenha() {
           onEndIconPress={() => setShowPassword(!showPassword)}
         />
         <Text style={{ marginTop: 4, fontSize: 12, color: colors.subTitle }}>
-          Sua senha deve conter pelo menos 5 caracteres
+          Sua senha deve conter pelo menos 6 caracteres
         </Text>
         {newPassword.length > 0 && !isPasswordValid && (
           <Text style={{ marginTop: 4, fontSize: 12, color: 'red' }}>
-            A senha deve ter pelo menos 5 caracteres
+            A senha deve ter pelo menos 6 caracteres
           </Text>
         )}
       </Box>

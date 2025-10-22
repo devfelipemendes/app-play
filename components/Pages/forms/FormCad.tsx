@@ -1364,7 +1364,7 @@ export default function FormCadastro() {
                 paddingBottom: 20,
               }}
             >
-              {typeChipTabs.map((tab) => (
+              {/* {typeChipTabs.map((tab) => (
                 <ThemeCard
                   key={tab.id}
                   title={tab.title}
@@ -1372,7 +1372,7 @@ export default function FormCadastro() {
                   active={activeTypeChipsTabs === tab.id}
                   onPress={() => setActiveTypeChipsTabs(tab.id)}
                 />
-              ))}
+              ))} */}
             </HStack>
 
             {activeTypeChipsTabs === 'simCard' && (
@@ -1504,8 +1504,7 @@ export default function FormCadastro() {
                       selectedDDD === ddd ? colors.primary : 'white',
                     borderRadius: 12,
                     borderWidth: 2,
-                    borderColor:
-                      selectedDDD === ddd ? colors.primary : colors.border,
+                    borderColor: selectedDDD === ddd ? colors.primary : '',
                     justifyContent: 'center',
                     alignItems: 'center',
                   }}

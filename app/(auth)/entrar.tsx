@@ -9,7 +9,7 @@ import { Keyboard, Animated, Platform, Image, Dimensions } from 'react-native'
 import { StatusBar } from 'expo-status-bar'
 
 import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
-import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
+import { useAppSelector } from '@/src/store/hooks'
 import type { RootState } from '@/src/store'
 import FormLogin from '@/components/Pages/forms/FormLogin'
 
@@ -104,7 +104,8 @@ export default function LoginScreen() {
                 height: isIOS || isSmallScreen ? 80 : 120,
                 opacity: logoOpacity,
                 alignSelf: 'center',
-                marginBottom: isIOS || isSmallScreen ? 16 : 32,
+                marginBottom: isIOS || isSmallScreen ? 40 : 16,
+                marginTop: isIOS || isSmallScreen ? 40 : 50,
               }}
               resizeMode="contain"
             />

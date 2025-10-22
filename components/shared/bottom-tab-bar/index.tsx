@@ -43,7 +43,7 @@ const tabItems: TabItem[] = [
   },
   {
     name: 'support',
-    label: 'Atendimento',
+    label: 'Suporte',
     path: 'support',
     inActiveIcon: MessageCircle,
     icon: MessageCircle,
@@ -89,10 +89,10 @@ function BottomTabBar() {
   const currentRoute = getCurrentRoute()
   const activeIndex = routeNameToIndex[currentRoute] ?? 0
 
-  const shadowStyle =
-    Platform.OS === 'ios'
-      ? { boxShadow: '0px -2px 6px 0px rgba(0, 0, 0, 0.182)' }
-      : SHADOW.medium
+  const shadowStyle = {
+    ...SHADOW.medium,
+    shadowOffset: { width: 0, height: -2 }, // Sombra para cima
+  }
 
   // Atualiza animação quando muda a aba ou layout
   useEffect(() => {
@@ -116,7 +116,8 @@ function BottomTabBar() {
       <HStack
         style={[
           {
-            paddingBottom: Platform.OS === 'ios' ? insets.bottom : moderateScale(16),
+            paddingBottom:
+              Platform.OS === 'ios' ? insets.bottom : moderateScale(16),
             paddingTop: TAB_BAR.padding.top,
             paddingHorizontal: TAB_BAR.padding.horizontal,
             borderTopLeftRadius: TAB_BAR.borderTopLeftRadius,

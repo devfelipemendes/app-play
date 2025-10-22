@@ -9,60 +9,60 @@
  * - Escalona proporcionalmente para outros dispositivos
  */
 
-import { Dimensions, Platform, StatusBar } from 'react-native';
+import { Dimensions, Platform, StatusBar } from 'react-native'
 
 /**
  * Dimensões de referência para cálculos de escala
  * Baseado no iPhone 11 Pro como design de referência
  */
-const DESIGN_WIDTH = 375;
-const DESIGN_HEIGHT = 812;
+const DESIGN_WIDTH = 375
+const DESIGN_HEIGHT = 812
 
 /**
  * Obtém as dimensões atuais da janela
  */
 function getDimensions() {
-  return Dimensions.get('window');
+  return Dimensions.get('window')
 }
 
 /**
  * Calcula a largura da tela atual
  */
 export function getScreenWidth(): number {
-  return getDimensions().width;
+  return getDimensions().width
 }
 
 /**
  * Calcula a altura da tela atual
  */
 export function getScreenHeight(): number {
-  return getDimensions().height;
+  return getDimensions().height
 }
 
 /**
  * Calcula a altura real disponível (excluindo status bar no Android)
  */
 export function getAvailableHeight(): number {
-  const windowHeight = getScreenHeight();
+  const windowHeight = getScreenHeight()
 
   if (Platform.OS === 'android' && StatusBar.currentHeight) {
-    return windowHeight - StatusBar.currentHeight;
+    return windowHeight - StatusBar.currentHeight
   }
 
-  return windowHeight;
+  return windowHeight
 }
 
 /**
  * Fatores de escala baseados nas dimensões do dispositivo
  */
 export function getScaleFactors() {
-  const { width, height } = getDimensions();
+  const { width, height } = getDimensions()
 
   return {
     widthScale: width / DESIGN_WIDTH,
     heightScale: height / DESIGN_HEIGHT,
     averageScale: (width / DESIGN_WIDTH + height / DESIGN_HEIGHT) / 2,
-  };
+  }
 }
 
 /**
@@ -80,8 +80,8 @@ export function getScaleFactors() {
  * ```
  */
 export function scaleWidth(size: number): number {
-  const { widthScale } = getScaleFactors();
-  return size * widthScale;
+  const { widthScale } = getScaleFactors()
+  return size * widthScale
 }
 
 /**
@@ -99,8 +99,8 @@ export function scaleWidth(size: number): number {
  * ```
  */
 export function scaleHeight(size: number): number {
-  const { heightScale } = getScaleFactors();
-  return size * heightScale;
+  const { heightScale } = getScaleFactors()
+  return size * heightScale
 }
 
 /**
@@ -120,8 +120,8 @@ export function scaleHeight(size: number): number {
  * ```
  */
 export function scale(size: number): number {
-  const { averageScale } = getScaleFactors();
-  return size * averageScale;
+  const { averageScale } = getScaleFactors()
+  return size * averageScale
 }
 
 /**
@@ -147,8 +147,8 @@ export function scale(size: number): number {
  * ```
  */
 export function moderateScale(size: number, factor: number = 0.5): number {
-  const { averageScale } = getScaleFactors();
-  return size + (averageScale - 1) * size * factor;
+  const { averageScale } = getScaleFactors()
+  return size + (averageScale - 1) * size * factor
 }
 
 /**
@@ -173,25 +173,25 @@ export function moderateScale(size: number, factor: number = 0.5): number {
 export function scaleFont(
   size: number,
   options: {
-    factor?: number;
-    minSize?: number;
-    maxSize?: number;
-  } = {}
+    factor?: number
+    minSize?: number
+    maxSize?: number
+  } = {},
 ): number {
-  const { factor = 0.4, minSize, maxSize } = options;
+  const { factor = 0.4, minSize, maxSize } = options
 
-  let scaledSize = moderateScale(size, factor);
+  let scaledSize = moderateScale(size, factor)
 
   // Aplica limites se definidos
   if (minSize !== undefined && scaledSize < minSize) {
-    scaledSize = minSize;
+    scaledSize = minSize
   }
 
   if (maxSize !== undefined && scaledSize > maxSize) {
-    scaledSize = maxSize;
+    scaledSize = maxSize
   }
 
-  return Math.round(scaledSize);
+  return Math.round(scaledSize)
 }
 
 /**
@@ -218,13 +218,13 @@ export function createSpacing(spacing: number) {
     oneAndHalf: moderateScale(spacing * 1.5),
     double: moderateScale(spacing * 2),
     triple: moderateScale(spacing * 3),
-  };
+  }
 }
 
 /**
  * Sistema de espaçamento padrão (base: 8px)
  */
-export const SPACING = createSpacing(8);
+export const SPACING = createSpacing(8)
 
 /**
  * Cria valores de borda responsivos
@@ -250,13 +250,13 @@ export function createBorderRadius(radius: number) {
     large: moderateScale(radius * 2, 0.3),
     xl: moderateScale(radius * 3, 0.3),
     full: 9999,
-  };
+  }
 }
 
 /**
  * Sistema de border radius padrão (base: 8px)
  */
-export const BORDER_RADIUS = createBorderRadius(8);
+export const BORDER_RADIUS = createBorderRadius(8)
 
 /**
  * Sistema de tipografia responsiva
@@ -264,7 +264,7 @@ export const BORDER_RADIUS = createBorderRadius(8);
 export const TYPOGRAPHY = {
   h1: scaleFont(32, { minSize: 28, maxSize: 40 }),
   h2: scaleFont(28, { minSize: 24, maxSize: 36 }),
-  h3: scaleFont(24, { minSize: 20, maxSize: 32 }),
+  h3: scaleFont(22, { minSize: 20, maxSize: 32 }),
   h4: scaleFont(20, { minSize: 18, maxSize: 28 }),
   h5: scaleFont(18, { minSize: 16, maxSize: 24 }),
   h6: scaleFont(16, { minSize: 14, maxSize: 22 }),
@@ -272,35 +272,35 @@ export const TYPOGRAPHY = {
   bodySmall: scaleFont(14, { minSize: 12, maxSize: 16 }),
   caption: scaleFont(12, { minSize: 11, maxSize: 14 }),
   overline: scaleFont(10, { minSize: 9, maxSize: 12 }),
-} as const;
+} as const
 
 /**
  * Verifica se o dispositivo é pequeno (largura < 375px)
  */
 export function isSmallDevice(): boolean {
-  return getScreenWidth() < 375;
+  return getScreenWidth() < 375
 }
 
 /**
  * Verifica se o dispositivo é médio (largura entre 375px e 414px)
  */
 export function isMediumDevice(): boolean {
-  const width = getScreenWidth();
-  return width >= 375 && width < 414;
+  const width = getScreenWidth()
+  return width >= 375 && width < 414
 }
 
 /**
  * Verifica se o dispositivo é grande (largura >= 414px)
  */
 export function isLargeDevice(): boolean {
-  return getScreenWidth() >= 414;
+  return getScreenWidth() >= 414
 }
 
 /**
  * Verifica se o dispositivo é um tablet (largura >= 768px)
  */
 export function isTablet(): boolean {
-  return getScreenWidth() >= 768;
+  return getScreenWidth() >= 768
 }
 
 /**
@@ -316,7 +316,7 @@ export function isTablet(): boolean {
  * ```
  */
 export function widthPercentage(percentage: number): number {
-  return (getScreenWidth() * percentage) / 100;
+  return (getScreenWidth() * percentage) / 100
 }
 
 /**
@@ -332,7 +332,7 @@ export function widthPercentage(percentage: number): number {
  * ```
  */
 export function heightPercentage(percentage: number): number {
-  return (getScreenHeight() * percentage) / 100;
+  return (getScreenHeight() * percentage) / 100
 }
 
 /**
@@ -350,7 +350,7 @@ export function heightPercentage(percentage: number): number {
  * ```
  */
 export function responsiveValue<T>(mobileValue: T, tabletValue: T): T {
-  return isTablet() ? tabletValue : mobileValue;
+  return isTablet() ? tabletValue : mobileValue
 }
 
 /**
@@ -371,22 +371,22 @@ export function responsiveValue<T>(mobileValue: T, tabletValue: T): T {
  * ```
  */
 export function responsiveMultiValue<T>(values: {
-  xs?: T;
-  sm?: T;
-  md?: T;
-  lg?: T;
-  xl?: T;
+  xs?: T
+  sm?: T
+  md?: T
+  lg?: T
+  xl?: T
 }): T | undefined {
-  const width = getScreenWidth();
+  const width = getScreenWidth()
 
-  if (width >= 1024 && values.xl !== undefined) return values.xl;
-  if (width >= 768 && values.lg !== undefined) return values.lg;
-  if (width >= 414 && values.md !== undefined) return values.md;
-  if (width >= 375 && values.sm !== undefined) return values.sm;
-  if (values.xs !== undefined) return values.xs;
+  if (width >= 1024 && values.xl !== undefined) return values.xl
+  if (width >= 768 && values.lg !== undefined) return values.lg
+  if (width >= 414 && values.md !== undefined) return values.md
+  if (width >= 375 && values.sm !== undefined) return values.sm
+  if (values.xs !== undefined) return values.xs
 
   // Fallback: retorna o primeiro valor disponível
-  return values.xl || values.lg || values.md || values.sm || values.xs;
+  return values.xl || values.lg || values.md || values.sm || values.xs
 }
 
 /**
@@ -398,16 +398,16 @@ export function responsiveMultiValue<T>(values: {
  */
 export function normalize(
   size: number,
-  type: 'spacing' | 'font' | 'size' = 'size'
+  type: 'spacing' | 'font' | 'size' = 'size',
 ): number {
   switch (type) {
     case 'spacing':
-      return moderateScale(size, 0.5);
+      return moderateScale(size, 0.5)
     case 'font':
-      return scaleFont(size);
+      return scaleFont(size)
     case 'size':
     default:
-      return scale(size);
+      return scale(size)
   }
 }
 
@@ -415,8 +415,8 @@ export function normalize(
  * Informações sobre o dispositivo atual
  */
 export function getDeviceInfo() {
-  const { width, height } = getDimensions();
-  const { widthScale, heightScale, averageScale } = getScaleFactors();
+  const { width, height } = getDimensions()
+  const { widthScale, heightScale, averageScale } = getScaleFactors()
 
   return {
     width,
@@ -430,5 +430,5 @@ export function getDeviceInfo() {
     isTablet: isTablet(),
     aspectRatio: width / height,
     platform: Platform.OS,
-  };
+  }
 }

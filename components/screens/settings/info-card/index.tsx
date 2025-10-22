@@ -35,7 +35,10 @@ const InfoCard = ({ title, content, icon }: InfoCardProps) => {
         backgroundColor: '#ffffff',
         borderRadius: 18,
         padding: 16,
-        boxShadow: '0px 1px 3px rgba(0, 0, 0, 0.24)',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.24,
+        shadowRadius: 3,
         elevation: 4,
       }}
     >

@@ -52,11 +52,10 @@ const HourlyCard = ({
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.24,
         shadowRadius: 3,
+        elevation: 2,
         alignItems: 'flex-start',
         gap: moderateScale(16),
-
         minWidth: 0,
-        overflow: 'hidden',
       }}
     >
       <HStack

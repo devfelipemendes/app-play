@@ -13,7 +13,8 @@ const axiosInstance = axios.create({
 
 // 🔍 Logger de requisições COMPLETO
 const logRequest = (config: any) => {
-  const { method, url, data, headers } = config
+  const { method, url, data, params, headers } = config
+  const fullUrl = `${config.baseURL}${url}`
 
   console.log(
     '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
@@ -22,19 +23,33 @@ const logRequest = (config: any) => {
   console.log(
     '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
   )
-  console.log(`📍 URL: ${method?.toUpperCase()} ${config.baseURL}${url}`)
-  console.log('⏰ Timestamp:', new Date().toISOString())
+  console.log(`📍 Method: ${method?.toUpperCase()}`)
+  console.log(`🔗 URL: ${fullUrl}`)
+  console.log(`⏰ Timestamp: ${new Date().toISOString()}`)
+  console.log(`🆔 Request ID: ${Date.now()}`)
 
-  if (headers) {
+  if (params && Object.keys(params).length > 0) {
+    console.log('🔍 Query Params:')
+    console.log(JSON.stringify(params, null, 2))
+  }
+
+  if (headers && Object.keys(headers).length > 0) {
     console.log('📋 Headers:')
-    Object.entries(headers).forEach(([key, value]) => {
-      console.log(`   ${key}: ${value}`)
-    })
+    const filteredHeaders = { ...headers }
+    // Ocultar tokens sensíveis
+    if (filteredHeaders.Authorization) {
+      filteredHeaders.Authorization = '***HIDDEN***'
+    }
+    console.log(JSON.stringify(filteredHeaders, null, 2))
   }
 
   if (data) {
     console.log('📦 Request Body:')
-    console.log(JSON.stringify(data, null, 2))
+    // Ocultar senhas no log
+    const safeData = { ...data }
+    if (safeData.password) safeData.password = '***HIDDEN***'
+    if (safeData.senha) safeData.senha = '***HIDDEN***'
+    console.log(JSON.stringify(safeData, null, 2))
   }
 
   console.log(
@@ -43,20 +58,66 @@ const logRequest = (config: any) => {
 }
 
 const logResponse = (response: any) => {
-  const { status, data, config } = response
+  const { status, data, config, headers } = response
+  const fullUrl = `${config.baseURL}${config.url}`
 
   console.log('✅ RESPONSE')
   console.log(
     '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
   )
-  console.log(`📍 URL: ${config.method?.toUpperCase()} ${config.url}`)
-  console.log(`📊 Status: ${status}`)
-  console.log('⏰ Timestamp:', new Date().toISOString())
+  console.log(`📍 Method: ${config.method?.toUpperCase()}`)
+  console.log(`🔗 URL: ${fullUrl}`)
+  console.log(`📊 Status: ${status} ${getStatusEmoji(status)}`)
+  console.log(`⏰ Timestamp: ${new Date().toISOString()}`)
+  console.log(`⚡ Duration: ${calculateDuration(config)}ms`)
+
+  if (headers && headers['content-type']) {
+    console.log(`📄 Content-Type: ${headers['content-type']}`)
+  }
+
   console.log('📦 Response Data:')
-  console.log(JSON.stringify(data, null, 2))
+  if (typeof data === 'object' && data !== null) {
+    const dataSize = JSON.stringify(data).length
+    console.log(`   Size: ${formatBytes(dataSize)}`)
+
+    // Limitar tamanho do log se muito grande
+    if (dataSize > 10000) {
+      console.log('   ⚠️ Response muito grande, mostrando preview...')
+      console.log(JSON.stringify(data, null, 2).substring(0, 1000) + '...')
+    } else {
+      console.log(JSON.stringify(data, null, 2))
+    }
+  } else {
+    console.log(data)
+  }
+
   console.log(
     '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
   )
+}
+
+// Helper functions
+const getStatusEmoji = (status: number): string => {
+  if (status >= 200 && status < 300) return '✅'
+  if (status >= 300 && status < 400) return '🔄'
+  if (status >= 400 && status < 500) return '⚠️'
+  if (status >= 500) return '❌'
+  return '❓'
+}
+
+const calculateDuration = (config: any): number => {
+  if (config.metadata?.startTime) {
+    return Date.now() - config.metadata.startTime
+  }
+  return 0
+}
+
+const formatBytes = (bytes: number): string => {
+  if (bytes === 0) return '0 Bytes'
+  const k = 1024
+  const sizes = ['Bytes', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i]
 }
 
 const logError = (error: any) => {
