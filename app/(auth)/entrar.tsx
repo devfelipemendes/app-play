@@ -65,11 +65,14 @@ export default function LoginScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.text }}>
       <StatusBar style="light" />
       <KeyboardAwareScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
+        contentContainerStyle={{
+          flexGrow: 1,
+        }}
         keyboardShouldPersistTaps="handled"
         enableOnAndroid
         extraScrollHeight={20}
         showsVerticalScrollIndicator={false}
+        scrollEnabled={!keyboardOpen} // Desabilita scroll quando teclado aberto
       >
         {/* Área do logo */}
 
@@ -114,7 +117,7 @@ export default function LoginScreen() {
             flexGrow: 1,
             paddingHorizontal: 24,
             paddingTop: isIOS || isSmallScreen ? 24 : 32,
-            paddingBottom: keyboardOpen ? 50 : 0,
+            paddingBottom: keyboardOpen ? 50 : 24,
             justifyContent: 'flex-start',
             borderTopLeftRadius: isIOS || isSmallScreen ? 50 : 70,
             backgroundColor: 'white',

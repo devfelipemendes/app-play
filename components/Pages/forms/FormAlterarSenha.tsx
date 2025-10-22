@@ -44,26 +44,25 @@ export default function FormAlterarSenha() {
         password: newPassword,
       }).unwrap()
 
-      Alert.alert(
-        'Senha Alterada',
-        'Sua senha foi alterada com sucesso!',
-        [
-          {
-            text: 'OK',
-            onPress: () => dispatch(setMode('login'))
-          }
-        ]
-      )
+      Alert.alert('Senha Alterada', 'Sua senha foi alterada com sucesso!', [
+        {
+          text: 'OK',
+          onPress: () => dispatch(setMode('login')),
+        },
+      ])
     } catch (error: any) {
       const errorStatus = error?.status || error?.data?.status
-      const errorMessage = error?.data?.error || error?.data?.message || 'Erro ao alterar senha. Tente novamente.'
+      const errorMessage =
+        error?.data?.error ||
+        error?.data?.message ||
+        'Erro ao alterar senha. Tente novamente.'
 
       // Detecta erro 403 - Bloqueio por múltiplas tentativas
       if (errorStatus === 403) {
         Alert.alert(
           'Acesso Bloqueado',
           'Após várias tentativas, a alteração de senha foi bloqueada por segurança.\n\nPara desbloquear, entre em contato com a central de atendimento.',
-          [{ text: 'OK' }]
+          [{ text: 'OK' }],
         )
         return
       }
@@ -73,7 +72,8 @@ export default function FormAlterarSenha() {
   }
 
   const isPasswordValid = newPassword.length >= 5
-  const doPasswordsMatch = newPassword === confirmPassword && confirmPassword.length > 0
+  const doPasswordsMatch =
+    newPassword === confirmPassword && confirmPassword.length > 0
 
   return (
     <Box>
@@ -86,10 +86,12 @@ export default function FormAlterarSenha() {
 
       {/* Header */}
       <Box style={{ marginBottom: 32, alignItems: 'center' }}>
-        <Text style={{ fontSize: 24, fontWeight: 'bold', color: colors.text }}>
+        <Text style={{ fontSize: 22, fontWeight: 'bold', color: colors.text }}>
           Alterar Senha
         </Text>
-        <Text style={{ fontSize: 16, fontWeight: '500', color: colors.subTitle }}>
+        <Text
+          style={{ fontSize: 16, fontWeight: '500', color: colors.subTitle }}
+        >
           Digite sua nova senha de acesso
         </Text>
       </Box>

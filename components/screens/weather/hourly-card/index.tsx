@@ -14,7 +14,12 @@ import {
   Phone,
   Smartphone,
 } from 'lucide-react-native'
-import { TYPOGRAPHY, BORDER_RADIUS, moderateScale, scale } from '@/utils/responsive'
+import {
+  TYPOGRAPHY,
+  BORDER_RADIUS,
+  moderateScale,
+  scale,
+} from '@/utils/responsive'
 import { CARD, ICON, SHADOW } from '@/config/responsiveDimensions'
 
 interface IHourlyCard {
@@ -43,10 +48,13 @@ const HourlyCard = ({
         borderRadius: BORDER_RADIUS.large,
         backgroundColor: colors.background,
         flex: 1,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.24,
+        shadowRadius: 3,
         alignItems: 'flex-start',
         gap: moderateScale(16),
-        ...SHADOW.small,
-        boxShadow: colors.shadow,
+
         minWidth: 0,
         overflow: 'hidden',
       }}

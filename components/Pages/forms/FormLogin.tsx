@@ -24,12 +24,12 @@ import {
   Scan,
   MessageCircle,
   ShoppingBag,
+  CheckIcon,
 } from 'lucide-react-native'
 import { ButtonSpinner } from '@gluestack-ui/themed'
 
 import { useBiometricAuth } from '@/hooks/useBiometricAuth'
 
-import { CheckIcon } from '@/components/ui/icon'
 import { IconButton } from '@/components/ui/iconButton'
 import { env } from '@/config/env'
 
@@ -174,7 +174,7 @@ export default function FormLogin() {
   return (
     <Box>
       <Box style={{ marginBottom: 16, alignItems: 'center' }}>
-        <Text style={{ fontSize: 24, fontWeight: 'bold', color: colors.text }}>
+        <Text style={{ fontSize: 22, fontWeight: 'bold', color: colors.text }}>
           Bem-vindo!
         </Text>
         <Text style={{ fontSize: 16, fontWeight: 'bold', color: colors.text }}>
@@ -192,7 +192,7 @@ export default function FormLogin() {
           name="cpfCnpj"
           render={({ field: { onChange, value } }) => (
             <CustomInput
-              placeholder="000.000.000-00 / 00.000.000/0000-00"
+              placeholder="CPF/CNPJ"
               value={mask(value, ['999.999.999-99', '99.999.999/9999-99'])}
               onChangeText={(text: string) =>
                 onChange(mask(text, ['99999999999', '99999999999999']))
@@ -268,7 +268,9 @@ export default function FormLogin() {
                 marginRight: 8,
               }}
             >
-              {saveBiometric && <CheckIcon size={16} color="white" />}
+              {saveBiometric && (
+                <CheckIcon style={{ margin: 4 }} color={colors.secondary} />
+              )}
             </Box>
             <Text style={{ fontSize: 14, color: colors.text }}>
               Salvar e usar {biometricType || 'Biometria'} para login

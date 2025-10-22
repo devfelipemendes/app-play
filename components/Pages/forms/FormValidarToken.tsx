@@ -119,7 +119,7 @@ export default function FormValidarToken() {
 
       {/* Header */}
       <Box style={{ marginBottom: 32, alignItems: 'center' }}>
-        <Text style={{ fontSize: 24, fontWeight: 'bold', color: colors.text }}>
+        <Text style={{ fontSize: 22, fontWeight: 'bold', color: colors.text }}>
           Validar Token
         </Text>
         <Text

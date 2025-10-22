@@ -639,7 +639,7 @@ export default function FormCadastro() {
             </Box>
             <Box style={{ marginBottom: 32, alignItems: 'center' }}>
               <Text
-                style={{ fontSize: 24, fontWeight: 'bold', color: colors.text }}
+                style={{ fontSize: 22, fontWeight: 'bold', color: colors.text }}
               >
                 Crie sua conta
               </Text>

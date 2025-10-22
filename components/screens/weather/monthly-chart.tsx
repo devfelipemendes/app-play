@@ -50,7 +50,11 @@ const MonthlyChart: React.FC<MonthlyChartProps> = ({ msisdn }) => {
 
   // Processar dados para o gráfico
   const monthlyChartData = useMemo(() => {
-    if (!consumoData || consumoData.length === 0 || !consumoData[0]?.resultados) {
+    if (
+      !consumoData ||
+      consumoData.length === 0 ||
+      !consumoData[0]?.resultados
+    ) {
       console.log('📊 MonthlyChart - Sem dados para processar')
       return []
     }
@@ -112,7 +116,9 @@ const MonthlyChart: React.FC<MonthlyChartProps> = ({ msisdn }) => {
         }}
       >
         <Icon as={Globe} size="md" style={{ color: colors.secondary }} />
-        <Text style={{ color: colors.secondary, fontSize: 14, textAlign: 'center' }}>
+        <Text
+          style={{ color: colors.secondary, fontSize: 14, textAlign: 'center' }}
+        >
           Não foi possível carregar o consumo mensal
         </Text>
       </VStack>
@@ -134,7 +140,9 @@ const MonthlyChart: React.FC<MonthlyChartProps> = ({ msisdn }) => {
         }}
       >
         <Icon as={Signal} size="md" style={{ color: colors.secondary }} />
-        <Text style={{ color: colors.secondary, fontSize: 14, textAlign: 'center' }}>
+        <Text
+          style={{ color: colors.secondary, fontSize: 14, textAlign: 'center' }}
+        >
           Sem dados de consumo para este mês
         </Text>
       </VStack>
@@ -143,7 +151,11 @@ const MonthlyChart: React.FC<MonthlyChartProps> = ({ msisdn }) => {
 
   const screenWidth = Dimensions.get('window').width
 
-  console.log('📊 MonthlyChart - Renderizando gráfico com', monthlyChartData.length, 'dias')
+  console.log(
+    '📊 MonthlyChart - Renderizando gráfico com',
+    monthlyChartData.length,
+    'dias',
+  )
 
   // Renderizar gráfico
   return (
