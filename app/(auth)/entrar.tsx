@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react'
 
 import { SafeAreaView } from '@/components/ui/safe-area-view'
 import { Box } from '@/components/ui/box'
-import { Text } from '@/components/ui/text'
 
 import IconLogo from '../../assets/AssetsPartners/adaptive-icon.png'
 
@@ -13,7 +12,7 @@ import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import type { RootState } from '@/src/store'
 import FormLogin from '@/components/Pages/forms/FormLogin'
-import { setMode } from '@/src/store/slices/screenFlowSlice'
+
 import FormCadastro from '@/components/Pages/forms/FormCad'
 import FormEsqueciSenha from '@/components/Pages/forms/FormEsqueciSenha'
 import FormValidarToken from '@/components/Pages/forms/FormValidarToken'
@@ -77,12 +76,17 @@ export default function LoginScreen() {
         <Box
           style={{
             // Em iOS e telas pequenas, não expande quando teclado fecha
-            flex: (isIOS || isSmallScreen) ? 0 : (keyboardOpen ? 0 : 1),
+            flex: isIOS || isSmallScreen ? 0 : keyboardOpen ? 0 : 1,
 
             // Altura mínima ajustada para iOS e telas pequenas
-            minHeight: (isIOS || isSmallScreen)
-              ? (keyboardOpen ? 0 : 80)
-              : (keyboardOpen ? 60 : 60),
+            minHeight:
+              isIOS || isSmallScreen
+                ? keyboardOpen
+                  ? 0
+                  : 80
+                : keyboardOpen
+                ? 60
+                : 60,
             justifyContent: 'center',
             alignItems: 'center',
             backgroundColor: colors.text,
@@ -93,11 +97,11 @@ export default function LoginScreen() {
               source={IconLogo}
               style={{
                 // Tamanho menor do logo em telas pequenas
-                width: (isIOS || isSmallScreen) ? 80 : 120,
-                height: (isIOS || isSmallScreen) ? 80 : 120,
+                width: isIOS || isSmallScreen ? 80 : 120,
+                height: isIOS || isSmallScreen ? 80 : 120,
                 opacity: logoOpacity,
                 alignSelf: 'center',
-                marginBottom: (isIOS || isSmallScreen) ? 16 : 32,
+                marginBottom: isIOS || isSmallScreen ? 16 : 32,
               }}
               resizeMode="contain"
             />
@@ -109,12 +113,10 @@ export default function LoginScreen() {
           style={{
             flexGrow: 1,
             paddingHorizontal: 24,
-            // Padding superior menor em iOS/telas pequenas
-            paddingTop: (isIOS || isSmallScreen) ? 24 : 32,
-            paddingBottom: keyboardOpen ? 50 : 32,
+            paddingTop: isIOS || isSmallScreen ? 24 : 32,
+            paddingBottom: keyboardOpen ? 50 : 0,
             justifyContent: 'flex-start',
-            // Raio da borda menor em iOS/telas pequenas
-            borderTopLeftRadius: (isIOS || isSmallScreen) ? 50 : 70,
+            borderTopLeftRadius: isIOS || isSmallScreen ? 50 : 70,
             backgroundColor: 'white',
           }}
         >

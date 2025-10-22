@@ -27,14 +27,8 @@ import {
 } from 'lucide-react-native'
 import { ButtonSpinner } from '@gluestack-ui/themed'
 
-import { maskCnpjCpf } from '@/src/utils/masks'
 import { useBiometricAuth } from '@/hooks/useBiometricAuth'
-import {
-  Checkbox,
-  CheckboxIcon,
-  CheckboxIndicator,
-  CheckboxLabel,
-} from '@/components/ui/checkbox'
+
 import { CheckIcon } from '@/components/ui/icon'
 import { IconButton } from '@/components/ui/iconButton'
 import { env } from '@/config/env'
@@ -179,7 +173,7 @@ export default function FormLogin() {
   }
   return (
     <Box>
-      <Box style={{ marginBottom: 32, alignItems: 'center' }}>
+      <Box style={{ marginBottom: 16, alignItems: 'center' }}>
         <Text style={{ fontSize: 24, fontWeight: 'bold', color: colors.text }}>
           Bem-vindo!
         </Text>
@@ -248,7 +242,12 @@ export default function FormLogin() {
           <Pressable
             onPress={() => {
               const newValue = !saveBiometric
-              console.log('📦 Checkbox clicado! Mudando de', saveBiometric, 'para', newValue)
+              console.log(
+                '📦 Checkbox clicado! Mudando de',
+                saveBiometric,
+                'para',
+                newValue,
+              )
               setSaveBiometric(newValue)
             }}
             style={{
@@ -269,9 +268,7 @@ export default function FormLogin() {
                 marginRight: 8,
               }}
             >
-              {saveBiometric && (
-                <CheckIcon size={16} color="white" />
-              )}
+              {saveBiometric && <CheckIcon size={16} color="white" />}
             </Box>
             <Text style={{ fontSize: 14, color: colors.text }}>
               Salvar e usar {biometricType || 'Biometria'} para login

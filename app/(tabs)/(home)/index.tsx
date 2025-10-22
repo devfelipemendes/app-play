@@ -85,9 +85,16 @@ const Home = () => {
   const [loadingLines, setLoadingLines] = useState(false)
   const [loadingLineChange, setLoadingLineChange] = useState(false)
   const [showActivateModal, setShowActivateModal] = useState(false)
-  const [showActivateWithStepsBottomSheet, setShowActivateWithStepsBottomSheet] = useState(false) // Sem ICCID
-  const [showActivateWithIccidBottomSheet, setShowActivateWithIccidBottomSheet] = useState(false) // Com ICCID
-  const [showReactivateBottomSheet, setShowReactivateBottomSheet] = useState(false)
+  const [
+    showActivateWithStepsBottomSheet,
+    setShowActivateWithStepsBottomSheet,
+  ] = useState(false) // Sem ICCID
+  const [
+    showActivateWithIccidBottomSheet,
+    setShowActivateWithIccidBottomSheet,
+  ] = useState(false) // Com ICCID
+  const [showReactivateBottomSheet, setShowReactivateBottomSheet] =
+    useState(false)
 
   // Hook do formatter
   const { formatConsumptionData } = useDadosFormatter()
@@ -507,10 +514,15 @@ const Home = () => {
   // Verificar se a linha está expirada (statusplan = 'EX')
   const isLineExpired = det2Data?.statusplan === 'EX'
 
+  // Verificar se a linha está em período de graça (statusplan = 'GRACE 3')
+  const isInGracePeriod = det2Data?.statusplan === 'GRACE 3'
+
   // Diferenciar os 3 casos de ativação:
   // 1. Tem ICCID mas não tem MSISDN ativo → Mostrar modal simples de planos
   // 2. Não tem ICCID → Mostrar modal com steps (digitar ICCID, DDD, plano)
-  const selectedLineHasIccid = Boolean(selectedLine?.iccid && selectedLine.iccid.trim().length > 0)
+  const selectedLineHasIccid = Boolean(
+    selectedLine?.iccid && selectedLine.iccid.trim().length > 0,
+  )
   const needsActivationWithIccid = isNoMsisdnError && selectedLineHasIccid
   const needsActivationWithSteps = isNoMsisdnError && !selectedLineHasIccid
 
@@ -769,6 +781,45 @@ const Home = () => {
       {/* Mostrar dados apenas se linha selecionada tiver MSISDN e NÃO estiver expirada */}
       {selectedLineHasMsisdn && !isLineExpired && (
         <>
+          {/* Aviso de período de graça (GRACE 3) */}
+          {isInGracePeriod && (
+            <Animated.View
+              entering={FadeInDown.delay(0).springify().damping(12)}
+            >
+              <HStack
+                style={{
+                  backgroundColor: colors.warning || '#FFF3CD',
+                  borderRadius: 8,
+                  paddingVertical: 12,
+                  paddingHorizontal: 16,
+                  alignItems: 'center',
+                  gap: 10,
+                  borderWidth: 1,
+                  borderColor: colors.error || '#FFE69C',
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 18,
+                  }}
+                >
+                  ⚠️
+                </Text>
+                <Text
+                  style={{
+                    flex: 1,
+                    fontSize: 13,
+                    color: colors.text || '#9e7805',
+                    lineHeight: 18,
+                  }}
+                >
+                  Sua linha pode ser bloqueada em breve devido ao tempo sem
+                  realizar uma recarga, faça uma recarga e continue conectado!
+                </Text>
+              </HStack>
+            </Animated.View>
+          )}
+
           <AnimatedVStack style={{ gap: 16 }}>
             {/* Cards com dados formatados de consumo */}
             <Animated.View
