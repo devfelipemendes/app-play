@@ -119,7 +119,6 @@ export default function RootLayout() {
             <PaperProvider>
               <MainLayout />
               <Toast />
-              <DevTools />
             </PaperProvider>
           </WhitelabelThemeProvider>
         </ThemeProvider>

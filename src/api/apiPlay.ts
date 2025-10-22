@@ -8,6 +8,6 @@ export const apiPlay = createApi({
   baseQuery: axiosBaseQuery({
     baseUrl: '', // A URL base já está no axiosInstance
   }),
-  tagTypes: ['User', 'Company', 'CheckCpf', 'ICCID', 'Plans', 'UserLines', 'Faturas', 'Portability', 'Consumo'], // Para cache invalidation
+  tagTypes: ['User', 'Company', 'CheckCpf', 'ICCID', 'Plans', 'UserLines', 'Faturas', 'Fatura', 'Portability', 'Consumo'], // Para cache invalidation
   endpoints: () => ({}), // Endpoints vazios - serão injetados
 })

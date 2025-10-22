@@ -54,6 +54,7 @@ import { Icon } from '@/components/ui/icon'
 import { useLoginMutation } from '@/src/api/endpoints/AuthApi'
 import { CustomInput } from '@/components/layout/CustomInput'
 import { LockKeyhole } from 'lucide-react-native'
+import { TesteFaturaButton } from '@/src/components/screens/TesteFaturaButton'
 
 const Settings = () => {
   const { colorMode }: any = useContext(ThemeContext)
@@ -498,6 +499,23 @@ const Settings = () => {
               e você perderá o acesso ao app.
             </Text>
           </VStack>
+
+          {/* Seção de Desenvolvimento/Teste */}
+          {__DEV__ && (
+            <VStack className="px-4" style={{ marginTop: 32 }}>
+              <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: '600',
+                  color: colors.text,
+                  marginBottom: 12,
+                }}
+              >
+                Desenvolvimento
+              </Text>
+              <TesteFaturaButton />
+            </VStack>
+          )}
 
           {/* Botão Sair */}
           <VStack className="px-4" style={{ marginTop: 32, marginBottom: 32 }}>

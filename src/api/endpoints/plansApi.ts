@@ -79,6 +79,7 @@ interface ActiveLineBody {
   pospago: string
   userInfo: string
   esim: boolean
+  companyid: number
 }
 
 interface ResponseActiveLine {

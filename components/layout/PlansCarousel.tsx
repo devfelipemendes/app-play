@@ -407,6 +407,7 @@ const PlansCarousel: React.FC = () => {
                   pospago: 'false', // ✅ String 'false' conforme esperado pela API
                   userInfo: JSON.stringify(userInfo),
                   esim: false,
+                  companyid: env.COMPANY_ID,
                 }
 
                 // Debug visual - mostra o payload na tela
