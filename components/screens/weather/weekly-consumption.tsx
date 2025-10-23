@@ -15,6 +15,7 @@ import {
 } from '@/src/utils/consumoFormatter'
 import ForeCastCard from '@/components/screens/weather/forecast-card'
 import { Globe, Radio } from 'lucide-react-native'
+import { useApiRetry } from '@/hooks/useApiRetry'
 
 interface WeeklyConsumptionProps {
   msisdn: string
@@ -23,6 +24,7 @@ interface WeeklyConsumptionProps {
 const WeeklyConsumption: React.FC<WeeklyConsumptionProps> = ({ msisdn }) => {
   const { colors } = useCompanyThemeSimple()
   const [getConsumo, { data, isLoading, error }] = useGetConsumoMutation()
+  const { retryApiCall } = useApiRetry()
 
   console.log('📊 WeeklyConsumption montado com msisdn:', msisdn)
   console.log('📊 WeeklyConsumption - data:', data)
@@ -32,24 +34,43 @@ const WeeklyConsumption: React.FC<WeeklyConsumptionProps> = ({ msisdn }) => {
   // Buscar dados de consumo ao montar componente ou quando msisdn mudar
   useEffect(() => {
     if (msisdn) {
-      const { month, year } = getCurrentMonthYear()
-      const normalizedMsisdn = normalizeMsisdn(msisdn)
+      const fetchConsumo = async () => {
+        const { month, year } = getCurrentMonthYear()
+        const normalizedMsisdn = normalizeMsisdn(msisdn)
 
-      console.log('📊 Buscando consumo semanal:', {
-        msisdnOriginal: msisdn,
-        msisdnNormalizado: normalizedMsisdn,
-        month,
-        year,
-      })
+        console.log('📊 Buscando consumo semanal:', {
+          msisdnOriginal: msisdn,
+          msisdnNormalizado: normalizedMsisdn,
+          month,
+          year,
+        })
 
-      getConsumo({
-        msisdn: normalizedMsisdn,
-        tipo: 'dados',
-        mes: month,
-        ano: year,
-      })
+        try {
+          await retryApiCall(
+            () => getConsumo({
+              msisdn: normalizedMsisdn,
+              tipo: 'dados',
+              mes: month,
+              ano: year,
+            }).unwrap(),
+            {
+              onAttempt: (attempt, max) => {
+                console.log(`🔄 Tentativa ${attempt}/${max} de buscar consumo semanal...`)
+              },
+              onError: (attempt, err) => {
+                console.log(`❌ Tentativa ${attempt} falhou:`, err)
+              },
+            }
+          )
+        } catch (err) {
+          console.error('❌ Erro ao buscar consumo semanal:', err)
+        }
+      }
+
+      fetchConsumo()
     }
-  }, [msisdn, getConsumo])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [msisdn])
 
   // Processar dados da API
   const weeklyData: WeeklyChartData[] = React.useMemo(() => {

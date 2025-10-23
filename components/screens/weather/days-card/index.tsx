@@ -1,4 +1,5 @@
 import React from 'react'
+import { Pressable } from 'react-native'
 import { HStack } from '@/components/ui/hstack'
 import { VStack } from '@/components/ui/vstack'
 import { Text } from '@/components/ui/text'
@@ -14,6 +15,7 @@ interface IDaysCard {
   highest: string | number // Valor bruto (valuetopup)
   lowest: string | number // Valor líquido (netvalue)
   paymentStatus: number // 1 = pago, 0 = pendente, 2 = estornado
+  onPress?: () => void // Callback quando clicar no card
 }
 
 // Função para formatar data
@@ -35,6 +37,7 @@ const DaysCard = ({
   highest,
   lowest,
   paymentStatus,
+  onPress,
 }: IDaysCard) => {
   const formattedDateCreated = formatDate(created)
 
@@ -70,7 +73,7 @@ const DaysCard = ({
   const statusConfig = getStatusConfig(paymentStatus)
   const StatusIcon = statusConfig.icon
 
-  return (
+  const CardContent = (
     <HStack
       style={{
         backgroundColor: colors.background,
@@ -122,6 +125,18 @@ const DaysCard = ({
       </HStack>
     </HStack>
   )
+
+  // Se tiver onPress, envolver com Pressable
+  if (onPress) {
+    return (
+      <Pressable onPress={onPress} android_ripple={{ color: colors.primary + '20' }}>
+        {CardContent}
+      </Pressable>
+    )
+  }
+
+  // Senão, retornar apenas o conteúdo
+  return CardContent
 }
 
 export default DaysCard

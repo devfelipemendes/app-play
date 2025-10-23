@@ -342,7 +342,9 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
         planid: selectedPlan.planid.toString(),
         planid_personalizado: selectedPlan.id.toString(), // ✅ Usa o ID do plano personalizado
         isApp: true,
-        pospago: 'false', // ✅ String 'false' conforme esperado pela API
+        pospago: false,
+        esim: false,
+        companyid: env.COMPANY_ID,
         userInfo: JSON.stringify({
           cpf: user?.cpf,
           name: user?.name,

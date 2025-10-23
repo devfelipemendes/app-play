@@ -53,12 +53,16 @@ import ActivateLineBottomSheet from '@/components/layout/ActivateLineBottomSheet
 import ActivateLineBottomSheetWithSteps from '@/components/layout/ActivateLineBottomSheetWithSteps'
 import ReactivateLineBottomSheet from '@/components/layout/ReactivateLineBottomSheet'
 import WeeklyConsumption from '@/components/screens/weather/weekly-consumption'
+import { useApiRetry } from '@/hooks/useApiRetry'
 
 const Home = () => {
   const AnimatedVStack = Animated.createAnimatedComponent(VStack)
 
   // Contexto das tabs internas
-  const { registerRefreshCallback }: any = React.useContext(WeatherTabContext)
+  const { registerRefreshCallback, setSelectedTabIndex }: any = React.useContext(WeatherTabContext)
+
+  // Hook de retry
+  const { retryApiCall } = useApiRetry()
 
   // Estados globais do Redux
   const det2Data = useAppSelector(selectDet2Data)
@@ -104,46 +108,54 @@ const Home = () => {
     return formatConsumptionData(det2Data)
   }, [det2Data, formatConsumptionData])
 
-  // Função para buscar dados de uma linha
+  // Função para buscar dados de uma linha com retry
   const fetchLineData = async (line: UserLine) => {
-    try {
-      dispatch(setLoading(true))
-      dispatch(setSelectedLineIccid(line.iccid))
+    dispatch(setLoading(true))
+    dispatch(setSelectedLineIccid(line.iccid))
 
-      console.log('🎯 Buscando dados para linha:', {
-        msisdn: line.msisdn,
-        iccid: line.iccid,
-        plano: line.plandescription,
-      })
+    console.log('🎯 Buscando dados para linha:', {
+      msisdn: line.msisdn,
+      iccid: line.iccid,
+      plano: line.plandescription,
+    })
 
-      const det2Request: Det2Request = {
-        atualizadet: 'SIM',
-        iccid: line.iccid,
-        parceiro: user?.parceiro,
-        token: user?.token,
-        userInfo: JSON.stringify({
-          cpf: user?.cpf,
-          name: user?.name,
-          parceiro: user?.parceiro,
-        }),
-      }
-
-      console.log('📤 Request getDet2:', det2Request)
-      console.log('🔑 Token Length:', user?.token?.length)
-      console.log('👤 User Data:', {
+    const det2Request: Det2Request = {
+      atualizadet: 'SIM',
+      iccid: line.iccid,
+      parceiro: user?.parceiro,
+      token: user?.token,
+      userInfo: JSON.stringify({
         cpf: user?.cpf,
+        name: user?.name,
         parceiro: user?.parceiro,
-        hasToken: !!user?.token,
-      })
+      }),
+    }
 
-      const det2Result = await getDet2(det2Request).unwrap()
+    console.log('📤 Request getDet2:', det2Request)
+    console.log('🔑 Token Length:', user?.token?.length)
+    console.log('👤 User Data:', {
+      cpf: user?.cpf,
+      parceiro: user?.parceiro,
+      hasToken: !!user?.token,
+    })
 
-      console.log('✅ Dados recebidos:', det2Result)
+    try {
+      const det2Result = await retryApiCall(
+        () => getDet2(det2Request).unwrap(),
+        {
+          onAttempt: (attempt, max) => {
+            console.log(`🔄 Tentativa ${attempt}/${max} de buscar dados det2...`)
+          },
+          onError: (attempt, err) => {
+            console.log(`❌ Tentativa ${attempt} falhou:`, err)
+          },
+        }
+      )
 
-      // Salvar no estado global
+      console.log('✅ Dados recebidos com sucesso:', det2Result)
       dispatch(setData(det2Result))
     } catch (err: any) {
-      console.log('❌ Erro ao buscar dados:', err)
+      console.log('❌ Todas as tentativas falharam para getDet2')
 
       // Se for erro 401, token expirou
       if (err?.status === 401) {
@@ -190,27 +202,37 @@ const Home = () => {
     }
   }
 
-  // Função para buscar todos os dados (usada no pull-to-refresh e na inicialização)
+  // Função para buscar todos os dados (usada no pull-to-refresh e na inicialização) com retry
   const fetchUserData = useCallback(async () => {
+    setLoadingLines(true)
+    dispatch(setError(null))
+
+    console.log('📞 Buscando linhas do usuário...')
+
+    const linesRequest = {
+      parceiro: user?.parceiro || 'PLAY MÓVEL',
+      token: user?.token || '',
+      cpf: user?.cpf || '',
+      franquiado: 0,
+      isApp: true,
+      usuario_atual: user?.cpf || '',
+    }
+
+    console.log('📤 Request getUserLines:', linesRequest)
+
     try {
-      setLoadingLines(true)
-      dispatch(setError(null))
-
-      console.log('📞 Buscando linhas do usuário...')
-
-      // 1. Buscar linhas do usuário
-      const linesRequest = {
-        parceiro: user?.parceiro || 'PLAY MÓVEL',
-        token: user?.token || '',
-        cpf: user?.cpf || '',
-        franquiado: 0,
-        isApp: true,
-        usuario_atual: user?.cpf || '',
-      }
-
-      console.log('📤 Request getUserLines:', linesRequest)
-
-      const linesResult = await getUserLines(linesRequest).unwrap()
+      // Buscar linhas com retry
+      const linesResult = await retryApiCall(
+        () => getUserLines(linesRequest).unwrap(),
+        {
+          onAttempt: (attempt, max) => {
+            console.log(`🔄 Tentativa ${attempt}/${max} de buscar linhas...`)
+          },
+          onError: (attempt, err) => {
+            console.log(`❌ Tentativa ${attempt} falhou:`, err)
+          },
+        }
+      )
 
       console.log('✅ Linhas encontradas:', linesResult.length, 'linhas')
       console.log('📋 Primeira linha:', linesResult[0])
@@ -232,7 +254,7 @@ const Home = () => {
 
         if (hasMsisdn) {
           console.log('🟢 Linha com MSISDN ativo')
-          // Buscar dados da linha ativa
+          // Buscar dados da linha ativa (já tem retry interno)
           await fetchLineData(primaryLine)
         } else {
           console.log('⚠️ ICCID sem MSISDN ativo')
@@ -273,6 +295,15 @@ const Home = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [registerRefreshCallback, fetchUserData])
+
+  // Resetar tab selecionada quando a tela Home é focada pela bottom navigation
+  useFocusEffect(
+    useCallback(() => {
+      if (setSelectedTabIndex) {
+        setSelectedTabIndex(0)
+      }
+    }, [setSelectedTabIndex])
+  )
 
   // Carregar dados apenas na primeira vez que a tela é focada
   useFocusEffect(

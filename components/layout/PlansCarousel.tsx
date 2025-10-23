@@ -404,7 +404,7 @@ const PlansCarousel: React.FC = () => {
                   planid: plan.planid.toString(),
                   planid_personalizado: plan.id.toString(), // ✅ Usa o ID do plano personalizado
                   isApp: true,
-                  pospago: 'false', // ✅ String 'false' conforme esperado pela API
+                  pospago: false, // ✅ String 'false' conforme esperado pela API
                   userInfo: JSON.stringify(userInfo),
                   esim: false,
                   companyid: env.COMPANY_ID,

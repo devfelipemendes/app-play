@@ -1,6 +1,13 @@
 // components/layout/ActivateLineBottomSheet.tsx
 import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react'
-import { TouchableOpacity, Alert, Image, Dimensions, View, Keyboard } from 'react-native'
+import {
+  TouchableOpacity,
+  Alert,
+  Image,
+  Dimensions,
+  View,
+  Keyboard,
+} from 'react-native'
 import { BottomSheetView } from '@gorhom/bottom-sheet'
 import { VStack } from '@/components/ui/vstack'
 import { HStack } from '@/components/ui/hstack'
@@ -499,7 +506,9 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
                   planid: selectedPlan.planid.toString(),
                   planid_personalizado: '',
                   isApp: true,
-                  pospago: 'N',
+                  pospago: false,
+                  esim: false,
+                  companyid: env.COMPANY_ID,
                   userInfo: JSON.stringify({
                     cpf: user?.cpf,
                     name: user?.name,

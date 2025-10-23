@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { Box } from '@/components/ui/box'
 import { Text } from '@/components/ui/text'
 import { Button, ButtonText } from '@/components/ui/button'
@@ -9,6 +9,9 @@ import { setMode } from '@/src/store/slices/screenFlowSlice'
 import { useForm, Controller } from 'react-hook-form'
 import { mask, unMask } from 'remask'
 import { Camera, CameraView } from 'expo-camera'
+import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { FaturaBottomSheet } from '@/src/components/screens/FaturaBottomSheet'
+import type { FaturaDetalhada } from '@/src/api/endpoints/faturaApi'
 
 import * as v from 'valibot'
 import { valibotResolver } from '@hookform/resolvers/valibot'
@@ -190,6 +193,10 @@ export default function FormCadastro() {
   const [lastValidatedIccid, setLastValidatedIccid] = useState('')
   const [selectedDDD, setSelectedDDD] = useState('')
 
+  // Estados para modal de fatura
+  const faturaBottomSheetRef = useRef<BottomSheetModal>(null)
+  const [faturaDetalhada, setFaturaDetalhada] = useState<FaturaDetalhada | null>(null)
+
   const { user } = useAuth()
 
   // NÃO chamar useCameraPermissions na raiz - só quando necessário
@@ -338,29 +345,21 @@ export default function FormCadastro() {
         parceiro: env.PARCEIRO,
       }
 
-      console.log('Dados a serem enviados:', payload)
-
-      console.log('=== PAYLOAD DEBUG ===')
-      console.log('Dados originais do form:', data)
-      console.log('Dados a serem enviados:', payload)
-      console.log(
-        'Tipo do número:',
-        typeof payload.number,
-        '- Valor:',
-        payload.number,
-      )
-      console.log('====================')
-
       const result = await createUser(payload).unwrap()
 
-      Toast.show({
-        type: 'success',
-        text1: 'Cadastro realizado com sucesso!',
-        text2: result.message || 'Bem-vindo à nossa plataforma',
-      })
-
-      // Redirecionar ou fazer algo após sucesso
-      setStep(3)
+      // Se a resposta contém uma fatura, mostra o modal
+      if (result.fatura) {
+        setFaturaDetalhada(result.fatura)
+        faturaBottomSheetRef.current?.present()
+      } else {
+        // Se não tem fatura, mostra toast e vai para próximo step
+        Toast.show({
+          type: 'success',
+          text1: 'Cadastro realizado com sucesso!',
+          text2: result.message || 'Bem-vindo à nossa plataforma',
+        })
+        setStep(3)
+      }
     } catch (err: any) {
       console.error('Erro ao cadastrar:', err)
 
@@ -368,9 +367,15 @@ export default function FormCadastro() {
         type: 'error',
         text1: 'Ops!!!',
         text2:
-          'Algo de inesperado acontenceu ao cadastrar, tente novamente em instantes',
+          err?.data?.message || 'Algo de inesperado aconteceu ao cadastrar, tente novamente em instantes',
       })
     }
+  }
+
+  const handleCloseFatura = () => {
+    faturaBottomSheetRef.current?.dismiss()
+    // Redireciona para login após fechar o modal
+    dispatch(setMode('login'))
   }
 
   const handleCepChange = async (cep: string) => {
@@ -390,25 +395,37 @@ export default function FormCadastro() {
 
     setLastValidatedIccid(iccid)
 
-    const result: any = await validateICCID({
-      companyid: env.COMPANY_ID || '',
-      iccid,
-    })
-
-    if (result.success && result.data) {
-      setIsIccidValid(true)
-      Toast.show({
-        type: 'success',
-        text1: 'ICCID válido',
-        text2: `${result.data.descricao} - Rede: ${result.rede}`,
+    try {
+      const result: any = await validateICCID({
+        companyid: env.COMPANY_ID || '',
+        iccid,
       })
-      setStep(4) // Vai para seleção de DDD
-    } else {
+
+      // Só avança se for realmente sucesso
+      if (result.success === true && result.data) {
+        setIsIccidValid(true)
+        Toast.show({
+          type: 'success',
+          text1: 'ICCID válido',
+          text2: `${result.data.descricao} - Rede: ${result.data.rede || 'N/A'}`,
+        })
+        setStep(4) // Vai para seleção de DDD
+      } else {
+        // Erro ou inválido
+        setIsIccidValid(false)
+        Toast.show({
+          type: 'error',
+          text1: 'ICCID inválido',
+          text2: result.error || 'Verifique o ICCID e tente novamente',
+        })
+      }
+    } catch (error) {
+      // Captura qualquer erro não tratado
       setIsIccidValid(false)
       Toast.show({
         type: 'error',
-        text1: 'ICCID inválido',
-        text2: result.error || 'Verifique o ICCID e tente novamente',
+        text1: 'Erro ao validar ICCID',
+        text2: 'Tente novamente em instantes',
       })
     }
   }
@@ -507,16 +524,7 @@ export default function FormCadastro() {
     setShowScan(false)
   }
 
-  useEffect(() => {
-    if (iccidValue.length >= 19) {
-      handleValidateICCID(iccidValue)
-    } else {
-      setIsIccidValid(null)
-    }
-  }, [iccidValue])
-
-  // 4. REMOVIDO - não precisa verificar permissões na montagem
-
+  // Validação com debounce do ICCID
   useEffect(() => {
     const cleanIccid = iccidValue.replace(/\D/g, '').trim()
 
@@ -1078,7 +1086,7 @@ export default function FormCadastro() {
                     onChangeText={(value) => onChange(value.toUpperCase())}
                     leftIcon={MessageCircle}
                     maxlength={2}
-                    keyboardType="number-pad"
+                    keyboardType="default"
                   />
                 )}
               />
@@ -1557,13 +1565,13 @@ export default function FormCadastro() {
             <Box style={{ alignItems: 'center' }}>
               <Text
                 style={{
-                  fontSize: 24,
+                  fontSize: 22,
                   fontWeight: 'bold',
                   color: colors.text,
                   textAlign: 'center',
                 }}
               >
-                Escolha O melhor plano para você!
+                Escolha o melhor plano para você!
               </Text>
               <Text
                 style={{
@@ -1824,6 +1832,13 @@ export default function FormCadastro() {
           </View>
         </Modal>
       </Portal>
+
+      {/* MODAL DE FATURA */}
+      <FaturaBottomSheet
+        ref={faturaBottomSheetRef}
+        fatura={faturaDetalhada}
+        onClose={handleCloseFatura}
+      />
 
       {renderStep()}
     </Box>

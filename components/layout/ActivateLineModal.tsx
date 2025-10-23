@@ -518,7 +518,9 @@ const ActivateLineModal: React.FC<ActivateLineModalProps> = ({
                 planid: selectedPlan.planid.toString(),
                 planid_personalizado: selectedPlan.id.toString(), // ✅ Envia o planid como personalizado
                 isApp: true,
-                pospago: 'false', // ✅ Mudado de 'N' para 'false'
+                pospago: false, // ✅ Mudado de 'N' para 'false'
+                esim: false,
+                companyid: env.COMPANY_ID,
                 userInfo: JSON.stringify({
                   cpf: user?.cpf,
                   name: user?.name,

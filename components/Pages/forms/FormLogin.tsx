@@ -90,17 +90,6 @@ export default function FormLogin() {
     })
   }, [isBiometricSupported, biometricType, hasStoredCredentials])
 
-  // Debug companyInfo
-  useEffect(() => {
-    console.log('🏢 Company Info Debug:', {
-      companyInfo,
-      link_chat: companyInfo?.link_chat,
-      link_website: companyInfo?.link_website,
-      isNull: companyInfo === null,
-      isUndefined: companyInfo === undefined,
-    })
-  }, [companyInfo])
-
   const onSubmit = async (data: LoginFormData) => {
     // Validação com valibot
     try {
@@ -419,7 +408,7 @@ export default function FormLogin() {
             icon={MessageCircle}
             size={28}
             color="white"
-            bgColor={colors.text}
+            bgColor={colors.secondary}
             borderRadius={10}
             onPress={handleOpenSupportChat}
             style={{ marginBottom: 8 }}

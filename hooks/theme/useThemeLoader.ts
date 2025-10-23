@@ -1,8 +1,7 @@
 // hooks/useCompanyTheme.ts
-import { useEffect, useContext } from 'react'
+import { useEffect, useContext, useMemo } from 'react'
 
 import { useAppSelector } from '@/src/store/hooks'
-import { useWhitelabelTheme } from '@/contexts/theme-context/whitelabel-the,e-context'
 import { useLazyGetCompanyInfoQuery } from '@/src/api/endpoints/AuthApi'
 import { lightenHexColor } from '@/src/utils/lightColorPrimary'
 import { ThemeContext } from '@/contexts/theme-context'
@@ -13,18 +12,12 @@ interface UseCompanyThemeParams {
   autoLoad?: boolean
 }
 
+// Hook para carregar dados da empresa e atualizar o Redux
 export const useCompanyTheme = ({
   companyid,
   token,
   autoLoad = true,
 }: UseCompanyThemeParams = {}) => {
-  const {
-    loadTheme,
-    theme,
-    isLoading: themeLoading,
-    error: themeError,
-  } = useWhitelabelTheme()
-
   // RTK Query hook
   const [
     getCompanyInfo,
@@ -33,7 +26,6 @@ export const useCompanyTheme = ({
 
   // Pegar dados do Redux usando useAppSelector
   const authData = useAppSelector((state: any) => {
-    // Ajuste conforme sua estrutura do Redux
     return {
       token: state.auth?.token || token,
       companyid: state.auth?.companyid || companyid,
@@ -60,12 +52,11 @@ export const useCompanyTheme = ({
         app: 'reqtk',
       }).unwrap()
 
-      // Carregar tema com os dados recebidos
-      if (result) {
-        loadTheme(result)
-      }
+      console.log('✅ Dados da empresa carregados:', result)
+      return result
     } catch (error) {
-      console.error('Erro ao buscar dados da empresa:', error)
+      console.error('❌ Erro ao buscar dados da empresa:', error)
+      throw error
     }
   }
 
@@ -80,14 +71,11 @@ export const useCompanyTheme = ({
     // Dados da empresa
     companyData,
 
-    // Tema whitelabel
-    theme,
-
     // Estados de loading
-    isLoading: apiLoading || isFetching || themeLoading,
+    isLoading: apiLoading || isFetching,
 
     // Erros
-    error: apiError || themeError,
+    error: apiError,
 
     // Funções
     loadCompanyTheme,
@@ -96,18 +84,45 @@ export const useCompanyTheme = ({
 }
 
 // Hook alternativo mais simples para usar em componentes
+// Busca cores diretamente do companyInfo no Redux
 export const useCompanyThemeSimple = () => {
-  const { theme, isLoading, error } = useWhitelabelTheme()
   const themeContext = useContext(ThemeContext)
   const isDark = themeContext?.colorMode === 'dark'
 
-  const primaryColor = theme?.colors?.primary || '#cc3366'
-  const secondaryColor = theme?.colors?.secondary || '#000000'
+  // Buscar companyInfo do Redux
+  const companyInfo = useAppSelector((state) => state.auth.companyInfo)
+
+  // Usar useMemo para cachear o parse e só recalcular quando companyInfo mudar
+  const { primaryColor, secondaryColor } = useMemo(() => {
+    let primary = '#636363' // Fallback padrão
+    let secondary = '#520258' // Fallback padrão
+
+    try {
+      if (companyInfo?.appTheme) {
+        const parsedTheme =
+          typeof companyInfo.appTheme === 'string'
+            ? JSON.parse(companyInfo.appTheme)
+            : companyInfo.appTheme
+
+        if (parsedTheme.colors?.primary) {
+          primary = parsedTheme.colors.primary
+        }
+        if (parsedTheme.colors?.secondary) {
+          secondary = parsedTheme.colors.secondary
+        }
+
+        console.log('🎨 Cores do tema:', { primary, secondary })
+      } else {
+        console.warn('⚠️ appTheme não encontrado, usando cores padrão')
+      }
+    } catch (error) {
+      console.error('❌ Erro ao parsear appTheme:', error)
+    }
+
+    return { primaryColor: primary, secondaryColor: secondary }
+  }, [companyInfo])
 
   return {
-    theme,
-    isLoading,
-    error,
     isDark,
 
     // Cores prontas para usar com suporte a dark mode

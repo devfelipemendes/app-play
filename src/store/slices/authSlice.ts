@@ -6,7 +6,7 @@ interface ICompanyInfo {
   companyname?: string | null
   cnpj?: string | null
   tradename?: string | null
-  logotipo?: string | null
+  logotipo?: string | null | undefined
   nomeparceiro?: string | null
   email?: string | null
   celular?: string | null
@@ -136,8 +136,11 @@ const authSlice = createSlice({
       state.error = null
     },
 
-    // Reset state
-    resetAuthState: () => initialState,
+    // Reset state - PRESERVA companyInfo pois é necessário na tela de login
+    resetAuthState: (state) => ({
+      ...initialState,
+      companyInfo: state.companyInfo, // Mantém companyInfo após logout
+    }),
   },
 })
 

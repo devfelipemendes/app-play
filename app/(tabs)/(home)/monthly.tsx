@@ -18,10 +18,12 @@ import {
 } from '@/src/utils/consumoFormatter'
 import { BarChart } from 'react-native-gifted-charts'
 import { WeatherTabContext } from '@/contexts/weather-screen-context'
+import { useApiRetry } from '@/hooks/useApiRetry'
 
 const Monthly = () => {
   const { colors } = useCompanyThemeSimple()
   const { registerRefreshCallback }: any = useContext(WeatherTabContext)
+  const { retryApiCall } = useApiRetry()
 
   // Pegar dados da linha selecionada do Redux
   const det2Data = useAppSelector(selectDet2Data)
@@ -43,24 +45,43 @@ const Monthly = () => {
   // Buscar dados de consumo quando componente montar ou msisdn mudar
   useEffect(() => {
     if (msisdn && !isNoMsisdn) {
-      const { month, year } = getCurrentMonthYear()
-      const normalizedMsisdn = normalizeMsisdn(msisdn)
+      const fetchConsumo = async () => {
+        const { month, year } = getCurrentMonthYear()
+        const normalizedMsisdn = normalizeMsisdn(msisdn)
 
-      console.log('📊 Buscando consumo mensal:', {
-        msisdnOriginal: msisdn,
-        msisdnNormalizado: normalizedMsisdn,
-        month,
-        year,
-      })
+        console.log('📊 Buscando consumo mensal:', {
+          msisdnOriginal: msisdn,
+          msisdnNormalizado: normalizedMsisdn,
+          month,
+          year,
+        })
 
-      getConsumo({
-        msisdn: normalizedMsisdn,
-        tipo: 'dados',
-        mes: month,
-        ano: year,
-      })
+        try {
+          await retryApiCall(
+            () => getConsumo({
+              msisdn: normalizedMsisdn,
+              tipo: 'dados',
+              mes: month,
+              ano: year,
+            }).unwrap(),
+            {
+              onAttempt: (attempt, max) => {
+                console.log(`🔄 Tentativa ${attempt}/${max} de buscar consumo mensal...`)
+              },
+              onError: (attempt, err) => {
+                console.log(`❌ Tentativa ${attempt} falhou:`, err)
+              },
+            }
+          )
+        } catch (err) {
+          console.error('❌ Erro ao buscar consumo mensal:', err)
+        }
+      }
+
+      fetchConsumo()
     }
-  }, [msisdn, isNoMsisdn, getConsumo])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [msisdn, isNoMsisdn])
 
   // Registrar função de refresh no contexto (tab 2 = monthly)
   useEffect(() => {

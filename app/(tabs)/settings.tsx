@@ -491,7 +491,7 @@ const Settings = () => {
               style={{
                 fontSize: 12,
                 color: colors.subTitle,
-                textAlign: 'justify',
+                textAlign: 'center',
                 lineHeight: 18,
               }}
             >
@@ -501,7 +501,7 @@ const Settings = () => {
           </VStack>
 
           {/* Seção de Desenvolvimento/Teste */}
-          {__DEV__ && (
+          {/* {__DEV__ && (
             <VStack className="px-4" style={{ marginTop: 32 }}>
               <Text
                 style={{
@@ -515,7 +515,7 @@ const Settings = () => {
               </Text>
               <TesteFaturaButton />
             </VStack>
-          )}
+          )} */}
 
           {/* Botão Sair */}
           <VStack className="px-4" style={{ marginTop: 32, marginBottom: 32 }}>

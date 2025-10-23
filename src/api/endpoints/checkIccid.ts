@@ -37,16 +37,39 @@ export const useChecaICCID = () => {
   const validateICCID = async (payload: ChecaICCIDBody) => {
     try {
       const result = await checaICCID(payload).unwrap()
-      return {
-        success: true,
-        data: result,
-        error: null,
+
+      // Garante que só retorna sucesso se realmente tiver dados válidos
+      if (result && result.success !== false) {
+        return {
+          success: true,
+          data: result,
+          error: null,
+        }
+      } else {
+        return {
+          success: false,
+          data: null,
+          error: result?.descricao || 'ICCID inválido',
+        }
       }
     } catch (err: any) {
+      console.error('Erro ao validar ICCID:', err)
+
+      // Trata diferentes tipos de erro
+      let errorMessage = 'Erro ao validar ICCID'
+
+      if (err?.status === 404) {
+        errorMessage = 'ICCID não encontrado'
+      } else if (err?.status === 400) {
+        errorMessage = err?.data?.message || 'ICCID inválido'
+      } else if (err?.data?.message) {
+        errorMessage = err.data.message
+      }
+
       return {
         success: false,
         data: null,
-        error: err?.data?.message || 'Erro ao validar ICCID',
+        error: errorMessage,
       }
     }
   }

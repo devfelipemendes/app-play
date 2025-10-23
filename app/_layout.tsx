@@ -22,10 +22,6 @@ import AuthProvider from '@/src/store/providers'
 import Toast from 'react-native-toast-message'
 
 import { createCustomConfig } from '@/config/theme'
-import {
-  useWhitelabelTheme,
-  WhitelabelThemeProvider,
-} from '@/contexts/theme-context/whitelabel-the,e-context'
 import { PaperProvider } from 'react-native-paper'
 import AuthGuard from '@/src/components/auth/AuthGuard'
 import DevTools from '@/components/DevTools'
@@ -115,12 +111,10 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Provider store={store}>
         <ThemeProvider>
-          <WhitelabelThemeProvider>
-            <PaperProvider>
-              <MainLayout />
-              <Toast />
-            </PaperProvider>
-          </WhitelabelThemeProvider>
+          <PaperProvider>
+            <MainLayout />
+            <Toast />
+          </PaperProvider>
         </ThemeProvider>
       </Provider>
     </GestureHandlerRootView>

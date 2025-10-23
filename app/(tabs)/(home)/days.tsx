@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import { VStack } from '@/components/ui/vstack'
 import { Text } from '@/components/ui/text'
 import { Box } from '@/components/ui/box'
@@ -11,7 +11,17 @@ import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
 import { useAuth } from '@/hooks/useAuth'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectDet2Data, selectDet2Error } from '@/src/store/slices/det2Slice'
-import { useListarFaturasQuery } from '@/src/api/endpoints/faturasApi'
+import {
+  useListarFaturasQuery,
+  type Fatura,
+} from '@/src/api/endpoints/faturasApi'
+import { FaturaBottomSheet } from '@/src/components/screens/FaturaBottomSheet'
+import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import {
+  useGetFaturaMutation,
+  type FaturaDetalhada,
+} from '@/src/api/endpoints/faturaApi'
+import Toast from 'react-native-toast-message'
 
 const Days = () => {
   const { hasDaysTabAnimated, registerRefreshCallback }: any =
@@ -27,6 +37,12 @@ const Days = () => {
   // Verificar se tem MSISDN ativo
   const isNoMsisdn = det2Error === 'NO_MSISDN'
   const hasLineData = det2Data?.iccid && user?.token && !isNoMsisdn
+
+  // Estados para o modal de fatura
+  const faturaBottomSheetRef = useRef<BottomSheetModal>(null)
+  const [faturaDetalhada, setFaturaDetalhada] =
+    useState<FaturaDetalhada | null>(null)
+  const [getFatura, { isLoading: loadingFatura }] = useGetFaturaMutation()
 
   // Buscar faturas da API (só se tiver MSISDN ativo)
   const {
@@ -61,6 +77,35 @@ const Days = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [registerRefreshCallback, hasLineData])
+
+  // Função para abrir modal de fatura
+  const handleOpenFatura = async (paymentId: string) => {
+    try {
+      console.log('📄 Abrindo fatura:', paymentId)
+
+      const result = await getFatura({
+        payid: paymentId,
+      }).unwrap()
+
+      console.log('✅ Dados da fatura:', result)
+
+      setFaturaDetalhada(result)
+      faturaBottomSheetRef.current?.present()
+    } catch (err: any) {
+      console.error('❌ Erro ao buscar fatura:', err)
+      Toast.show({
+        type: 'error',
+        text1: 'Erro',
+        text2: err?.data?.erro || 'Erro ao carregar fatura',
+      })
+    }
+  }
+
+  // Função para fechar modal
+  const handleCloseFatura = () => {
+    faturaBottomSheetRef.current?.dismiss()
+    setFaturaDetalhada(null)
+  }
 
   // Estado: Sem MSISDN ativo
   if (isNoMsisdn) {
@@ -208,30 +253,42 @@ const Days = () => {
   })
 
   return (
-    <AnimatedVStack space="md" className="px-5 pb-5">
-      {faturasOrdenadas.map((fatura: any, index: number) => {
-        return (
-          <Animated.View
-            key={fatura.paymentid}
-            entering={
-              hasDaysTabAnimated.current
-                ? undefined
-                : FadeInDown.delay(index * 100)
-                    .springify()
-                    .damping(12)
-            }
-          >
-            <DaysCard
-              name={fatura.tipo}
-              created={fatura.created}
-              highest={fatura.valuetopup}
-              lowest={fatura.netvalue}
-              paymentStatus={fatura.paymentstatus}
-            />
-          </Animated.View>
-        )
-      })}
-    </AnimatedVStack>
+    <>
+      <AnimatedVStack space="md" className="px-5 pb-5">
+        {faturasOrdenadas.map((fatura: Fatura, index: number) => {
+          return (
+            <Animated.View
+              key={fatura.paymentid}
+              entering={
+                hasDaysTabAnimated.current
+                  ? undefined
+                  : FadeInDown.delay(index * 100)
+                      .springify()
+                      .damping(12)
+              }
+            >
+              <DaysCard
+                name={fatura.tipo}
+                created={fatura.created}
+                highest={fatura.valuetopup}
+                lowest={fatura.netvalue}
+                paymentStatus={fatura.paymentstatus}
+                onPress={() =>
+                  handleOpenFatura(fatura.paymentasaasid.toString())
+                }
+              />
+            </Animated.View>
+          )
+        })}
+      </AnimatedVStack>
+
+      {/* Modal de detalhes da fatura */}
+      <FaturaBottomSheet
+        ref={faturaBottomSheetRef}
+        fatura={faturaDetalhada}
+        onClose={handleCloseFatura}
+      />
+    </>
   )
 }
 

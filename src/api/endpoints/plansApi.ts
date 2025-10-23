@@ -76,7 +76,7 @@ interface ActiveLineBody {
   planid: string
   planid_personalizado: string
   isApp: boolean
-  pospago: string
+  pospago: boolean
   userInfo: string
   esim: boolean
   companyid: number

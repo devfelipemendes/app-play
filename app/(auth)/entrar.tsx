@@ -3,8 +3,6 @@ import React, { useEffect, useRef, useState } from 'react'
 import { SafeAreaView } from '@/components/ui/safe-area-view'
 import { Box } from '@/components/ui/box'
 
-import IconLogo from '../../assets/AssetsPartners/adaptive-icon.png'
-
 import { Keyboard, Animated, Platform, Image, Dimensions } from 'react-native'
 import { StatusBar } from 'expo-status-bar'
 
@@ -23,6 +21,8 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 export default function LoginScreen() {
   const [keyboardOpen, setKeyboardOpen] = useState(false)
   const { colors } = useCompanyThemeSimple()
+
+  const companyInfo = useAppSelector((state) => state.auth.companyInfo)
 
   const mode = useAppSelector((state: RootState) => state.screenFlow.mode)
 
@@ -62,7 +62,7 @@ export default function LoginScreen() {
   }, [])
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.text }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.secondary }}>
       <StatusBar style="light" />
       <KeyboardAwareScrollView
         contentContainerStyle={{
@@ -92,12 +92,16 @@ export default function LoginScreen() {
                 : 60,
             justifyContent: 'center',
             alignItems: 'center',
-            backgroundColor: colors.text,
+            backgroundColor: colors.secondary,
           }}
         >
           {mode === 'login' && !keyboardOpen && (
             <Animated.Image
-              source={IconLogo}
+              source={
+                companyInfo?.logotipo
+                  ? { uri: companyInfo?.logotipo }
+                  : require('@/assets/AssetsPartners/adaptive-icon.png')
+              }
               style={{
                 // Tamanho menor do logo em telas pequenas
                 width: isIOS || isSmallScreen ? 80 : 120,

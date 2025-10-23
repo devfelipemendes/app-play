@@ -1,6 +1,7 @@
 // src/store/api/cadastroEndpoints.ts - Endpoint de cadastro
 
 import { apiPlay } from '../apiPlay'
+import type { FaturaDetalhada } from './faturaApi'
 
 // ✅ Tipos para o endpoint de cadastro
 export interface CadastroRequest {
@@ -34,6 +35,7 @@ export interface CadastroResponse {
     email: string
     [key: string]: any
   }
+  fatura?: FaturaDetalhada
   error?: string
 }
 
