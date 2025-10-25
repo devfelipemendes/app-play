@@ -59,7 +59,8 @@ const Home = () => {
   const AnimatedVStack = Animated.createAnimatedComponent(VStack)
 
   // Contexto das tabs internas
-  const { registerRefreshCallback, setSelectedTabIndex }: any = React.useContext(WeatherTabContext)
+  const { registerRefreshCallback, setSelectedTabIndex }: any =
+    React.useContext(WeatherTabContext)
 
   // Hook de retry
   const { retryApiCall } = useApiRetry()
@@ -73,7 +74,6 @@ const Home = () => {
   const selectedLineIccid = useAppSelector(
     (state) => state.det2.selectedLineIccid,
   )
-  const det2State = useAppSelector((state) => state.det2)
 
   const { colors } = useCompanyThemeSimple()
   const { user } = useAuth()
@@ -144,12 +144,14 @@ const Home = () => {
         () => getDet2(det2Request).unwrap(),
         {
           onAttempt: (attempt, max) => {
-            console.log(`🔄 Tentativa ${attempt}/${max} de buscar dados det2...`)
+            console.log(
+              `🔄 Tentativa ${attempt}/${max} de buscar dados det2...`,
+            )
           },
           onError: (attempt, err) => {
             console.log(`❌ Tentativa ${attempt} falhou:`, err)
           },
-        }
+        },
       )
 
       console.log('✅ Dados recebidos com sucesso:', det2Result)
@@ -231,7 +233,7 @@ const Home = () => {
           onError: (attempt, err) => {
             console.log(`❌ Tentativa ${attempt} falhou:`, err)
           },
-        }
+        },
       )
 
       console.log('✅ Linhas encontradas:', linesResult.length, 'linhas')
@@ -265,7 +267,8 @@ const Home = () => {
         }
       } else {
         console.log('⚠️ Nenhuma linha encontrada para este usuário')
-        dispatch(setError('Nenhuma linha encontrada'))
+        // ✅ NÃO setar erro aqui - o card "Sem Nenhuma Linha" será exibido
+        // dispatch(setError('Nenhuma linha encontrada'))
       }
     } catch (err: any) {
       console.log('❌ Erro no fluxo completo:', err)
@@ -302,7 +305,7 @@ const Home = () => {
       if (setSelectedTabIndex) {
         setSelectedTabIndex(0)
       }
-    }, [setSelectedTabIndex])
+    }, [setSelectedTabIndex]),
   )
 
   // Carregar dados apenas na primeira vez que a tela é focada
@@ -393,6 +396,20 @@ const Home = () => {
       fetchUserData,
     ]),
   )
+
+  // Log quando modal de reativação é aberto - DEVE estar ANTES de qualquer return
+  useEffect(() => {
+    if (showReactivateBottomSheet) {
+      console.log('🔍 [HOME] Abrindo modal de reativação')
+      console.log('📞 [HOME] selectedLine?.msisdn:', selectedLine?.msisdn)
+      console.log('📞 [HOME] selectedLine completa:', {
+        id: selectedLine?.id,
+        msisdn: selectedLine?.msisdn,
+        iccid: selectedLine?.iccid,
+        msisdnstatus: selectedLine?.msisdnstatus,
+      })
+    }
+  }, [showReactivateBottomSheet, selectedLine])
 
   // Estado de carregamento
   if (loadingLines || det2Loading || loadingLineChange) {
@@ -538,6 +555,7 @@ const Home = () => {
 
   // Verificar se há linhas e se a linha selecionada tem MSISDN
   const hasLines = userLines.length > 0
+  const hasNoLines = userLines.length === 0 && !loadingLines // ✅ Novo: usuário sem nenhuma linha
   const selectedLineHasMsisdn =
     selectedLine?.msisdn && selectedLine?.msisdnstatus === 0
   const isNoMsisdnError = det2Error === 'NO_MSISDN'
@@ -550,20 +568,35 @@ const Home = () => {
 
   // Diferenciar os 3 casos de ativação:
   // 1. Tem ICCID mas não tem MSISDN ativo → Mostrar modal simples de planos
-  // 2. Não tem ICCID → Mostrar modal com steps (digitar ICCID, DDD, plano)
+  // 2. Não tem ICCID (mas tem linha) → Mostrar modal com steps (digitar ICCID, DDD, plano)
+  // 3. Não tem nenhuma linha → Mostrar card informativo + modal com steps
   const selectedLineHasIccid = Boolean(
     selectedLine?.iccid && selectedLine.iccid.trim().length > 0,
   )
   const needsActivationWithIccid = isNoMsisdnError && selectedLineHasIccid
   const needsActivationWithSteps = isNoMsisdnError && !selectedLineHasIccid
 
-  console.log('🔍 DEBUG - Condições:', {
+  console.log('🔍 [HOME] ===== DEBUG COMPLETO =====')
+  console.log('🔍 [HOME] userLines.length:', userLines.length)
+  console.log('🔍 [HOME] loadingLines:', loadingLines)
+  console.log('🔍 [HOME] det2Loading:', det2Loading)
+  console.log('🔍 [HOME] loadingLineChange:', loadingLineChange)
+  console.log('🔍 [HOME] det2Error:', det2Error)
+  console.log('🔍 [HOME] hasLines:', hasLines)
+  console.log('🔍 [HOME] hasNoLines:', hasNoLines)
+  console.log('🔍 [HOME] selectedLine:', selectedLine)
+  console.log('🔍 [HOME] Condições detalhadas:', {
+    hasLines,
+    hasNoLines,
+    userLinesLength: userLines.length,
+    loadingLines,
     isNoMsisdnError,
     selectedLineHasIccid,
     needsActivationWithIccid,
     needsActivationWithSteps,
     selectedLineIccid: selectedLine?.iccid,
   })
+  console.log('🔍 [HOME] ===============================')
 
   // Handler para sucesso na ativação (com ICCID)
   const handleActivationWithIccidSuccess = () => {
@@ -582,7 +615,7 @@ const Home = () => {
   // Handler para sucesso na reativação
   const handleReactivationSuccess = () => {
     // Recarregar as linhas após reativação bem-sucedida
-    console.log('🎉 Reativação bem-sucedida, recarregando dados...')
+    console.log('🎉 [HOME] Reativação bem-sucedida, recarregando dados...')
     setShowReactivateBottomSheet(false)
     fetchUserData()
   }
@@ -607,6 +640,91 @@ const Home = () => {
           loading={loadingLineChange || det2Loading}
         />
       )}
+
+      {/* CASO 0: Usuário não tem nenhuma linha cadastrada */}
+      {hasNoLines &&
+        (() => {
+          console.log('✅ [HOME] Renderizando card: Sem Nenhuma Linha')
+          return true
+        })() && (
+          <VStack
+            style={{
+              padding: 32,
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: 16,
+              backgroundColor: colors.background,
+              borderRadius: 16,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.24,
+              shadowRadius: 3,
+              elevation: 2,
+            }}
+          >
+            <Icon as={Globe} size="xl" style={{ color: colors.primary }} />
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: 'bold',
+                color: colors.text,
+                textAlign: 'center',
+              }}
+            >
+              Bem-vindo à {user?.parceiro || 'sua operadora'}!
+            </Text>
+            <Text
+              style={{
+                fontSize: 14,
+                color: colors.secondary,
+                textAlign: 'center',
+                lineHeight: 20,
+              }}
+            >
+              Você ainda não possui nenhuma linha cadastrada. Ative uma nova
+              linha agora mesmo e comece a aproveitar nossos serviços!
+            </Text>
+
+            <TouchableOpacity
+              onPress={() => setShowActivateWithStepsBottomSheet(true)}
+              style={{
+                marginTop: 8,
+                paddingVertical: 14,
+                paddingHorizontal: 32,
+                backgroundColor: colors.primary,
+                borderRadius: 12,
+                shadowColor: colors.primary,
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.3,
+                shadowRadius: 4,
+                elevation: 4,
+              }}
+            >
+              <Text
+                style={{
+                  color: colors.textButton,
+                  fontSize: 16,
+                  fontWeight: '600',
+                }}
+              >
+                Ativar Minha Primeira Linha
+              </Text>
+            </TouchableOpacity>
+
+            <Text
+              style={{
+                fontSize: 12,
+                color: colors.subTitle,
+                textAlign: 'center',
+                fontStyle: 'italic',
+                marginTop: 8,
+              }}
+            >
+              O processo é rápido e fácil! Você precisará do número do seu chip
+              (ICCID) e escolher um plano.
+            </Text>
+          </VStack>
+        )}
 
       {/* CASO 1: Tem ICCID mas não tem MSISDN ativo */}
       {needsActivationWithIccid && selectedLine && (

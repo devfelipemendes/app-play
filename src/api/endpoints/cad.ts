@@ -35,7 +35,7 @@ export interface CadastroResponse {
     email: string
     [key: string]: any
   }
-  fatura?: FaturaDetalhada
+  fatura?: string // ✅ CORRIGIDO: fatura é o paymentId (string), não o objeto completo
   error?: string
 }
 

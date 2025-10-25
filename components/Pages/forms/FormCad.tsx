@@ -48,6 +48,7 @@ import Toast from 'react-native-toast-message'
 import { BackHandler, Dimensions, View, TouchableOpacity } from 'react-native'
 import { useCpfCnpjCheck } from '@/hooks/useCpfCnpjValidator'
 import { useCreateUserMutation } from '@/src/api/endpoints/cad'
+import { useGetFaturaMutation } from '@/src/api/endpoints/faturaApi'
 import { useCep } from '@/hooks/useGetCep'
 import DatePickerInput from '@/components/layout/CustomIputDatePicker'
 import { Modal, Portal, ProgressBar } from 'react-native-paper'
@@ -61,6 +62,8 @@ import { useDebounce } from '@/hooks/useDebounce'
 import PlansCarousel from '@/components/layout/PlansCarousel'
 import { setUserInfo } from '@/src/store/slices/ativarLinhaSlice'
 import { useAuth } from '@/hooks/useAuth'
+import type { Fatura } from '@/src/api/endpoints/faturaApi'
+import type { ResponseActiveLine } from '@/src/api/endpoints/plansApi'
 
 const cadastroSchema = v.pipe(
   v.object({
@@ -195,7 +198,8 @@ export default function FormCadastro() {
 
   // Estados para modal de fatura
   const faturaBottomSheetRef = useRef<BottomSheetModal>(null)
-  const [faturaDetalhada, setFaturaDetalhada] = useState<FaturaDetalhada | null>(null)
+  const [faturaDetalhada, setFaturaDetalhada] =
+    useState<ResponseActiveLine | null>(null)
 
   const { user } = useAuth()
 
@@ -208,6 +212,7 @@ export default function FormCadastro() {
 
   const { fetchCep, loading: loadingCep, error } = useCep()
   const [createUser, { isLoading: isCreatingUser }] = useCreateUserMutation()
+  const [getFatura, { isLoading: isLoadingFatura }] = useGetFaturaMutation()
 
   const { colors } = useCompanyThemeSimple()
   const dispatch = useAppDispatch()
@@ -276,7 +281,6 @@ export default function FormCadastro() {
 
       return status === 'granted'
     } catch (error) {
-      console.error('Erro ao solicitar permissão de câmera:', error)
       setHasPermission(false)
       return false
     }
@@ -311,7 +315,7 @@ export default function FormCadastro() {
         return `${day}-${month}-${year}`
       }
     } catch (error) {
-      console.warn('Erro ao formatar data:', error)
+      // Silently fail and return original
     }
 
     return dateString // Retorna a string original se não conseguir formatar
@@ -347,11 +351,13 @@ export default function FormCadastro() {
 
       const result = await createUser(payload).unwrap()
 
-      // Se a resposta contém uma fatura, mostra o modal
-      if (result.fatura) {
-        setFaturaDetalhada(result.fatura)
-        faturaBottomSheetRef.current?.present()
+      if (result.fatura && typeof result.fatura === 'string') {
+        console.log('✅ [CADASTRO] PaymentId detectado:', result.fatura)
+        console.log('🔄 [CADASTRO] Buscando dados completos da fatura...')
       } else {
+        console.log(
+          'ℹ️ [CADASTRO] Nenhum paymentId retornado, indo para step 3',
+        )
         // Se não tem fatura, mostra toast e vai para próximo step
         Toast.show({
           type: 'success',
@@ -361,21 +367,25 @@ export default function FormCadastro() {
         setStep(3)
       }
     } catch (err: any) {
-      console.error('Erro ao cadastrar:', err)
-
       Toast.show({
         type: 'error',
         text1: 'Ops!!!',
         text2:
-          err?.data?.message || 'Algo de inesperado aconteceu ao cadastrar, tente novamente em instantes',
+          err?.data?.message ||
+          'Algo de inesperado aconteceu ao cadastrar, tente novamente em instantes',
       })
     }
   }
 
   const handleCloseFatura = () => {
+    // Primeiro fecha o modal
     faturaBottomSheetRef.current?.dismiss()
-    // Redireciona para login após fechar o modal
-    dispatch(setMode('login'))
+
+    // Aguarda um pouco antes de redirecionar para garantir que o modal foi desmontado
+    setTimeout(() => {
+      setFaturaDetalhada(null) // Limpa a fatura
+      dispatch(setMode('login'))
+    }, 300)
   }
 
   const handleCepChange = async (cep: string) => {
@@ -407,7 +417,9 @@ export default function FormCadastro() {
         Toast.show({
           type: 'success',
           text1: 'ICCID válido',
-          text2: `${result.data.descricao} - Rede: ${result.data.rede || 'N/A'}`,
+          text2: `${result.data.descricao} - Rede: ${
+            result.data.rede || 'N/A'
+          }`,
         })
         setStep(4) // Vai para seleção de DDD
       } else {
@@ -497,7 +509,6 @@ export default function FormCadastro() {
           return
         }
       } catch (err) {
-        console.error('Erro ao verificar CPF/CNPJ:', err)
         Toast.show({
           type: 'error',
           text1: 'Erro na verificação',
@@ -655,7 +666,7 @@ export default function FormCadastro() {
                 style={{
                   fontSize: 16,
                   fontWeight: '500',
-                  color: colors.subTitle,
+                  color: colors.text,
                 }}
               >
                 Vamos fazer parte da melhor operadora 🚀
@@ -690,7 +701,7 @@ export default function FormCadastro() {
                   style={{
                     marginBottom: 8,
                     fontSize: 14,
-                    color: colors.subTitle,
+                    color: colors.text,
                   }}
                 >
                   CPF
@@ -716,7 +727,7 @@ export default function FormCadastro() {
                   style={{
                     marginBottom: 8,
                     fontSize: 14,
-                    color: colors.subTitle,
+                    color: colors.text,
                   }}
                 >
                   Informe seu CPF para fornecermos uma experiêcia com maior
@@ -731,7 +742,7 @@ export default function FormCadastro() {
                   style={{
                     marginBottom: 8,
                     fontSize: 14,
-                    color: colors.subTitle,
+                    color: colors.text,
                   }}
                 >
                   CNPJ
@@ -759,7 +770,7 @@ export default function FormCadastro() {
                   style={{
                     marginBottom: 8,
                     fontSize: 14,
-                    color: colors.subTitle,
+                    color: colors.text,
                   }}
                 >
                   Informe seu CNPJ para fornecermos uma experiêcia com maior
@@ -778,7 +789,7 @@ export default function FormCadastro() {
             </Box>
             <Box style={{ marginBottom: 32, alignItems: 'center' }}>
               <Text
-                style={{ fontSize: 24, fontWeight: 'bold', color: colors.text }}
+                style={{ fontSize: 22, fontWeight: 'bold', color: colors.text }}
               >
                 Complete seu cadastro
               </Text>
@@ -786,7 +797,7 @@ export default function FormCadastro() {
                 style={{
                   fontSize: 16,
                   fontWeight: '500',
-                  color: colors.subTitle,
+                  color: colors.text,
                 }}
               >
                 Finalize suas informações
@@ -849,7 +860,7 @@ export default function FormCadastro() {
                   style={{
                     marginBottom: 8,
                     fontSize: 14,
-                    color: colors.subTitle,
+                    color: colors.text,
                   }}
                 >
                   Nome completo
@@ -881,7 +892,7 @@ export default function FormCadastro() {
                   style={{
                     marginBottom: 8,
                     fontSize: 14,
-                    color: colors.subTitle,
+                    color: colors.text,
                   }}
                 >
                   Razão social
@@ -911,7 +922,7 @@ export default function FormCadastro() {
                 style={{
                   marginBottom: 8,
                   fontSize: 14,
-                  color: colors.subTitle,
+                  color: colors.text,
                 }}
               >
                 E-mail
@@ -961,7 +972,7 @@ export default function FormCadastro() {
                 style={{
                   marginBottom: 8,
                   fontSize: 14,
-                  color: colors.subTitle,
+                  color: colors.text,
                 }}
               >
                 Celular
@@ -991,7 +1002,7 @@ export default function FormCadastro() {
                 style={{
                   marginBottom: 8,
                   fontSize: 14,
-                  color: colors.subTitle,
+                  color: colors.text,
                 }}
               >
                 WhatsApp
@@ -1021,7 +1032,7 @@ export default function FormCadastro() {
                 style={{
                   marginBottom: 8,
                   fontSize: 14,
-                  color: colors.subTitle,
+                  color: colors.text,
                 }}
               >
                 CEP
@@ -1071,7 +1082,7 @@ export default function FormCadastro() {
                 style={{
                   marginBottom: 8,
                   fontSize: 14,
-                  color: colors.subTitle,
+                  color: colors.text,
                 }}
               >
                 UF
@@ -1099,7 +1110,7 @@ export default function FormCadastro() {
                 style={{
                   marginBottom: 8,
                   fontSize: 14,
-                  color: colors.subTitle,
+                  color: colors.text,
                 }}
               >
                 Cidade
@@ -1128,7 +1139,7 @@ export default function FormCadastro() {
                 style={{
                   marginBottom: 8,
                   fontSize: 14,
-                  color: colors.subTitle,
+                  color: colors.text,
                 }}
               >
                 Bairro
@@ -1157,7 +1168,7 @@ export default function FormCadastro() {
                 style={{
                   marginBottom: 8,
                   fontSize: 14,
-                  color: colors.subTitle,
+                  color: colors.text,
                 }}
               >
                 Logradouro
@@ -1184,7 +1195,7 @@ export default function FormCadastro() {
                 style={{
                   marginBottom: 8,
                   fontSize: 14,
-                  color: colors.subTitle,
+                  color: colors.text,
                 }}
               >
                 Número
@@ -1216,7 +1227,7 @@ export default function FormCadastro() {
                 style={{
                   marginBottom: 8,
                   fontSize: 14,
-                  color: colors.subTitle,
+                  color: colors.text,
                 }}
               >
                 Complemento
@@ -1245,7 +1256,7 @@ export default function FormCadastro() {
                 style={{
                   marginBottom: 8,
                   fontSize: 14,
-                  color: colors.subTitle,
+                  color: colors.text,
                 }}
               >
                 Senha
@@ -1276,7 +1287,7 @@ export default function FormCadastro() {
                 style={{
                   marginBottom: 8,
                   fontSize: 14,
-                  color: colors.subTitle,
+                  color: colors.text,
                 }}
               >
                 Confirmar senha
@@ -1313,18 +1324,25 @@ export default function FormCadastro() {
                 backgroundColor: colors.primary,
                 marginBottom: 24,
               }}
+              disabled={isCreatingUser || isLoadingFatura}
             >
               <ButtonText
                 style={{ color: 'white', fontSize: 16, fontWeight: '600' }}
               >
-                {loading ? 'Cadastrando...' : 'Cadastrar'}
+                {isCreatingUser
+                  ? 'Cadastrando...'
+                  : isLoadingFatura
+                  ? 'Carregando fatura...'
+                  : 'Cadastrar'}
               </ButtonText>
-              {loading && <ButtonSpinner color={colors.secondary} />}
+              {(isCreatingUser || isLoadingFatura) && (
+                <ButtonSpinner color={colors.secondary} />
+              )}
             </Button>
 
             {/* Link para voltar ao login */}
             <Box style={{ alignItems: 'center' }}>
-              <Text style={{ fontSize: 14, color: '#666' }}>
+              <Text style={{ fontSize: 14, color: colors.disabled }}>
                 Já possui uma conta?{' '}
                 <Text
                   style={{ color: `${colors.primary}`, fontWeight: '500' }}
@@ -1357,7 +1375,7 @@ export default function FormCadastro() {
                 style={{
                   fontSize: 16,
                   fontWeight: '500',
-                  color: colors.subTitle,
+                  color: colors.text,
                 }}
               >
                 Finalize suas informações
@@ -1389,7 +1407,7 @@ export default function FormCadastro() {
                   style={{
                     marginBottom: 8,
                     fontSize: 14,
-                    color: colors.subTitle,
+                    color: colors.text,
                   }}
                 >
                   ICCID do SIM Card
@@ -1446,7 +1464,7 @@ export default function FormCadastro() {
                   style={{
                     marginTop: 4,
                     fontSize: 12,
-                    color: colors.subTitle,
+                    color: colors.text,
                   }}
                 >
                   ICCID é o número do código de barras do cartão do seu SIM
@@ -1484,7 +1502,7 @@ export default function FormCadastro() {
                 style={{
                   fontSize: 16,
                   fontWeight: '500',
-                  color: colors.subTitle,
+                  color: colors.text,
                 }}
               >
                 Escolha o código de área da linha
@@ -1577,7 +1595,7 @@ export default function FormCadastro() {
                 style={{
                   fontSize: 16,
                   fontWeight: '500',
-                  color: colors.subTitle,
+                  color: colors.text,
                   textAlign: 'center',
                 }}
               >
@@ -1607,7 +1625,7 @@ export default function FormCadastro() {
                 style={{
                   fontSize: 16,
                   fontWeight: '500',
-                  color: colors.subTitle,
+                  color: colors.text,
                 }}
               >
                 Vamos fazer parte da melhor operadora 🚀
@@ -1642,7 +1660,7 @@ export default function FormCadastro() {
                   style={{
                     marginBottom: 8,
                     fontSize: 14,
-                    color: colors.subTitle,
+                    color: colors.text,
                   }}
                 >
                   CPF
@@ -1682,7 +1700,7 @@ export default function FormCadastro() {
                   style={{
                     marginBottom: 8,
                     fontSize: 14,
-                    color: colors.subTitle,
+                    color: colors.text,
                   }}
                 >
                   Informe seu CPF para fornecermos uma experiêcia com maior
@@ -1697,7 +1715,7 @@ export default function FormCadastro() {
                   style={{
                     marginBottom: 8,
                     fontSize: 14,
-                    color: colors.subTitle,
+                    color: colors.text,
                   }}
                 >
                   CNPJ
@@ -1725,7 +1743,7 @@ export default function FormCadastro() {
                   style={{
                     marginBottom: 8,
                     fontSize: 14,
-                    color: colors.subTitle,
+                    color: colors.text,
                   }}
                 >
                   Informe seu CNPJ para fornecermos uma experiêcia com maior
@@ -1832,13 +1850,6 @@ export default function FormCadastro() {
           </View>
         </Modal>
       </Portal>
-
-      {/* MODAL DE FATURA */}
-      <FaturaBottomSheet
-        ref={faturaBottomSheetRef}
-        fatura={faturaDetalhada}
-        onClose={handleCloseFatura}
-      />
 
       {renderStep()}
     </Box>

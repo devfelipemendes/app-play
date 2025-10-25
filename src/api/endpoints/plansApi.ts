@@ -1,5 +1,6 @@
 // store/plansApi.ts
 import { apiPlay } from '../apiPlay'
+import type { Fatura } from './faturaApi'
 
 interface PlanOriginal {
   id: number
@@ -82,8 +83,8 @@ interface ActiveLineBody {
   companyid: number
 }
 
-interface ResponseActiveLine {
-  fatura: string
+export interface ResponseActiveLine {
+  fatura: Fatura
   msg: string
 }
 

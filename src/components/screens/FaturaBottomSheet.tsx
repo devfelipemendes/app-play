@@ -54,6 +54,52 @@ export const FaturaBottomSheet = forwardRef<
     'pix' | 'boleto' | 'recorrente'
   >('pix')
 
+  // 🔍 DEBUG: Log quando o paymentMethod mudar
+  useEffect(() => {
+    console.log('💳 [FATURA_MODAL] paymentMethod atual:', paymentMethod)
+  }, [paymentMethod])
+
+  // 🔍 DEBUG: Log sempre que a prop fatura mudar
+  useEffect(() => {
+    console.log('📨 [FATURA_MODAL] Prop fatura recebida:', fatura ? '✅ existe' : '❌ null/undefined')
+    if (fatura) {
+      console.log('📨 [FATURA_MODAL] fatura.payment:', fatura.payment)
+      console.log('📨 [FATURA_MODAL] Dados da fatura:', {
+        id: fatura.id,
+        payment: fatura.payment,
+        value: fatura.value,
+        status: fatura.status,
+        dueDate: fatura.dueDate,
+        barcode: fatura.barcode ? '✅ existe' : '❌ não existe',
+        payload: fatura.payload ? '✅ existe' : '❌ não existe',
+        invoiceNumber: fatura.invoiceNumber,
+        nome: fatura.nome,
+        cpf: fatura.cpf,
+      })
+
+      // Define automaticamente a aba de pagamento baseada no campo payment
+      if (fatura.payment) {
+        const paymentLower = fatura.payment.toLowerCase()
+        console.log('🔄 [FATURA_MODAL] fatura.payment (lowercase):', paymentLower)
+
+        if (paymentLower.includes('pix') || paymentLower === 'pix') {
+          console.log('✅ [FATURA_MODAL] Definindo paymentMethod como: pix')
+          setPaymentMethod('pix')
+        } else if (paymentLower.includes('boleto') || paymentLower === 'boleto' || paymentLower === 'bank_slip') {
+          console.log('✅ [FATURA_MODAL] Definindo paymentMethod como: boleto')
+          setPaymentMethod('boleto')
+        } else if (paymentLower.includes('credit') || paymentLower.includes('card') || paymentLower === 'credit_card') {
+          console.log('✅ [FATURA_MODAL] Definindo paymentMethod como: recorrente')
+          setPaymentMethod('recorrente')
+        } else {
+          console.log('⚠️ [FATURA_MODAL] Payment não reconhecido, mantendo default: pix')
+        }
+      } else {
+        console.log('⚠️ [FATURA_MODAL] fatura.payment está vazio/null, mantendo default: pix')
+      }
+    }
+  }, [fatura])
+
   // Estados de recorrência
   const [cartoes, setCartoes] = useState<Cartao[]>([])
   const [isRecActive, setIsRecActive] = useState(false)
@@ -91,7 +137,9 @@ export const FaturaBottomSheet = forwardRef<
   )
 
   const formatCurrency = (value: number | string) => {
+    if (value === undefined || value === null) return 'R$ 0,00'
     const numValue = typeof value === 'string' ? parseFloat(value) : value
+    if (isNaN(numValue)) return 'R$ 0,00'
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL',
@@ -99,23 +147,28 @@ export const FaturaBottomSheet = forwardRef<
   }
 
   const formatDate = (dateString: string) => {
+    if (!dateString) return '-'
     try {
       const date = new Date(dateString)
+      if (isNaN(date.getTime())) return dateString
       return date.toLocaleDateString('pt-BR')
     } catch {
-      return dateString
+      return dateString || '-'
     }
   }
 
   const formatCPF = (cpf: string) => {
+    if (!cpf) return '-'
     return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')
   }
 
   const formatCNPJ = (cnpj: string) => {
+    if (!cnpj) return '-'
     return cnpj.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5')
   }
 
   const formatPhone = (phone: string) => {
+    if (!phone) return '-'
     return phone.replace(/(\d{2})(\d{2})(\d{5})(\d{4})/, '+$1 ($2) $3-$4')
   }
 
@@ -198,7 +251,6 @@ export const FaturaBottomSheet = forwardRef<
         throw new Error('Falha no download')
       }
     } catch (error) {
-      console.error('Erro ao baixar PDF:', error)
       Toast.show({
         text1: 'Erro ao baixar PDF',
         text2: 'Verifique sua conexão e tente novamente',
@@ -215,7 +267,7 @@ export const FaturaBottomSheet = forwardRef<
         message: `Código de barras do boleto:\n${fatura.barcode}\n\nNosso número: ${fatura.codigoboleto}`,
       })
     } catch (error) {
-      console.error('Erro ao compartilhar:', error)
+      // Silently fail
     }
   }
 
@@ -243,7 +295,7 @@ export const FaturaBottomSheet = forwardRef<
         title: 'Compartilhar Fatura',
       })
     } catch (error) {
-      console.error('Erro ao compartilhar:', error)
+      // Silently fail
     }
   }
 
@@ -259,7 +311,6 @@ export const FaturaBottomSheet = forwardRef<
         position: 'bottom',
       })
     } catch (error) {
-      console.error('Erro ao copiar:', error)
       Toast.show({
         text1: 'Erro ao copiar código PIX',
         type: 'error',
@@ -279,7 +330,6 @@ export const FaturaBottomSheet = forwardRef<
         position: 'bottom',
       })
     } catch (error) {
-      console.error('Erro ao copiar:', error)
       Toast.show({
         text1: 'Erro ao copiar código de barras',
         type: 'error',
@@ -312,7 +362,7 @@ export const FaturaBottomSheet = forwardRef<
         setIsRecActive(temCartaoPrincipal)
       }
     } catch (error: any) {
-      console.error('Erro ao carregar cartões:', error)
+      // Silently fail - cartões não carregados
     } finally {
       setLoadingCartoes(false)
     }
@@ -677,7 +727,12 @@ export const FaturaBottomSheet = forwardRef<
                   </View>
 
                   {/* Conteúdo PIX */}
-                  {paymentMethod === 'pix' && fatura.payload && (
+                  {paymentMethod === 'pix' && (() => {
+                    console.log('🔍 [RENDER] Tentando renderizar PIX')
+                    console.log('🔍 [RENDER] paymentMethod === "pix"?', paymentMethod === 'pix')
+                    console.log('🔍 [RENDER] fatura.payload existe?', !!fatura.payload)
+                    return fatura.payload
+                  })() && (
                     <View style={styles.paymentContent}>
                       <View style={styles.qrCodeContainer}>
                         <QRCode
@@ -718,7 +773,12 @@ export const FaturaBottomSheet = forwardRef<
                   )}
 
                   {/* Conteúdo Boleto */}
-                  {paymentMethod === 'boleto' && fatura.barcode && (
+                  {paymentMethod === 'boleto' && (() => {
+                    console.log('🔍 [RENDER] Tentando renderizar Boleto')
+                    console.log('🔍 [RENDER] paymentMethod === "boleto"?', paymentMethod === 'boleto')
+                    console.log('🔍 [RENDER] fatura.barcode existe?', !!fatura.barcode)
+                    return fatura.barcode
+                  })() && (
                     <View style={styles.paymentContent}>
                       <Text style={styles.paymentInstruction}>
                         Código de barras do boleto:
@@ -754,7 +814,11 @@ export const FaturaBottomSheet = forwardRef<
                   )}
 
                   {/* Conteúdo Recorrente/Cartão */}
-                  {paymentMethod === 'recorrente' && (
+                  {paymentMethod === 'recorrente' && (() => {
+                    console.log('🔍 [RENDER] Renderizando Cartão/Recorrente')
+                    console.log('🔍 [RENDER] paymentMethod === "recorrente"?', paymentMethod === 'recorrente')
+                    return true
+                  })() && (
                     <View style={styles.paymentContent}>
                       {loadingCartoes ? (
                         <View style={styles.loadingContainer}>

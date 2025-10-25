@@ -370,6 +370,12 @@ const ReactivateLineBottomSheet: React.FC<ReactivateLineBottomSheetProps> = ({
           style: 'default',
           onPress: async () => {
             try {
+              // 🔍 DEBUG: Log do msisdn original recebido
+              console.log('📞 [REATIVAR] ===== DEBUG MSISDN =====')
+              console.log('📞 [REATIVAR] msisdn original (prop):', msisdn)
+              console.log('📞 [REATIVAR] msisdn sem formatação:', msisdn.replace(/\D/g, ''))
+              console.log('📞 [REATIVAR] msisdn sem DDD 55:', msisdn.replace(/\D/g, '').slice(2))
+
               const payload = {
                 token: user?.token || '',
                 userInfo: JSON.stringify({
@@ -381,6 +387,10 @@ const ReactivateLineBottomSheet: React.FC<ReactivateLineBottomSheetProps> = ({
                 planid_personalizado: selectedPlan.id?.toString() || '',
                 msisdn: msisdn.replace(/\D/g, '').slice(2), // Remove formatação e DDD (55)
               }
+
+              console.log('📦 [REATIVAR] Payload completo:', JSON.stringify(payload, null, 2))
+              console.log('📦 [REATIVAR] msisdn no payload:', payload.msisdn)
+              console.log('📞 [REATIVAR] ================================')
 
               const result = await reactivateLine(payload).unwrap()
 

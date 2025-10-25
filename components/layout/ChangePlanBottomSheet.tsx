@@ -6,6 +6,7 @@ import {
   View,
   Dimensions,
   Keyboard,
+  Image,
 } from 'react-native'
 import { VStack } from '@/components/ui/vstack'
 import { HStack } from '@/components/ui/hstack'
@@ -32,6 +33,8 @@ import {
   Extrapolation,
 } from 'react-native-reanimated'
 import Toast from 'react-native-toast-message'
+import { useAppSelector } from '@/src/store/hooks'
+import { selectDet2Data } from '@/src/store/slices/det2Slice'
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window')
 
@@ -81,11 +84,29 @@ interface ChangePlanBottomSheetProps {
   onSuccess?: (fatura?: string) => void
 }
 
+interface AppBenefit {
+  name: string
+  image: any // ImageSourcePropType
+}
+
 // Mock de apps inclusos
-const mockApps = [
-  { name: 'WhatsApp' },
-  { name: 'Instagram' },
-  { name: 'YouTube' },
+const mockApps: AppBenefit[] = [
+  {
+    name: 'WhatsApp',
+    image: require('@/assets/images/whatsApp.png'),
+  },
+  {
+    name: 'Acúmulo de Gigas',
+    image: require('@/assets/images/acumuloDeGigas.png'),
+  },
+  {
+    name: "SMS's Ilimitados",
+    image: require('@/assets/images/smsIlimitado.png'),
+  },
+  {
+    name: 'Ligações Ilimitadas',
+    image: require('@/assets/images/ligaçõesIlimitadas.png'),
+  },
 ]
 
 // Componente do Card do Plano
@@ -201,7 +222,7 @@ const PlanCard: React.FC<PlanCardProps> = React.memo(
                 textAlign: 'center',
               }}
             >
-              {plan.min} Minutos • {plan.sms} SMS
+              {plan.description}
             </Text>
           </VStack>
 
@@ -223,35 +244,73 @@ const PlanCard: React.FC<PlanCardProps> = React.memo(
                   textAlign: 'center',
                 }}
               >
-                Apps inclusos:
+                Benefícios:
               </Text>
               <View
                 style={{
                   flexDirection: 'row',
                   flexWrap: 'wrap',
                   justifyContent: 'center',
-                  gap: 6,
+                  gap: 12,
                 }}
               >
                 {mockApps.map((app, index) => (
                   <View
                     key={index}
                     style={{
-                      width: RESPONSIVE.appIcon.size,
-                      aspectRatio: 1,
-                      borderRadius: 12,
-                      backgroundColor: '#F8F9FA',
-                      justifyContent: 'center',
                       alignItems: 'center',
-                      shadowColor: '#000',
-                      shadowOffset: { width: 0, height: 1 },
-                      shadowOpacity: 0.08,
-                      shadowRadius: 2,
-                      elevation: 2,
+                      width: RESPONSIVE.appIcon.size,
+                      marginBottom: 4,
                     }}
                   >
+                    {/* Card com imagem */}
+                    <View
+                      style={{
+                        width: RESPONSIVE.appIcon.size - 20,
+                        aspectRatio: 1,
+                        borderRadius: 12,
+                        backgroundColor: '#F8F9FA',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 1 },
+                        shadowOpacity: 0.08,
+                        shadowRadius: 2,
+                        elevation: 2,
+                        marginBottom: 6,
+                        overflow: 'hidden', // Para respeitar o borderRadius
+                      }}
+                    >
+                      {app.image ? (
+                        <Image
+                          source={app.image}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            borderRadius: 12,
+                          }}
+                          resizeMode="cover"
+                        />
+                      ) : (
+                        <Text
+                          style={{
+                            fontSize: RESPONSIVE.fontSize.benefits * 0.8,
+                            color: colors.text,
+                          }}
+                        >
+                          {app.name.charAt(0)}
+                        </Text>
+                      )}
+                    </View>
+                    {/* Texto abaixo do card */}
                     <Text
-                      style={{ fontSize: RESPONSIVE.fontSize.benefits * 0.65 }}
+                      style={{
+                        fontSize: RESPONSIVE.fontSize.benefits * 0.55,
+                        color: colors.text,
+                        textAlign: 'center',
+                        lineHeight: RESPONSIVE.fontSize.benefits * 0.65,
+                      }}
+                      numberOfLines={2}
                     >
                       {app.name}
                     </Text>
@@ -323,12 +382,16 @@ const ChangePlanBottomSheet: React.FC<ChangePlanBottomSheetProps> = ({
   currentPlanId,
   onSuccess,
 }) => {
+  // ✅ TODOS OS HOOKS NO TOPO (antes de qualquer lógica)
   const { user } = useAuth()
+  const det2Data = useAppSelector(selectDet2Data)
+
   const bottomSheetRef = useRef<BottomSheet>(null)
   const carouselRef = useRef<ICarouselInstance>(null)
 
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null)
   const [currentIndex, setCurrentIndex] = useState(0)
+
   const progressValue = useSharedValue<number>(0)
 
   const snapPoints = useMemo(() => ['80%'], [])
@@ -346,6 +409,9 @@ const ChangePlanBottomSheet: React.FC<ChangePlanBottomSheetProps> = ({
 
   // Tipagem explícita para o erro
   const hasPlansError = Boolean(plansError)
+
+  // 📞 Usar msisdn da linha selecionada (det2Data) ao invés do prop
+  const selectedLineMsisdn = det2Data?.msisdn || msisdn
 
   const allPlans = React.useMemo(() => {
     if (!plansData) return []
@@ -408,8 +474,18 @@ const ChangePlanBottomSheet: React.FC<ChangePlanBottomSheetProps> = ({
                 token: user?.token || '',
                 planid: selectedPlan.planid,
                 planid_personalizado: selectedPlan.id?.toString() || '',
-                msisdn: msisdn.replace(/\D/g, '').slice(2), // Remove formatação e DDD (55)
+                msisdn: selectedLineMsisdn.replace(/\D/g, '').slice(2), // Remove formatação e DDD (55)
               }
+
+              console.log('📞 [ALTERAR PLANO] Payload enviado:', payload)
+              console.log(
+                '📞 [ALTERAR PLANO] msisdn original:',
+                selectedLineMsisdn,
+              )
+              console.log(
+                '📞 [ALTERAR PLANO] msisdn sem DDD:',
+                selectedLineMsisdn.replace(/\D/g, '').slice(2),
+              )
 
               const result = await changePlan(payload).unwrap()
 
@@ -484,7 +560,7 @@ const ChangePlanBottomSheet: React.FC<ChangePlanBottomSheetProps> = ({
         style={{
           justifyContent: 'center',
           gap: 8,
-          marginTop: 8,
+
           marginBottom: 4,
         }}
       >
@@ -615,7 +691,7 @@ const ChangePlanBottomSheet: React.FC<ChangePlanBottomSheetProps> = ({
                 ref={carouselRef}
                 loop={false}
                 width={screenWidth}
-                height={CARD_HEIGHT + 40}
+                height={CARD_HEIGHT}
                 data={allPlans}
                 renderItem={renderPlanCard}
                 onProgressChange={onProgressChange}

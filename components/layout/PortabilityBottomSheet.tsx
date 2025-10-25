@@ -28,6 +28,8 @@ import BottomSheet, {
 import Toast from 'react-native-toast-message'
 import moment from 'moment'
 import 'moment/locale/pt-br'
+import { maskCelularSemDDD } from '@/src/utils/masks'
+import { maskCelular } from '@/utils/masks'
 
 moment.locale('pt-br')
 
@@ -384,22 +386,16 @@ const PortabilityBottomSheet: React.FC<PortabilityBottomSheetProps> = ({
     )
   }
 
-  // Renderizar formulário de solicitação
   const renderRequestForm = () => {
-    // Formatar número atual de forma segura
-    const currentPhone = msisdn
-      ? formatPhone(msisdn.replace(/\D/g, '').slice(2))
-      : '-'
+    const currentPhone = msisdn ? formatPhone(msisdn.replace(/\D/g, '')) : '-'
 
     return (
       <BottomSheetScrollView style={{ flex: 1 }}>
         <VStack space="lg" style={{ paddingBottom: 20 }}>
-          {/* Número atual - apenas texto */}
           <Text style={{ fontSize: 16, color: colors.text, fontWeight: '500' }}>
-            Número atual: {currentPhone}
+            Número atual: {maskCelular(currentPhone)}
           </Text>
 
-          {/* Input do número a portar */}
           <VStack space="xs">
             <Text
               style={{
@@ -438,7 +434,6 @@ const PortabilityBottomSheet: React.FC<PortabilityBottomSheetProps> = ({
               </View>
             </HStack>
 
-            {/* Mostrar operadora */}
             {operadora.name && (
               <Text
                 style={{
@@ -451,7 +446,6 @@ const PortabilityBottomSheet: React.FC<PortabilityBottomSheetProps> = ({
               </Text>
             )}
 
-            {/* Loading operadora */}
             {(loadingOperadora || fetchingOperadora) && (
               <HStack space="xs" style={{ alignItems: 'center' }}>
                 <ActivityIndicator size="small" color={colors.primary} />

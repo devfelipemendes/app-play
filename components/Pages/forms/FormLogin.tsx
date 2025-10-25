@@ -78,7 +78,10 @@ export default function FormLogin() {
     biometricType,
     hasStoredCredentials,
     saveCredentials,
+    removeCredentials,
     authenticateWithBiometric,
+    getStoredCredentials,
+    checkStoredCredentials,
   } = useBiometricAuth()
 
   // Debug - remover depois
@@ -94,6 +97,27 @@ export default function FormLogin() {
     // Validação com valibot
     try {
       const UnMaskData = unMask(data.cpfCnpj)
+
+      // 🔍 Verificar se há credenciais salvas com CPF diferente
+      if (hasStoredCredentials) {
+        const storedCreds = await getStoredCredentials()
+
+        if (storedCreds && storedCreds.cpf !== UnMaskData) {
+          console.log('⚠️ CPF diferente detectado!')
+          console.log('📦 CPF salvo:', storedCreds.cpf)
+          console.log('📦 CPF tentando logar:', UnMaskData)
+
+          // Limpar credenciais antigas
+          await removeCredentials()
+          await checkStoredCredentials()
+
+          Alert.alert(
+            'Acesso Rápido Removido',
+            'Você está fazendo login com um usuário diferente. O acesso rápido anterior foi removido.',
+            [{ text: 'OK' }]
+          )
+        }
+      }
 
       // Executa o login
       await signIn(
@@ -111,12 +135,40 @@ export default function FormLogin() {
       // Se o checkbox de biometria estiver marcado, salva as credenciais
       if (saveBiometric && isBiometricSupported) {
         const saved = await saveCredentials(UnMaskData, data.password)
-        if (saved && loginSuccess) {
+        if (saved) {
           Alert.alert(
             'Biometria Configurada',
             `Você pode fazer login com ${biometricType} na próxima vez!`,
           )
         }
+      }
+
+      // 🆕 Se não tinha checkbox marcado MAS acabou de remover credenciais antigas
+      // Perguntar se quer ativar biometria para o novo usuário
+      if (!saveBiometric && isBiometricSupported && !hasStoredCredentials) {
+        Alert.alert(
+          'Ativar Acesso Rápido?',
+          `Deseja usar ${biometricType} para fazer login mais rapidamente na próxima vez?`,
+          [
+            {
+              text: 'Agora não',
+              style: 'cancel',
+            },
+            {
+              text: 'Sim, ativar',
+              onPress: async () => {
+                const saved = await saveCredentials(UnMaskData, data.password)
+                if (saved) {
+                  await checkStoredCredentials()
+                  Alert.alert(
+                    'Acesso Rápido Ativado',
+                    `${biometricType} configurado com sucesso!`,
+                  )
+                }
+              },
+            },
+          ],
+        )
       }
     } catch (err: any) {
       console.log('Erro de validação', err.errors)
@@ -357,7 +409,7 @@ export default function FormLogin() {
         <Text style={{ fontSize: 14, color: '#666' }}>
           Ainda não possui uma conta?{' '}
           <Text
-            style={{ color: `${colors.primary}`, fontWeight: '500' }}
+            style={{ color: `${colors.primary}`, fontWeight: '700' }}
             onPress={() => dispatch(setMode('cadastro'))}
           >
             Cadastre-se
@@ -369,7 +421,7 @@ export default function FormLogin() {
         <Text style={{ fontSize: 14, color: '#666' }}>
           Esqueceu sua Senha?{' '}
           <Text
-            style={{ color: `${colors.primary}`, fontWeight: '500' }}
+            style={{ color: `${colors.primary}`, fontWeight: '700' }}
             onPress={() => dispatch(setMode('esqueciSenha'))}
           >
             Clique aqui!

@@ -75,6 +75,18 @@ export const useBiometricAuth = () => {
     }
   }
 
+  // Busca as credenciais salvas (sem autenticação)
+  const getStoredCredentials = async (): Promise<BiometricCredentials | null> => {
+    try {
+      const storedData = await AsyncStorage.getItem(CREDENTIALS_KEY)
+      if (!storedData) return null
+      return JSON.parse(storedData)
+    } catch (error) {
+      console.error('Erro ao buscar credenciais salvas:', error)
+      return null
+    }
+  }
+
   // Salva credenciais após login bem-sucedido
   const saveCredentials = async (cpf: string, password: string): Promise<boolean> => {
     try {
@@ -138,5 +150,6 @@ export const useBiometricAuth = () => {
     removeCredentials,
     authenticateWithBiometric,
     checkStoredCredentials,
+    getStoredCredentials, // ✅ Novo: buscar credenciais sem autenticação
   }
 }

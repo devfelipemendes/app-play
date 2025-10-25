@@ -31,6 +31,12 @@ export const maskCelular = (value: any) => {
 
   return mask(formattedValue, ['(99) 99999-9999']) // Aplica a máscara
 }
+export const maskCelularSemDDD = (value: any) => {
+  if (!value) return ''
+  const formattedValue = formatPhoneNumber(value) // Remove o "55" se existir
+
+  return mask(formattedValue, ['9 9999-9999']) // Aplica a máscara
+}
 
 export const maskTelefone = (value: any) =>
   !!value ? mask(value, ['(99) 9999-9999']) : ''

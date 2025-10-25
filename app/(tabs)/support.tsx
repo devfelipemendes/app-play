@@ -108,6 +108,7 @@ const Support = () => {
                 style={{
                   gap: 12,
                   paddingTop: 12,
+                  paddingRight: 16,
                   borderTopWidth: 1,
                   borderTopColor: colors.secondary + '20',
                 }}
@@ -124,7 +125,8 @@ const Support = () => {
                       color: colors.secondary,
                     }}
                   >
-                    Atendimento: Segunda a Sexta, 9h às 18h
+                    Segunda a Sábado de 08:00 h as 22:00 h domingos e feriados
+                    de 09:00 h as 17:00 h
                   </Text>
                 </HStack>
                 <HStack style={{ alignItems: 'center', gap: 10 }}>

@@ -35,7 +35,7 @@ const { width: screenWidth, height: screenHeight } = Dimensions.get('window')
 
 // Dimensões do card do carousel
 const CARD_WIDTH = screenWidth * 0.88
-const CARD_HEIGHT = screenHeight * 0.52
+const CARD_HEIGHT = screenHeight * 0.5
 
 // Responsividade consistente com ActivateLineBottomSheet
 const RESPONSIVE = {
@@ -336,7 +336,7 @@ const AdditionalRechargeBottomSheet: React.FC<
         style={{
           justifyContent: 'center',
           gap: 8,
-          marginTop: 12,
+
           marginBottom: 8,
         }}
       >
@@ -488,24 +488,6 @@ const AdditionalRechargeBottomSheet: React.FC<
             // borderBottomColor: colors.secondary + '20',
           }}
         >
-          {/* Área de arrastar visual */}
-          <View
-            style={{
-              alignItems: 'center',
-              paddingVertical: 8,
-              marginBottom: 8,
-            }}
-          >
-            {/* <View
-              style={{
-                width: 40,
-                height: 4,
-                borderRadius: 2,
-                backgroundColor: colors.secondary + '40',
-              }}
-            /> */}
-          </View>
-
           <HStack
             style={{
               justifyContent: 'space-between',
@@ -616,7 +598,7 @@ const AdditionalRechargeBottomSheet: React.FC<
                 ref={carouselRef}
                 loop={false}
                 width={screenWidth}
-                height={CARD_HEIGHT + 40}
+                height={CARD_HEIGHT}
                 data={allPlans}
                 renderItem={renderPlanCard}
                 onProgressChange={onProgressChange}

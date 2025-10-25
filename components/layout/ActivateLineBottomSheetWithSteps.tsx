@@ -7,6 +7,7 @@ import {
   Dimensions,
   TextInput as RNTextInput,
   Keyboard,
+  Image,
 } from 'react-native'
 import { VStack } from '@/components/ui/vstack'
 import { HStack } from '@/components/ui/hstack'
@@ -31,6 +32,11 @@ import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel'
 import Toast from 'react-native-toast-message'
 import { listaDdd } from '@/utils/listaDdd'
 import { Camera, CameraView, useCameraPermissions } from 'expo-camera'
+import { FaturaBottomSheet } from '@/src/components/screens/FaturaBottomSheet'
+import {
+  type FaturaDetalhada,
+  useGetFaturaMutation,
+} from '@/src/api/endpoints/faturaApi'
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window')
 
@@ -77,19 +83,27 @@ interface ActivateLineBottomSheetProps {
   onSuccess?: () => void
 }
 
+interface AppBenefit {
+  name: string
+  image: any // ImageSourcePropType
+}
 // Mock de apps inclusos
-const mockApps = [
+const mockApps: AppBenefit[] = [
   {
     name: 'WhatsApp',
-    icon: 'https://via.placeholder.com/40x40/25D366/FFFFFF?text=W',
+    image: require('@/assets/images/whatsApp.png'),
   },
   {
-    name: 'Instagram',
-    icon: 'https://via.placeholder.com/40x40/E4405F/FFFFFF?text=I',
+    name: 'Acúmulo de Gigas',
+    image: require('@/assets/images/acumuloDeGigas.png'),
   },
   {
-    name: 'YouTube',
-    icon: 'https://via.placeholder.com/40x40/FF0000/FFFFFF?text=Y',
+    name: "SMS's Ilimitados",
+    image: require('@/assets/images/smsIlimitado.png'),
+  },
+  {
+    name: 'Ligações Ilimitadas',
+    image: require('@/assets/images/ligaçõesIlimitadas.png'),
   },
 ]
 
@@ -109,6 +123,7 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
 }) => {
   const { user } = useAuth()
   const bottomSheetRef = useRef<BottomSheetModal>(null)
+  const faturaBottomSheetRef = useRef<BottomSheetModal>(null)
   const carouselRef = useRef<ICarouselInstance>(null)
   const iccidInputRef = useRef<RNTextInput>(null)
 
@@ -129,11 +144,16 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null)
   const [currentIndex, setCurrentIndex] = useState(0)
 
+  // Estados da fatura
+  const [faturaDetalhada, setFaturaDetalhada] =
+    useState<FaturaDetalhada | null>(null)
+
   const snapPoints = useMemo(() => ['90%'], [])
 
   // Mutations e queries
   const [checkIccid, { isLoading: loadingIccid }] = useChecaICCIDMutation()
   const [activateLine, { isLoading: isActivating }] = useActivateLineMutation()
+  const [getFatura, { isLoading: isLoadingFatura }] = useGetFaturaMutation()
 
   // Query de planos - só busca quando ICCID é válido
   const {
@@ -261,16 +281,54 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
     }
   }
 
-  const handleScanCode = ({ data }: { type: string; data: string }) => {
+  const handleScanCode = ({ data, type }: { type: string; data: string }) => {
+    console.log('📷 [SCANNER] Código detectado:', { type, data })
+
+    // Prevenir múltiplos scans
+    if (!showScanner) {
+      console.log('⚠️ [SCANNER] Scanner já fechado, ignorando scan')
+      return
+    }
+
     const cleanedData = data.replace(/\D/g, '').trim()
-    setFormData((prev) => ({ ...prev, iccid: cleanedData }))
-    setShowScanner(false)
+    console.log('📷 [SCANNER] Código limpo:', cleanedData)
+
+    if (cleanedData.length >= 18 && cleanedData.length <= 22) {
+      setFormData((prev) => ({ ...prev, iccid: cleanedData }))
+      setShowScanner(false)
+
+      Toast.show({
+        type: 'success',
+        text1: 'Código escaneado!',
+        text2: `ICCID: ${cleanedData}`,
+      })
+    } else {
+      console.log('⚠️ [SCANNER] Tamanho inválido:', cleanedData.length)
+      Toast.show({
+        type: 'warning',
+        text1: 'Código inválido',
+        text2: 'O código do chip deve ter entre 18-22 dígitos',
+      })
+    }
   }
 
   const getCameraPermissions = async () => {
     try {
-      // Usa API direta da Camera ao invés do hook
+      console.log('📷 [CAMERA] Solicitando permissão...')
+
+      // Primeiro verifica se já tem permissão
+      const currentPermission = await Camera.getCameraPermissionsAsync()
+      console.log('📷 [CAMERA] Permissão atual:', currentPermission.status)
+
+      if (currentPermission.status === 'granted') {
+        setHasPermission(true)
+        return true
+      }
+
+      // Se não tem, solicita
       const { status } = await Camera.requestCameraPermissionsAsync()
+      console.log('📷 [CAMERA] Permissão após solicitar:', status)
+
       setHasPermission(status === 'granted')
 
       if (status === 'denied') {
@@ -283,24 +341,46 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
       }
 
       return status === 'granted'
-    } catch (error) {
-      console.error('Erro ao solicitar permissão de câmera:', error)
+    } catch (error: any) {
+      console.error('❌ [CAMERA] Erro ao solicitar permissão:', error)
+      console.error('❌ [CAMERA] Stack:', error?.stack)
       setHasPermission(false)
+
+      Toast.show({
+        type: 'error',
+        text1: 'Erro ao acessar câmera',
+        text2:
+          error?.message || 'Tente novamente ou digite o ICCID manualmente',
+      })
+
       return false
     }
   }
 
   const openScanner = async () => {
-    // Solicita permissão e só abre se concedida
-    const granted = await getCameraPermissions()
+    try {
+      console.log('📷 [SCANNER] Abrindo scanner...')
 
-    if (granted) {
-      setShowScanner(true)
-    } else {
+      // Solicita permissão e só abre se concedida
+      const granted = await getCameraPermissions()
+
+      if (granted) {
+        console.log('✅ [SCANNER] Permissão concedida, abrindo câmera')
+        setShowScanner(true)
+      } else {
+        console.log('❌ [SCANNER] Permissão negada')
+        Toast.show({
+          type: 'error',
+          text1: 'Permissão necessária',
+          text2: 'Habilite a câmera nas configurações para escanear',
+        })
+      }
+    } catch (error: any) {
+      console.error('❌ [SCANNER] Erro ao abrir scanner:', error)
       Toast.show({
         type: 'error',
-        text1: 'Permissão necessária',
-        text2: 'Habilite a câmera nas configurações para escanear',
+        text1: 'Erro ao abrir câmera',
+        text2: 'Digite o ICCID manualmente',
       })
     }
   }
@@ -325,6 +405,19 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
     } else if (currentStep === ActivationStep.CONFIRMATION) {
       setCurrentStep(ActivationStep.PLAN_SELECT)
     }
+  }
+
+  // Função para fechar modal de fatura
+  const handleCloseFatura = () => {
+    // Primeiro fecha o modal de fatura
+    faturaBottomSheetRef.current?.dismiss()
+
+    // Aguarda um pouco antes de limpar e fechar modal principal
+    setTimeout(() => {
+      setFaturaDetalhada(null)
+      onClose()
+      onSuccess?.()
+    }, 300)
   }
 
   // Ativar linha final
@@ -352,26 +445,94 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
         }),
       }
 
-      console.log('🚀 Payload de ativação:', payload)
-      console.log('👤 User:', user)
-      console.log('📋 Selected Plan:', selectedPlan)
+      console.log('🚀 [ATIVAÇÃO_STEPS] Payload de ativação:', payload)
 
       const result = await activateLine(payload).unwrap()
 
-      console.log('✅ Resultado da ativação:', result)
+      // 🔍 DEBUG: Log da resposta da ativação
+      console.log(
+        '📦 [ATIVAÇÃO_STEPS] Resposta completa:',
+        JSON.stringify(result, null, 2),
+      )
+      console.log(
+        '🎯 [ATIVAÇÃO_STEPS] result.fatura (paymentId):',
+        result?.fatura,
+      )
 
-      Toast.show({
-        type: 'success',
-        text1: 'Linha Ativada! 🎉',
-        text2:
-          result.msg ||
-          'Aguarde alguns minutos para o efetuamento da ativação.',
-      })
+      // Se a resposta contém um paymentId, busca a fatura completa
+      if (result?.fatura && typeof result.fatura === 'string') {
+        console.log('✅ [ATIVAÇÃO_STEPS] PaymentId detectado:', result.fatura)
+        console.log('🔄 [ATIVAÇÃO_STEPS] Buscando dados completos da fatura...')
 
-      onClose()
-      onSuccess?.()
+        try {
+          // Busca a fatura completa usando o paymentId
+          const faturaCompleta = await getFatura({
+            payid: result.fatura,
+          }).unwrap()
+
+          console.log('✅ [ATIVAÇÃO_STEPS] Fatura completa recebida!')
+          console.log(
+            '✅ [ATIVAÇÃO_STEPS] faturaCompleta.payment:',
+            faturaCompleta.payment,
+          )
+          console.log('✅ [ATIVAÇÃO_STEPS] Campos importantes:', {
+            id: faturaCompleta.id,
+            payment: faturaCompleta.payment,
+            value: faturaCompleta.value,
+            status: faturaCompleta.status,
+            dueDate: faturaCompleta.dueDate,
+            barcode: faturaCompleta.barcode ? '✅ existe' : '❌ não existe',
+            payload: faturaCompleta.payload ? '✅ existe' : '❌ não existe',
+          })
+
+          // Define a fatura completa no estado
+          setFaturaDetalhada(faturaCompleta)
+
+          console.log('🚀 [ATIVAÇÃO_STEPS] Abrindo modal de fatura...')
+
+          // Fecha o modal de ativação primeiro
+          bottomSheetRef.current?.dismiss()
+
+          // Aguarda um pouco e abre o modal de fatura
+          setTimeout(() => {
+            faturaBottomSheetRef.current?.present()
+          }, 400)
+        } catch (faturaError: any) {
+          console.error(
+            '❌ [ATIVAÇÃO_STEPS] Erro ao buscar fatura:',
+            faturaError,
+          )
+          Toast.show({
+            type: 'error',
+            text1: 'Erro ao carregar fatura',
+            text2:
+              faturaError?.data?.message ||
+              'Não foi possível carregar os detalhes da fatura',
+          })
+          // Mesmo com erro na fatura, mostra sucesso e fecha
+          Toast.show({
+            type: 'success',
+            text1: 'Linha Ativada! 🎉',
+            text2: 'Aguarde alguns minutos para o efetuamento da ativação.',
+          })
+          onClose()
+          onSuccess?.()
+        }
+      } else {
+        console.log('ℹ️ [ATIVAÇÃO_STEPS] Nenhum paymentId retornado')
+        // Se não tem fatura, mostra toast de sucesso
+        Toast.show({
+          type: 'success',
+          text1: 'Linha Ativada! 🎉',
+          text2:
+            result.msg ||
+            'Aguarde alguns minutos para o efetuamento da ativação.',
+        })
+        onClose()
+        onSuccess?.()
+      }
     } catch (error: any) {
-      console.error('Erro ao ativar linha:', error)
+      console.error('❌ [ATIVAÇÃO_STEPS] Erro ao ativar linha:', error)
 
       if (error.status === 502) {
         Alert.alert('Erro', 'Este ICCID já está cadastrado no sistema!')
@@ -496,23 +657,59 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
                     <View
                       key={index}
                       style={{
-                        width: RESPONSIVE.appIcon.size,
-                        aspectRatio: 1,
-                        borderRadius: 12,
-                        backgroundColor: '#F8F9FA',
-                        justifyContent: 'center',
                         alignItems: 'center',
-                        shadowColor: '#000',
-                        shadowOffset: { width: 0, height: 1 },
-                        shadowOpacity: 0.08,
-                        shadowRadius: 2,
-                        elevation: 2,
+                        width: RESPONSIVE.appIcon.size,
+                        marginBottom: 4,
                       }}
                     >
+                      {/* Card com imagem */}
+                      <View
+                        style={{
+                          width: RESPONSIVE.appIcon.size - 20,
+                          aspectRatio: 1,
+                          borderRadius: 12,
+                          backgroundColor: '#F8F9FA',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          shadowColor: '#000',
+                          shadowOffset: { width: 0, height: 1 },
+                          shadowOpacity: 0.08,
+                          shadowRadius: 2,
+                          elevation: 2,
+                          marginBottom: 6,
+                          overflow: 'hidden', // Para respeitar o borderRadius
+                        }}
+                      >
+                        {app.image ? (
+                          <Image
+                            source={app.image}
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              borderRadius: 12,
+                            }}
+                            resizeMode="cover"
+                          />
+                        ) : (
+                          <Text
+                            style={{
+                              fontSize: RESPONSIVE.fontSize.benefits * 0.8,
+                              color: colors.text,
+                            }}
+                          >
+                            {app.name.charAt(0)}
+                          </Text>
+                        )}
+                      </View>
+                      {/* Texto abaixo do card */}
                       <Text
                         style={{
-                          fontSize: RESPONSIVE.fontSize.benefits * 0.65,
+                          fontSize: RESPONSIVE.fontSize.benefits * 0.55,
+                          color: colors.text,
+                          textAlign: 'center',
+                          lineHeight: RESPONSIVE.fontSize.benefits * 0.65,
                         }}
+                        numberOfLines={2}
                       >
                         {app.name}
                       </Text>
@@ -681,11 +878,39 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
                     height: screenHeight,
                     width: screenWidth,
                   }}
+                  facing="back"
                   onBarcodeScanned={showScanner ? handleScanCode : undefined}
                   barcodeScannerSettings={{
-                    barcodeTypes: ['code128', 'code39', 'ean13'],
+                    barcodeTypes: [
+                      'code128',
+                      'code39',
+                      'code93',
+                      'ean13',
+                      'ean8',
+                      'itf14',
+                      'upc_e',
+                      'upc_a',
+                      'codabar',
+                      'qr',
+                    ],
                   }}
                 />
+
+                {/* Botão fechar scanner */}
+                <TouchableOpacity
+                  onPress={() => setShowScanner(false)}
+                  style={{
+                    position: 'absolute',
+                    top: 50,
+                    right: 20,
+                    zIndex: 3,
+                    backgroundColor: 'rgba(0,0,0,0.7)',
+                    borderRadius: 30,
+                    padding: 12,
+                  }}
+                >
+                  <Icon as={X} size="lg" style={{ color: 'white' }} />
+                </TouchableOpacity>
 
                 {/* Texto instrucional */}
                 <View
@@ -817,6 +1042,7 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
                   flexWrap: 'wrap',
                   gap: 10,
                   paddingBottom: 20,
+                  justifyContent: 'center',
                 }}
               >
                 {listaDdd.map((ddd) => (
@@ -1095,137 +1321,148 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
   }
 
   return (
-    <BottomSheetModal
-      ref={bottomSheetRef}
-      snapPoints={snapPoints}
-      enablePanDownToClose
-      onDismiss={onClose}
-      backdropComponent={renderBackdrop}
-      backgroundStyle={{ backgroundColor: colors.background }}
-      handleIndicatorStyle={{ backgroundColor: colors.disabled }}
-      enableContentPanningGesture={true}
-      enableOverDrag={false}
-      activeOffsetY={[-5, 5]}
-    >
-      <BottomSheetView style={{ flex: 1, paddingHorizontal: 20 }}>
-        {/* Header */}
-        <HStack
-          style={{
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            paddingBottom: 16,
-            borderBottomWidth: 1,
-            borderBottomColor: colors.border,
-          }}
-        >
-          {/* Botão voltar */}
-          {currentStep !== ActivationStep.ICCID_INPUT && (
-            <TouchableOpacity onPress={handleBackStep} style={{ padding: 4 }}>
-              <Icon as={ChevronLeft} color={colors.text} size="xl" />
-            </TouchableOpacity>
-          )}
-
-          {/* Título */}
-          <VStack style={{ flex: 1, alignItems: 'center' }}>
-            <Text style={{ fontSize: 12, color: colors.subTitle }}>
-              {getStepTitle()}
-            </Text>
-            <Text
-              style={{ fontSize: 18, fontWeight: '600', color: colors.text }}
-            >
-              Ativar Linha
-            </Text>
-          </VStack>
-
-          {/* Botão fechar */}
-        </HStack>
-
-        {/* Indicador de progresso */}
-        <HStack
-          space="xs"
-          style={{
-            marginTop: 16,
-            marginBottom: 16,
-          }}
-        >
-          {[
-            ActivationStep.ICCID_INPUT,
-            ActivationStep.DDD_SELECT,
-            ActivationStep.PLAN_SELECT,
-            ActivationStep.CONFIRMATION,
-          ].map((step, index) => {
-            const isActive =
-              Object.values(ActivationStep).indexOf(currentStep) >= index
-            return (
-              <View
-                key={step}
-                style={{
-                  flex: 1,
-                  height: 4,
-                  borderRadius: 2,
-                  backgroundColor: isActive ? colors.primary : colors.disabled,
-                }}
-              />
-            )
-          })}
-        </HStack>
-
-        {/* Conteúdo do step */}
-        <View style={{ flex: 1, paddingTop: 8 }}>{renderStepContent()}</View>
-
-        {/* Footer com botões */}
-        {!showScanner && (
-          <VStack
-            space="sm"
+    <>
+      <BottomSheetModal
+        ref={bottomSheetRef}
+        snapPoints={snapPoints}
+        enablePanDownToClose
+        onDismiss={onClose}
+        backdropComponent={renderBackdrop}
+        backgroundStyle={{ backgroundColor: colors.background }}
+        handleIndicatorStyle={{ backgroundColor: colors.disabled }}
+        enableContentPanningGesture={true}
+        enableOverDrag={false}
+        activeOffsetY={[-5, 5]}
+      >
+        <BottomSheetView style={{ flex: 1, paddingHorizontal: 20 }}>
+          {/* Header */}
+          <HStack
             style={{
-              paddingTop: 16,
+              justifyContent: 'space-between',
+              alignItems: 'center',
               paddingBottom: 16,
-              borderTopWidth: 1,
-              borderTopColor: colors.border,
+              borderBottomWidth: 1,
+              borderBottomColor: colors.border,
             }}
           >
-            {currentStep === ActivationStep.CONFIRMATION ? (
-              <TouchableOpacity
-                onPress={handleActivateLine}
-                disabled={isActivating}
-                style={{
-                  backgroundColor: colors.primary,
-                  borderRadius: 12,
-                  paddingVertical: 16,
-                  alignItems: 'center',
-                  opacity: isActivating ? 0.6 : 1,
-                }}
-              >
-                <Text
-                  style={{ fontSize: 16, fontWeight: '600', color: 'white' }}
-                >
-                  {isActivating ? 'Ativando...' : 'Confirmar Ativação'}
-                </Text>
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity
-                onPress={handleNextStep}
-                disabled={!canGoNext()}
-                style={{
-                  backgroundColor: canGoNext()
-                    ? colors.primary
-                    : colors.disabled,
-                  borderRadius: 12,
-                  paddingVertical: 16,
-                  alignItems: 'center',
-                }}
-              >
-                <Text
-                  style={{ fontSize: 16, fontWeight: '600', color: 'white' }}
-                >
-                  Continuar
-                </Text>
+            {/* Botão voltar */}
+            {currentStep !== ActivationStep.ICCID_INPUT && (
+              <TouchableOpacity onPress={handleBackStep} style={{ padding: 4 }}>
+                <Icon as={ChevronLeft} color={colors.text} size="xl" />
               </TouchableOpacity>
             )}
-          </VStack>
-        )}
-      </BottomSheetView>
-    </BottomSheetModal>
+
+            {/* Título */}
+            <VStack style={{ flex: 1, alignItems: 'center' }}>
+              <Text style={{ fontSize: 12, color: colors.subTitle }}>
+                {getStepTitle()}
+              </Text>
+              <Text
+                style={{ fontSize: 18, fontWeight: '600', color: colors.text }}
+              >
+                Ativar Linha
+              </Text>
+            </VStack>
+
+            {/* Botão fechar */}
+          </HStack>
+
+          {/* Indicador de progresso */}
+          <HStack
+            space="xs"
+            style={{
+              marginTop: 16,
+              marginBottom: 16,
+            }}
+          >
+            {[
+              ActivationStep.ICCID_INPUT,
+              ActivationStep.DDD_SELECT,
+              ActivationStep.PLAN_SELECT,
+              ActivationStep.CONFIRMATION,
+            ].map((step, index) => {
+              const isActive =
+                Object.values(ActivationStep).indexOf(currentStep) >= index
+              return (
+                <View
+                  key={step}
+                  style={{
+                    flex: 1,
+                    height: 4,
+                    borderRadius: 2,
+                    backgroundColor: isActive
+                      ? colors.primary
+                      : colors.disabled,
+                  }}
+                />
+              )
+            })}
+          </HStack>
+
+          {/* Conteúdo do step */}
+          <View style={{ flex: 1, paddingTop: 8 }}>{renderStepContent()}</View>
+
+          {/* Footer com botões */}
+          {!showScanner && (
+            <VStack
+              space="sm"
+              style={{
+                paddingTop: 16,
+                paddingBottom: 16,
+                borderTopWidth: 1,
+                borderTopColor: colors.border,
+              }}
+            >
+              {currentStep === ActivationStep.CONFIRMATION ? (
+                <TouchableOpacity
+                  onPress={handleActivateLine}
+                  disabled={isActivating}
+                  style={{
+                    backgroundColor: colors.primary,
+                    borderRadius: 12,
+                    paddingVertical: 16,
+                    alignItems: 'center',
+                    opacity: isActivating ? 0.6 : 1,
+                  }}
+                >
+                  <Text
+                    style={{ fontSize: 16, fontWeight: '600', color: 'white' }}
+                  >
+                    {isActivating ? 'Ativando...' : 'Confirmar Ativação'}
+                  </Text>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  onPress={handleNextStep}
+                  disabled={!canGoNext()}
+                  style={{
+                    backgroundColor: canGoNext()
+                      ? colors.primary
+                      : colors.disabled,
+                    borderRadius: 12,
+                    paddingVertical: 16,
+                    alignItems: 'center',
+                  }}
+                >
+                  <Text
+                    style={{ fontSize: 16, fontWeight: '600', color: 'white' }}
+                  >
+                    Continuar
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </VStack>
+          )}
+        </BottomSheetView>
+      </BottomSheetModal>
+
+      {/* Modal de detalhes da fatura */}
+      <FaturaBottomSheet
+        ref={faturaBottomSheetRef}
+        fatura={faturaDetalhada}
+        onClose={handleCloseFatura}
+      />
+    </>
   )
 }
 

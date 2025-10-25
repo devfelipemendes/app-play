@@ -67,6 +67,7 @@ module.exports = ({ config = {} }) => {
       ...config,
       expo: {
         ...baseConfig,
+        orientation: 'portrait', // 🔒 Bloquear orientação em portrait
         ios: {
           ...(baseConfig.ios || {}),
           bundleIdentifier: baseConfig.ios?.bundleIdentifier || 'com.appplay.default',
@@ -80,6 +81,7 @@ module.exports = ({ config = {} }) => {
           ...(baseConfig.android || {}),
           package: baseConfig.android?.package || 'com.appplay.default',
           permissions: baseConfig.android?.permissions || [],
+          screenOrientation: 'portrait', // 🔒 Bloquear orientação no Android
         },
         extra: {
           ...(baseConfig.extra || {}),
@@ -104,6 +106,7 @@ module.exports = ({ config = {} }) => {
       owner: partnerConfig.owner,
       version: partnerConfig.version || baseConfig.version,
       userInterfaceStyle: baseConfig.userInterfaceStyle || 'automatic',
+      orientation: 'portrait', // 🔒 Bloquear orientação em portrait
 
       // iOS Config
       ios: {
@@ -135,6 +138,7 @@ module.exports = ({ config = {} }) => {
         },
         softwareKeyboardLayoutMode: baseConfig.android?.softwareKeyboardLayoutMode,
         permissions: baseConfig.android?.permissions || [],
+        screenOrientation: 'portrait', // 🔒 Bloquear orientação no Android
       },
 
       // Assets

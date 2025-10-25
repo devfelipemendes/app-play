@@ -69,7 +69,7 @@ export const CustomInput = ({
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder || label}
-        placeholderTextColor="#eaeaea"
+        placeholderTextColor={colors.disabled}
         style={{
           color: colors.text,
           fontSize: TYPOGRAPHY.bodySmall,

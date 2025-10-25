@@ -7,6 +7,7 @@ import {
   Dimensions,
   Alert,
   Image,
+  ActivityIndicator,
 } from 'react-native'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { Box, Button, HStack, VStack } from '@gluestack-ui/themed'
@@ -24,6 +25,15 @@ import {
 import { RootState } from '@/src/store/index'
 import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
 import { env } from '@/config/env'
+import Toast from 'react-native-toast-message'
+import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { FaturaBottomSheet } from '@/src/components/screens/FaturaBottomSheet'
+import {
+  type FaturaDetalhada,
+  useGetFaturaMutation,
+} from '@/src/api/endpoints/faturaApi'
+import { setMode } from '@/src/store/slices/screenFlowSlice'
+import { useRouter } from 'expo-router'
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window')
 const CARD_WIDTH = screenWidth * 0.9
@@ -73,30 +83,26 @@ interface Plan {
   mostraappfranquia?: boolean | null
 }
 
-const mockApps = [
+interface AppBenefit {
+  name: string
+  image: any // ImageSourcePropType
+}
+const mockApps: AppBenefit[] = [
   {
     name: 'WhatsApp',
-    icon: 'https://via.placeholder.com/40x40/25D366/FFFFFF?text=W',
+    image: require('@/assets/images/whatsApp.png'),
   },
   {
-    name: 'Instagram',
-    icon: 'https://via.placeholder.com/40x40/E4405F/FFFFFF?text=I',
+    name: 'Acúmulo de Gigas',
+    image: require('@/assets/images/acumuloDeGigas.png'),
   },
   {
-    name: 'YouTube',
-    icon: 'https://via.placeholder.com/40x40/FF0000/FFFFFF?text=Y',
+    name: "SMS's Ilimitados",
+    image: require('@/assets/images/smsIlimitado.png'),
   },
   {
-    name: 'Netflix',
-    icon: 'https://via.placeholder.com/40x40/E50914/FFFFFF?text=N',
-  },
-  {
-    name: 'Spotify',
-    icon: 'https://via.placeholder.com/40x40/1DB954/FFFFFF?text=S',
-  },
-  {
-    name: 'TikTok',
-    icon: 'https://via.placeholder.com/40x40/000000/FFFFFF?text=T',
+    name: 'Ligações Ilimitadas',
+    image: require('@/assets/images/ligaçõesIlimitadas.png'),
   },
 ]
 
@@ -104,10 +110,11 @@ interface PlanCardProps {
   plan: Plan
   animationValue: any
   onBuy: () => void
+  isActivating?: boolean // Indica se este plano está sendo ativado
 }
 
 const PlanCard: React.FC<PlanCardProps> = React.memo(
-  ({ plan, animationValue, onBuy }) => {
+  ({ plan, animationValue, onBuy, isActivating = false }) => {
     const { colors } = useCompanyThemeSimple()
 
     const animatedStyle = useAnimatedStyle(() => {
@@ -194,7 +201,10 @@ const PlanCard: React.FC<PlanCardProps> = React.memo(
               textAlign: 'center',
             }}
           >
-            {plan.min} Minutos • {plan.sms} SMS
+            {plan.min === '999'
+              ? 'Minutos Ilimitados'
+              : plan.min + ' ' + 'Minutos'}{' '}
+            • {plan.sms} SMS
           </Text>
         </VStack>
 
@@ -225,41 +235,63 @@ const PlanCard: React.FC<PlanCardProps> = React.memo(
               gap: 6,
             }}
           >
-            {mockApps.slice(0, 6).map((app, index) => (
+            {mockApps.map((app, index) => (
               <View
                 key={index}
                 style={{
-                  width: RESPONSIVE.appIcon.size,
-                  aspectRatio: 1,
-                  borderRadius: 12,
-                  backgroundColor: '#F8F9FA',
-                  justifyContent: 'center',
                   alignItems: 'center',
-                  shadowColor: '#000',
-                  shadowOffset: { width: 0, height: 1 },
-                  shadowOpacity: 0.08,
-                  shadowRadius: 2,
-                  elevation: 2,
+                  width: RESPONSIVE.appIcon.size,
+                  marginBottom: 4,
                 }}
               >
-                <Image
-                  source={{ uri: app.icon }}
+                {/* Card com imagem */}
+                <View
                   style={{
-                    width: '60%',
-                    height: '60%',
-                    borderRadius: 6,
+                    width: RESPONSIVE.appIcon.size - 20,
+                    aspectRatio: 1,
+                    borderRadius: 12,
+                    backgroundColor: '#F8F9FA',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowOpacity: 0.08,
+                    shadowRadius: 2,
+                    elevation: 2,
+                    marginBottom: 6,
+                    overflow: 'hidden', // Para respeitar o borderRadius
                   }}
-                  resizeMode="cover"
-                />
+                >
+                  {app.image ? (
+                    <Image
+                      source={app.image}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        borderRadius: 12,
+                      }}
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <Text
+                      style={{
+                        fontSize: RESPONSIVE.fontSize.benefits * 0.8,
+                        color: colors.text,
+                      }}
+                    >
+                      {app.name.charAt(0)}
+                    </Text>
+                  )}
+                </View>
+                {/* Texto abaixo do card */}
                 <Text
                   style={{
-                    fontSize: RESPONSIVE.fontSize.benefits * 0.65,
+                    fontSize: RESPONSIVE.fontSize.benefits * 0.55,
                     color: colors.text,
-                    fontWeight: '500',
-                    marginTop: 2,
                     textAlign: 'center',
+                    lineHeight: RESPONSIVE.fontSize.benefits * 0.65,
                   }}
-                  numberOfLines={1}
+                  numberOfLines={2}
                 >
                   {app.name}
                 </Text>
@@ -310,43 +342,68 @@ const PlanCard: React.FC<PlanCardProps> = React.memo(
         {/* Botão de Compra */}
         <Button
           onPress={onBuy}
+          disabled={isActivating}
           style={{
-            backgroundColor: colors.primary,
+            backgroundColor: isActivating ? colors.disabled : colors.primary,
             borderRadius: 16,
             paddingVertical: screenHeight * 0.018,
             paddingHorizontal: screenWidth * 0.06,
             shadowColor: colors.primary,
             shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
+            shadowOpacity: isActivating ? 0.1 : 0.3,
             shadowRadius: 8,
-            elevation: 6,
+            elevation: isActivating ? 2 : 6,
           }}
         >
-          <Text
-            style={{
-              color: colors.textButton,
-              fontSize: screenWidth * 0.04,
-              fontWeight: '600',
-              textAlign: 'center',
-            }}
-          >
-            Contratar Plano
-          </Text>
+          {isActivating ? (
+            <HStack space="sm" alignItems="center" justifyContent="center">
+              <ActivityIndicator size="small" color={colors.textButton} />
+              <Text
+                style={{
+                  color: colors.textButton,
+                  fontSize: screenWidth * 0.04,
+                  fontWeight: '600',
+                  textAlign: 'center',
+                }}
+              >
+                Ativando...
+              </Text>
+            </HStack>
+          ) : (
+            <Text
+              style={{
+                color: colors.textButton,
+                fontSize: screenWidth * 0.04,
+                fontWeight: '600',
+                textAlign: 'center',
+              }}
+            >
+              Contratar Plano
+            </Text>
+          )}
         </Button>
       </Box>
     )
   },
   (prevProps, nextProps) => {
-    // Só re-renderizar se o planid mudar
-    return prevProps.plan.planid === nextProps.plan.planid
+    // Re-renderizar se o planid ou isActivating mudarem
+    return (
+      prevProps.plan.planid === nextProps.plan.planid &&
+      prevProps.isActivating === nextProps.isActivating
+    )
   },
 )
 
 const PlansCarousel: React.FC = () => {
   const carouselRef = useRef<ICarouselInstance>(null)
+  const faturaBottomSheetRef = useRef<BottomSheetModal>(null)
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [faturaDetalhada, setFaturaDetalhada] =
+    useState<FaturaDetalhada | null>(null)
+  const [activatingPlanId, setActivatingPlanId] = useState<number | null>(null) // Controla qual plano está sendo ativado
   const progressValue = useSharedValue<number>(0)
   const { colors } = useCompanyThemeSimple()
+  const dispatch = useAppDispatch()
 
   // Buscar informações do usuário do Redux
   const userInfo = useAppSelector((state: RootState) => state.ativarLinha || {})
@@ -366,6 +423,10 @@ const PlansCarousel: React.FC = () => {
 
   // Mutation para ativar linha
   const [activateLine, { isLoading: isActivating }] = useActivateLineMutation()
+
+  // Mutation para buscar fatura completa
+  const [getFatura, { isLoading: isLoadingFatura }] = useGetFaturaMutation()
+
   const canShowPlans = env.COMPANY_ID
 
   // Mostrar apenas planos personalizados com mostraApp: true
@@ -373,121 +434,179 @@ const PlansCarousel: React.FC = () => {
     (plan) => plan.mostraApp === true,
   )
 
+  const handleCloseFatura = () => {
+    // Primeiro fecha o modal
+    faturaBottomSheetRef.current?.dismiss()
+
+    // Aguarda um pouco antes de redirecionar para garantir que o modal foi desmontado
+    setTimeout(() => {
+      setFaturaDetalhada(null) // Limpa a fatura
+      dispatch(setMode('login'))
+    }, 300)
+  }
+
   const handleBuyPlan = useCallback(
     async (plan: Plan) => {
       if (!cpf || !dddToUse || !iccid) {
-        Alert.alert(
-          'Dados Incompletos',
-          'Complete o cadastro antes de contratar um plano:\n\n' +
-            (!cpf ? '• CPF/CNPJ\n' : '') +
-            (!dddToUse ? '• DDD\n' : '') +
-            (!iccid ? '• ICCID do SIM Card' : ''),
-          [{ text: 'OK', style: 'default' }],
-        )
+        Toast.show({
+          type: 'info',
+          text1: 'Dados Incompletos',
+          text2: 'Complete o cadastro antes de contratar um plano',
+        })
         return
       }
 
       try {
         Alert.alert(
           'Confirmar Compra',
-          `Deseja contratar o plano de ${plan.gigas} por R$ ${plan.value}/mês?`,
+          `Deseja contratar o plano de ${plan.gigas}GB por R$ ${plan.value}/mês?`,
           [
             { text: 'Cancelar', style: 'cancel' },
             {
               text: 'Confirmar',
               style: 'default',
               onPress: async () => {
+                // Define que este plano está sendo ativado
+                setActivatingPlanId(plan.id)
+
                 const payload = {
                   cpf: cpf,
                   ddd: dddToUse,
                   iccid: iccid,
                   planid: plan.planid.toString(),
-                  planid_personalizado: plan.id.toString(), // ✅ Usa o ID do plano personalizado
+                  planid_personalizado: plan.id.toString(),
                   isApp: true,
-                  pospago: false, // ✅ String 'false' conforme esperado pela API
+                  pospago: false,
                   userInfo: JSON.stringify(userInfo),
                   esim: false,
                   companyid: env.COMPANY_ID,
                 }
 
-                // Debug visual - mostra o payload na tela
-                Alert.alert(
-                  '🔍 Debug - Payload',
-                  JSON.stringify(payload, null, 2),
-                  [
-                    { text: 'Cancelar', style: 'cancel' },
-                    {
-                      text: 'Enviar',
-                      onPress: async () => {
-                        try {
-                          const result = await activateLine(payload).unwrap()
+                try {
+                  const result = await activateLine(payload).unwrap()
 
-                          // Debug visual - mostra o resultado
-                          Alert.alert(
-                            '✅ Debug - Resposta',
-                            JSON.stringify(result, null, 2),
-                            [
-                              {
-                                text: 'OK',
-                                onPress: () => {
-                                  Alert.alert('Sucesso! 🎉', result.msg)
-                                },
-                              },
-                            ],
-                          )
-                        } catch (error: any) {
-                          // Debug visual - mostra o erro
-                          Alert.alert(
-                            '❌ Debug - Erro',
-                            JSON.stringify(
-                              {
-                                status: error.status,
-                                data: error.data,
-                                message: error.message,
-                              },
-                              null,
-                              2,
-                            ),
-                            [
-                              {
-                                text: 'OK',
-                                onPress: () => {
-                                  Alert.alert(
-                                    'Erro ❌',
-                                    error.data?.msg || 'Erro ao ativar linha',
-                                  )
-                                },
-                              },
-                            ],
-                          )
-                        }
-                      },
-                    },
-                  ],
-                )
+                  // 🔍 DEBUG: Log da resposta da ativação
+                  console.log(
+                    '📦 [ATIVAÇÃO] Resposta completa:',
+                    JSON.stringify(result, null, 2),
+                  )
+                  console.log(
+                    '🎯 [ATIVAÇÃO] result.fatura (paymentId):',
+                    result?.fatura,
+                  )
+
+                  // Se a resposta contém um paymentId, busca a fatura completa
+                  if (result?.fatura && typeof result.fatura === 'string') {
+                    console.log(
+                      '✅ [ATIVAÇÃO] PaymentId detectado:',
+                      result.fatura,
+                    )
+                    console.log(
+                      '🔄 [ATIVAÇÃO] Buscando dados completos da fatura...',
+                    )
+
+                    try {
+                      // Busca a fatura completa usando o paymentId
+                      const faturaCompleta = await getFatura({
+                        payid: result.fatura,
+                      }).unwrap()
+
+                      console.log('✅ [ATIVAÇÃO] Fatura completa recebida!')
+                      console.log(
+                        '✅ [ATIVAÇÃO] faturaCompleta.payment:',
+                        faturaCompleta.payment,
+                      )
+                      console.log('✅ [ATIVAÇÃO] Campos importantes:', {
+                        id: faturaCompleta.id,
+                        payment: faturaCompleta.payment,
+                        value: faturaCompleta.value,
+                        status: faturaCompleta.status,
+                        dueDate: faturaCompleta.dueDate,
+                        barcode: faturaCompleta.barcode
+                          ? '✅ existe'
+                          : '❌ não existe',
+                        payload: faturaCompleta.payload
+                          ? '✅ existe'
+                          : '❌ não existe',
+                      })
+
+                      // Define a fatura completa no estado
+                      setFaturaDetalhada(faturaCompleta)
+
+                      console.log('🚀 [ATIVAÇÃO] Abrindo modal de fatura...')
+                      faturaBottomSheetRef.current?.present()
+
+                      // Remove loading ao abrir o modal
+                      setActivatingPlanId(null)
+                    } catch (faturaError: any) {
+                      console.error(
+                        '❌ [ATIVAÇÃO] Erro ao buscar fatura:',
+                        faturaError,
+                      )
+                      Toast.show({
+                        type: 'error',
+                        text1: 'Erro ao carregar fatura',
+                        text2:
+                          faturaError?.data?.message ||
+                          'Não foi possível carregar os detalhes da fatura',
+                      })
+                      // Remove loading
+                      setActivatingPlanId(null)
+                      // Mesmo com erro na fatura, redireciona após 2s
+                      setTimeout(() => {
+                        dispatch(setMode('login'))
+                      }, 2000)
+                    }
+                  } else {
+                    console.log('ℹ️ [ATIVAÇÃO] Nenhum paymentId retornado')
+                    // Se não tem fatura, mostra toast de sucesso
+                    Toast.show({
+                      type: 'success',
+                      text1: 'Sucesso!',
+                      text2: result.msg || 'Linha ativada com sucesso!',
+                    })
+                    // Remove loading
+                    setActivatingPlanId(null)
+                    // Redireciona para login após 2 segundos
+                    setTimeout(() => {
+                      dispatch(setMode('login'))
+                    }, 2000)
+                  }
+                } catch (error: any) {
+                  console.error('❌ [ATIVAÇÃO] Erro ao ativar linha:', error)
+                  Toast.show({
+                    type: 'error',
+                    text1: 'Erro ao ativar linha',
+                    text2: error.data?.msg || 'Tente novamente em instantes',
+                  })
+                  // Remove loading em caso de erro
+                  setActivatingPlanId(null)
+                }
               },
             },
           ],
         )
       } catch (error) {
-        console.error('Erro ao processar compra:', error)
+        // Silently fail
       }
     },
-    [cpf, dddToUse, iccid, userInfo, activateLine],
+    [cpf, dddToUse, iccid, userInfo, activateLine, dispatch],
   )
 
   const renderPlanCard = useCallback(
     ({ item, animationValue }: { item: Plan; animationValue: any }) => {
       const handleBuy = () => handleBuyPlan(item)
+      const isActivating = activatingPlanId === item.id
       return (
         <PlanCard
           plan={item}
           animationValue={animationValue}
           onBuy={handleBuy}
+          isActivating={isActivating}
         />
       )
     },
-    [handleBuyPlan],
+    [handleBuyPlan, activatingPlanId],
   )
 
   const onProgressChange = (offsetProgress: number) => {
@@ -508,7 +627,7 @@ const PlansCarousel: React.FC = () => {
           flexDirection: 'row',
           justifyContent: 'center',
           alignItems: 'center',
-          marginTop: 8,
+
           gap: 8,
         }}
       >
@@ -639,6 +758,7 @@ const PlansCarousel: React.FC = () => {
           plan={allPlans[0]}
           animationValue={useSharedValue(0)}
           onBuy={() => handleBuyPlan(allPlans[0])}
+          isActivating={activatingPlanId === allPlans[0].id}
         />
       </Box>
     )
@@ -667,6 +787,13 @@ const PlansCarousel: React.FC = () => {
       />
 
       {renderDots()}
+
+      {/* MODAL DE FATURA */}
+      <FaturaBottomSheet
+        ref={faturaBottomSheetRef}
+        fatura={faturaDetalhada}
+        onClose={handleCloseFatura}
+      />
     </Box>
   )
 }

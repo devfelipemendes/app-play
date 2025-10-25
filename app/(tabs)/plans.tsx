@@ -13,6 +13,8 @@ import type { RootState } from '@/src/store'
 import { StatusBar } from 'expo-status-bar'
 import { ThemeContext } from '@/contexts/theme-context'
 import { useRouter } from 'expo-router'
+import { selectDet2Data, selectDet2Error } from '@/src/store/slices/det2Slice'
+import { maskCelular } from '@/utils/masks'
 
 const Plans = () => {
   const { colors } = useCompanyThemeSimple()
@@ -23,12 +25,28 @@ const Plans = () => {
   const [showActivateLineModal, setShowActivateLineModal] = useState(false)
   const [showPortabilityModal, setShowPortabilityModal] = useState(false)
 
-  // Pegar dados do usuário
+  // Pegar dados do usuário e da linha selecionada
   const user = useAppSelector((state: RootState) => state.auth.user)
-  const msisdn = user?.msisdn || ''
-  const currentPlanId = user?.planid_personalizado || ''
+  const det2Data = useAppSelector(selectDet2Data)
+  const det2Error = useAppSelector(selectDet2Error)
+
+  const msisdn = det2Data?.msisdn || ''
+  const currentPlanId = det2Data?.planid_personalizado || user?.planid_personalizado || ''
   const codigoP = user?.cp || ''
   const tempMsisdn = user?.tempmsisdn || ''
+
+  // Verificar se a linha selecionada tem MSISDN ativo
+  const isNoMsisdn = det2Error === 'NO_MSISDN'
+  const hasMsisdn = !isNoMsisdn && Boolean(msisdn && msisdn.trim().length > 0)
+
+  // Verificar se é pós-pago
+  const isPospago = user?.pospago === true
+
+  console.log('📱 [PLANS] det2Error:', det2Error)
+  console.log('📱 [PLANS] det2Data?.msisdn:', det2Data?.msisdn)
+  console.log('📱 [PLANS] isNoMsisdn:', isNoMsisdn)
+  console.log('📱 [PLANS] hasMsisdn:', hasMsisdn)
+  console.log('📱 [PLANS] isPospago:', isPospago)
 
   const handleChangePlan = () => {
     setShowChangePlanModal(true)
@@ -100,26 +118,45 @@ const Plans = () => {
       />
 
       <VStack className="px-4" space="md">
-        <RedirectCard
-          title="Alterar Plano"
-          icon={RefreshCcw}
-          onPress={handleChangePlan}
-        />
-        <RedirectCard
-          title="Recarga Adicional"
-          icon={Plus}
-          onPress={handleAdditionalRecharge}
-        />
-        <RedirectCard
-          title="Portabilidade"
-          icon={Repeat}
-          onPress={handlePortability}
-        />
-        <RedirectCard
-          title="Ativar Linha"
-          icon={Smartphone}
-          onPress={handleActivateLine}
-        />
+        {/* Se é PÓS-PAGO, mostra apenas Portabilidade */}
+        {isPospago ? (
+          <RedirectCard
+            title="Portabilidade"
+            icon={Repeat}
+            onPress={handlePortability}
+          />
+        ) : !hasMsisdn ? (
+          // Se NÃO é pós-pago e NÃO tem MSISDN, mostra apenas Ativar Nova Linha
+          <RedirectCard
+            title="Ativar Nova Linha"
+            icon={Smartphone}
+            onPress={handleActivateLine}
+          />
+        ) : (
+          // Se NÃO é pós-pago e TEM MSISDN, mostra todos os botões
+          <>
+            <RedirectCard
+              title="Alterar Plano"
+              icon={RefreshCcw}
+              onPress={handleChangePlan}
+            />
+            <RedirectCard
+              title="Recarga Adicional"
+              icon={Plus}
+              onPress={handleAdditionalRecharge}
+            />
+            <RedirectCard
+              title="Portabilidade"
+              icon={Repeat}
+              onPress={handlePortability}
+            />
+            <RedirectCard
+              title="Ativar Nova Linha"
+              icon={Smartphone}
+              onPress={handleActivateLine}
+            />
+          </>
+        )}
       </VStack>
 
       {/* Bottom Sheet de Alterar Plano */}

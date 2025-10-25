@@ -88,7 +88,7 @@ export default function LoginScreen() {
                   ? 0
                   : 80
                 : keyboardOpen
-                ? 60
+                ? 160
                 : 60,
             justifyContent: 'center',
             alignItems: 'center',

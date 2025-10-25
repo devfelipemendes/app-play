@@ -13,14 +13,12 @@ import { useAppSelector } from '@/src/store/hooks'
 import { selectDet2Data, selectDet2Error } from '@/src/store/slices/det2Slice'
 import {
   useListarFaturasQuery,
-  type Fatura,
-} from '@/src/api/endpoints/faturasApi'
-import { FaturaBottomSheet } from '@/src/components/screens/FaturaBottomSheet'
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
-import {
   useGetFaturaMutation,
+  type Fatura,
   type FaturaDetalhada,
 } from '@/src/api/endpoints/faturaApi'
+import { FaturaBottomSheet } from '@/src/components/screens/FaturaBottomSheet'
+import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import Toast from 'react-native-toast-message'
 
 const Days = () => {
@@ -44,7 +42,23 @@ const Days = () => {
     useState<FaturaDetalhada | null>(null)
   const [getFatura, { isLoading: loadingFatura }] = useGetFaturaMutation()
 
-  // Buscar faturas da API (só se tiver MSISDN ativo)
+  // 🔍 Determinar parâmetro de busca: CPF ou ICCID
+  // Se não tem linha ativa (isNoMsisdn), busca por CPF do usuário logado
+  // Se tem linha ativa, busca por ICCID da linha selecionada
+  const parametroBusca = isNoMsisdn ? user?.cpf || '' : det2Data?.iccid || ''
+  const canFetchFaturas = user?.token && parametroBusca
+
+  console.log('🔍 [FATURAS] ===== DEBUG BUSCA FATURAS =====')
+  console.log('🔍 [FATURAS] user?.cpf:', user?.cpf)
+  console.log('🔍 [FATURAS] det2Data?.iccid:', det2Data?.iccid)
+  console.log('🔍 [FATURAS] isNoMsisdn:', isNoMsisdn)
+  console.log('🔍 [FATURAS] Tipo de busca:', isNoMsisdn ? 'CPF' : 'ICCID')
+  console.log('🔍 [FATURAS] Parâmetro usado:', parametroBusca)
+  console.log('🔍 [FATURAS] canFetchFaturas:', canFetchFaturas)
+  console.log('🔍 [FATURAS] =================================')
+
+  // Buscar faturas da API
+  // Busca por CPF se não tem linha ativa, por ICCID se tem
   const {
     data: faturasData,
     isLoading,
@@ -53,10 +67,10 @@ const Days = () => {
   } = useListarFaturasQuery(
     {
       token: user?.token || '',
-      parametro: det2Data?.iccid || '',
+      parametro: parametroBusca,
     },
     {
-      skip: !hasLineData, // Pular query se não tiver dados necessários
+      skip: !canFetchFaturas, // Pular query se não tiver dados necessários
     },
   )
 
@@ -68,15 +82,16 @@ const Days = () => {
   useEffect(() => {
     if (registerRefreshCallback) {
       const refreshFaturas = async () => {
-        console.log('🔄 Atualizando faturas...')
-        if (hasLineData) {
+        console.log('🔄 [FATURAS] Atualizando faturas...')
+        console.log('🔄 [FATURAS] canFetchFaturas:', canFetchFaturas)
+        if (canFetchFaturas) {
           await refetch()
         }
       }
       registerRefreshCallback(1, refreshFaturas)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [registerRefreshCallback, hasLineData])
+  }, [registerRefreshCallback, canFetchFaturas])
 
   // Função para abrir modal de fatura
   const handleOpenFatura = async (paymentId: string) => {
@@ -107,48 +122,9 @@ const Days = () => {
     setFaturaDetalhada(null)
   }
 
-  // Estado: Sem MSISDN ativo
-  if (isNoMsisdn) {
-    return (
-      <VStack
-        className="px-5 pb-5 justify-center items-center"
-        style={{ paddingTop: 40 }}
-      >
-        <Box
-          style={{
-            padding: 32,
-            borderRadius: 16,
-            backgroundColor: colors.background,
-            alignItems: 'center',
-            gap: 16,
-            elevation: 2,
-          }}
-        >
-          <Icon as={Globe} size="xl" style={{ color: colors.primary }} />
-          <Text
-            style={{
-              fontSize: 18,
-              fontWeight: 'bold',
-              color: colors.text,
-              textAlign: 'center',
-            }}
-          >
-            ICCID sem linha ativa
-          </Text>
-          <Text
-            style={{
-              fontSize: 14,
-              color: colors.secondary,
-              textAlign: 'center',
-              lineHeight: 20,
-            }}
-          >
-            Ative uma linha para visualizar suas faturas
-          </Text>
-        </Box>
-      </VStack>
-    )
-  }
+  // ✅ REMOVIDO: Não precisa mais deste bloco
+  // Agora, mesmo sem linha ativa (isNoMsisdn), vai buscar faturas por CPF
+  // O componente vai renderizar normalmente e mostrar "Carregando" ou "Sem faturas"
 
   // Estado: Carregando
   if (isLoading) {
