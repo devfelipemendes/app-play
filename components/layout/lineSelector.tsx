@@ -266,14 +266,16 @@ const LineSelector = ({
                             {formatPhoneNumber(line.msisdn) ||
                               'Sem MSISDN Ativo'}
                           </Text>
-                          <Text
-                            style={{
-                              fontSize: 12,
-                              color: colors.secondary,
-                            }}
-                          >
-                            {line.plandescription}
-                          </Text>
+                          {line.msisdn && (
+                            <Text
+                              style={{
+                                fontSize: 12,
+                                color: colors.secondary,
+                              }}
+                            >
+                              {line.plandescription}
+                            </Text>
+                          )}
                           {formatPhoneNumber(line.msisdn) !== null && (
                             <Text
                               style={{
@@ -282,7 +284,10 @@ const LineSelector = ({
                                 marginTop: 2,
                               }}
                             >
-                              `Vence: {formatDateToBR(line.bundleexpiry)}
+                              {line.msisdn
+                                ? 'Vence:'
+                                : 'Selecione a linha e ative um novo CHIP para começar a usar'}{' '}
+                              {formatDateToBR(line.bundleexpiry)}
                             </Text>
                           )}
                         </VStack>

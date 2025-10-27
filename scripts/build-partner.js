@@ -57,7 +57,7 @@ async function validateTenant(tenantId) {
 /**
  * Executa build para um parceiro
  */
-async function buildPartner(tenantId, platform, profile) {
+async function buildPartner(tenantId, platform, profile, easCmd = 'eas') {
   try {
     console.log(`\n${'='.repeat(70)}`);
     console.log(`🚀 Building app for Tenant ID: ${tenantId}`);
@@ -80,22 +80,22 @@ async function buildPartner(tenantId, platform, profile) {
       console.log(`\n🔨 Building for ${plt.toUpperCase()}...`);
 
       // Monta comando EAS
-      const easCommand = [
-        'eas build',
+      const easBuildArgs = [
+        'build',
         `--platform ${plt}`,
         `--profile ${profile}`,
         '--non-interactive',
       ];
 
       if (noWait) {
-        easCommand.push('--no-wait');
+        easBuildArgs.push('--no-wait');
       }
 
       if (autoSubmit && profile === 'production') {
-        easCommand.push('--auto-submit');
+        easBuildArgs.push('--auto-submit');
       }
 
-      const command = easCommand.join(' ');
+      const command = `${easCmd} ${easBuildArgs.join(' ')}`;
 
       console.log(`   📝 Command: ${command}`);
       console.log(`   ⏳ Starting build...\n`);
@@ -129,7 +129,7 @@ async function buildPartner(tenantId, platform, profile) {
 /**
  * Build de todos os parceiros
  */
-async function buildAllPartners(platform, profile) {
+async function buildAllPartners(platform, profile, easCmd = 'eas') {
   try {
     console.log('\n🚀 Building apps for all tenants...\n');
 
@@ -147,7 +147,7 @@ async function buildAllPartners(platform, profile) {
 
     for (const tenantId of tenantIds) {
       try {
-        await buildPartner(tenantId, platform, profile);
+        await buildPartner(tenantId, platform, profile, easCmd);
         successCount++;
       } catch (error) {
         failCount++;
@@ -173,13 +173,13 @@ async function buildAllPartners(platform, profile) {
 /**
  * Lista builds recentes
  */
-async function listBuilds(tenantId) {
+async function listBuilds(tenantId, easCmd = 'eas') {
   try {
     console.log(`\n📋 Listing builds for tenant ${tenantId}...\n`);
 
     const { config } = await validateTenant(tenantId);
 
-    execSync('eas build:list --limit 5', {
+    execSync(`${easCmd} build:list --limit 5`, {
       stdio: 'inherit',
       env: {
         ...process.env,
@@ -193,29 +193,51 @@ async function listBuilds(tenantId) {
 }
 
 /**
+ * Verifica disponibilidade do EAS CLI
+ */
+function checkEasCli() {
+  // Tenta 'eas' primeiro (instalação global)
+  try {
+    execSync('eas --version', { stdio: 'pipe' });
+    return 'eas';
+  } catch {
+    // Se 'eas' não funcionar, tenta 'npx eas' (fallback)
+    try {
+      execSync('npx eas --version', { stdio: 'pipe' });
+      console.log('ℹ️  Using "npx eas" (global installation not found in PATH)');
+      console.log('💡 Tip: Restart your terminal to use "eas" directly\n');
+      return 'npx eas';
+    } catch {
+      console.error('❌ EAS CLI not found.');
+      console.error('');
+      console.error('Please install it with:');
+      console.error('  npm install -g eas-cli');
+      console.error('');
+      console.error('Then restart your terminal and try again.');
+      process.exit(1);
+    }
+  }
+}
+
+/**
  * Main
  */
 async function main() {
   try {
-    // Verifica se EAS CLI está instalado
-    try {
-      execSync('eas --version', { stdio: 'pipe' });
-    } catch {
-      console.error('❌ EAS CLI not found. Install it with: npm install -g eas-cli');
-      process.exit(1);
-    }
+    // Verifica se EAS CLI está instalado e retorna o comando correto
+    const easCommand = checkEasCli();
 
     // Comando especial: listar builds
     if (process.argv.includes('--list')) {
-      await listBuilds(partnerId === 'all' ? '46' : partnerId);
+      await listBuilds(partnerId === 'all' ? '46' : partnerId, easCommand);
       return;
     }
 
     // Build
     if (partnerId === 'all') {
-      await buildAllPartners(platformArg, profileArg);
+      await buildAllPartners(platformArg, profileArg, easCommand);
     } else {
-      await buildPartner(partnerId, platformArg, profileArg);
+      await buildPartner(partnerId, platformArg, profileArg, easCommand);
     }
 
   } catch (error) {

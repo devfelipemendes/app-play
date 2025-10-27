@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { VStack } from '@/components/ui/vstack'
-import { Globe } from 'lucide-react-native'
+import { Globe, Mail, Phone, Signal } from 'lucide-react-native'
 import { Icon } from '@/components/ui/icon'
 import { HStack } from '@/components/ui/hstack'
 import HourlyCard from '@/components/screens/weather/hourly-card'
@@ -579,28 +579,6 @@ const Home = () => {
   const needsActivationWithIccid = isNoMsisdnError && selectedLineHasIccid
   const needsActivationWithSteps = isNoMsisdnError && !selectedLineHasIccid
 
-  console.log('🔍 [HOME] ===== DEBUG COMPLETO =====')
-  console.log('🔍 [HOME] userLines.length:', userLines.length)
-  console.log('🔍 [HOME] loadingLines:', loadingLines)
-  console.log('🔍 [HOME] det2Loading:', det2Loading)
-  console.log('🔍 [HOME] loadingLineChange:', loadingLineChange)
-  console.log('🔍 [HOME] det2Error:', det2Error)
-  console.log('🔍 [HOME] hasLines:', hasLines)
-  console.log('🔍 [HOME] hasNoLines:', hasNoLines)
-  console.log('🔍 [HOME] selectedLine:', selectedLine)
-  console.log('🔍 [HOME] Condições detalhadas:', {
-    hasLines,
-    hasNoLines,
-    userLinesLength: userLines.length,
-    loadingLines,
-    isNoMsisdnError,
-    selectedLineHasIccid,
-    needsActivationWithIccid,
-    needsActivationWithSteps,
-    selectedLineIccid: selectedLine?.iccid,
-  })
-  console.log('🔍 [HOME] ===============================')
-
   // Handler para sucesso na ativação (com ICCID)
   const handleActivationWithIccidSuccess = () => {
     console.log('🎉 Ativação com ICCID bem-sucedida, recarregando dados...')
@@ -948,6 +926,7 @@ const Home = () => {
           {/* Aviso de período de graça (GRACE 3) */}
           {isInGracePeriod && (
             <Animated.View
+              key={`grace-period-${selectedLine?.msisdn || selectedLine?.id}`}
               entering={FadeInDown.delay(0).springify().damping(12)}
             >
               <HStack
@@ -984,9 +963,15 @@ const Home = () => {
             </Animated.View>
           )}
 
-          <AnimatedVStack style={{ gap: 16 }}>
+          <AnimatedVStack
+            style={{ gap: 16 }}
+            key={selectedLine?.msisdn || selectedLine?.id}
+          >
             {/* Cards com dados formatados de consumo */}
             <Animated.View
+              key={`consumption-cards-1-${
+                selectedLine?.msisdn || selectedLine?.id
+              }`}
               entering={FadeInDown.delay(0).springify().damping(12)}
             >
               <HStack style={{ gap: 16 }}>
@@ -999,42 +984,53 @@ const Home = () => {
                   arrowUpIcon={false}
                 />
                 <HourlyCard
-                  icon={Globe}
+                  icon={Signal}
                   text="Dados Restantes"
                   currentUpdate={consumptionData?.dados.restante || 'Sem dados'}
-                  lastUpdate={`${
-                    consumptionData?.dados.percentage || 0
-                  }% usado`}
-                  arrowDownIcon={true}
-                  arrowUpIcon={false}
+                  lastUpdate={
+                    consumptionData?.dados.hasAccumulated
+                      ? `${consumptionData?.dados.accumulated} acumulados!`
+                      : `${consumptionData?.dados.percentage || 0}% usado`
+                  }
+                  arrowDownIcon={!consumptionData?.dados.hasAccumulated}
+                  arrowUpIcon={consumptionData?.dados.hasAccumulated}
                 />
               </HStack>
             </Animated.View>
 
             <Animated.View
+              key={`consumption-cards-2-${
+                selectedLine?.msisdn || selectedLine?.id
+              }`}
               entering={FadeInDown.delay(100).springify().damping(12)}
             >
               <HStack style={{ gap: 16 }}>
                 <HourlyCard
-                  icon={Globe}
+                  icon={Phone}
                   text="Minutos Restantes"
                   currentUpdate={
                     consumptionData?.minutos.restante || 'Sem dados'
                   }
-                  lastUpdate={`${
-                    consumptionData?.minutos.percentage || 0
-                  }% usado`}
-                  arrowDownIcon={true}
-                  arrowUpIcon={false}
+                  lastUpdate={
+                    consumptionData?.minutos.hasAccumulated
+                      ? `${consumptionData?.minutos.accumulated} acumulados!`
+                      : `${consumptionData?.minutos.percentage || 0}% usado`
+                  }
+                  arrowDownIcon={!consumptionData?.minutos.hasAccumulated}
+                  arrowUpIcon={consumptionData?.minutos.hasAccumulated}
                 />
 
                 <HourlyCard
-                  icon={Globe}
+                  icon={Mail}
                   text="SMS Restantes"
                   currentUpdate={det2Data?.smsrestante || 'Sem dados'}
-                  lastUpdate={`${consumptionData?.sms.percentage || 0}% usado`}
-                  arrowDownIcon={true}
-                  arrowUpIcon={false}
+                  lastUpdate={
+                    consumptionData?.sms.hasAccumulated
+                      ? `${consumptionData?.sms.accumulated} acumulados!`
+                      : `${consumptionData?.sms.percentage || 0}% usado`
+                  }
+                  arrowDownIcon={!consumptionData?.sms.hasAccumulated}
+                  arrowUpIcon={consumptionData?.sms.hasAccumulated}
                 />
               </HStack>
             </Animated.View>
@@ -1070,7 +1066,7 @@ const Home = () => {
         isOpen={showReactivateBottomSheet}
         onClose={() => setShowReactivateBottomSheet(false)}
         colors={colors}
-        msisdn={selectedLine?.msisdn || ''}
+        iccid={selectedLine?.iccid || ''}
         onSuccess={handleReactivationSuccess}
       />
     </VStack>

@@ -1,25 +1,25 @@
 {
   "name": "Play Móvel",
   "slug": "playmovel",
-  "owner": "playmovel-org",
+  "owner": "playmovel",
   "version": "1.0.0",
   "ios": {
     "supportsTablet": true,
     "bundleIdentifier": "com.playmovel.app",
     "buildNumber": "1",
     "icon": {
-      "backgroundColor": "#007AFF"
+      "backgroundColor": "#000624"
     }
   },
   "android": {
     "package": "com.playmovel.app",
     "versionCode": 1,
     "adaptiveIcon": {
-      "backgroundColor": "#007AFF"
+      "backgroundColor": "#000624"
     }
   },
   "splash": {
-    "backgroundColor": "#007AFF",
+    "backgroundColor": "#000624",
     "resizeMode": "contain"
   },
   "extra": {

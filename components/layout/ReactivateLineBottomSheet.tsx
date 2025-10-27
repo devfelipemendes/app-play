@@ -6,6 +6,7 @@ import {
   View,
   Dimensions,
   Keyboard,
+  Image,
 } from 'react-native'
 import { VStack } from '@/components/ui/vstack'
 import { HStack } from '@/components/ui/hstack'
@@ -33,6 +34,11 @@ import {
   Extrapolation,
 } from 'react-native-reanimated'
 import Toast from 'react-native-toast-message'
+import { FaturaBottomSheet } from '@/src/components/screens/FaturaBottomSheet'
+import {
+  type FaturaDetalhada,
+  useGetFaturaMutation,
+} from '@/src/api/endpoints/faturaApi'
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window')
 
@@ -77,15 +83,33 @@ interface ReactivateLineBottomSheetProps {
   isOpen: boolean
   onClose: () => void
   colors: any
-  msisdn: string // Número da linha para reativar
+  iccid: string // Número da linha para reativar
   onSuccess?: () => void
 }
 
 // Mock de apps inclusos
-const mockApps = [
-  { name: 'WhatsApp' },
-  { name: 'Instagram' },
-  { name: 'YouTube' },
+interface AppBenefit {
+  name: string
+  image: any // ImageSourcePropType
+}
+// Mock de apps inclusos
+const mockApps: AppBenefit[] = [
+  {
+    name: 'WhatsApp',
+    image: require('@/assets/images/whatsApp.png'),
+  },
+  {
+    name: 'Acúmulo de Gigas',
+    image: require('@/assets/images/acumuloDeGigas.png'),
+  },
+  {
+    name: "SMS's Ilimitados",
+    image: require('@/assets/images/smsIlimitado.png'),
+  },
+  {
+    name: 'Ligações Ilimitadas',
+    image: require('@/assets/images/ligaçõesIlimitadas.png'),
+  },
 ]
 
 // Componente do Card do Plano
@@ -214,21 +238,59 @@ const PlanCard: React.FC<PlanCardProps> = React.memo(
                   <View
                     key={index}
                     style={{
-                      width: RESPONSIVE.appIcon.size,
-                      aspectRatio: 1,
-                      borderRadius: 12,
-                      backgroundColor: '#F8F9FA',
-                      justifyContent: 'center',
                       alignItems: 'center',
-                      shadowColor: '#000',
-                      shadowOffset: { width: 0, height: 1 },
-                      shadowOpacity: 0.08,
-                      shadowRadius: 2,
-                      elevation: 2,
+                      width: RESPONSIVE.appIcon.size,
+                      marginBottom: 4,
                     }}
                   >
+                    {/* Card com imagem */}
+                    <View
+                      style={{
+                        width: RESPONSIVE.appIcon.size - 20,
+                        aspectRatio: 1,
+                        borderRadius: 12,
+                        backgroundColor: '#F8F9FA',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 1 },
+                        shadowOpacity: 0.08,
+                        shadowRadius: 2,
+                        elevation: 2,
+                        marginBottom: 6,
+                        overflow: 'hidden', // Para respeitar o borderRadius
+                      }}
+                    >
+                      {app.image ? (
+                        <Image
+                          source={app.image}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            borderRadius: 12,
+                          }}
+                          resizeMode="cover"
+                        />
+                      ) : (
+                        <Text
+                          style={{
+                            fontSize: RESPONSIVE.fontSize.benefits * 0.8,
+                            color: colors.text,
+                          }}
+                        >
+                          {app.name.charAt(0)}
+                        </Text>
+                      )}
+                    </View>
+                    {/* Texto abaixo do card */}
                     <Text
-                      style={{ fontSize: RESPONSIVE.fontSize.benefits * 0.65 }}
+                      style={{
+                        fontSize: RESPONSIVE.fontSize.benefits * 0.55,
+                        color: colors.text,
+                        textAlign: 'center',
+                        lineHeight: RESPONSIVE.fontSize.benefits * 0.65,
+                      }}
+                      numberOfLines={2}
                     >
                       {app.name}
                     </Text>
@@ -295,21 +357,26 @@ const ReactivateLineBottomSheet: React.FC<ReactivateLineBottomSheetProps> = ({
   isOpen,
   onClose,
   colors,
-  msisdn,
+  iccid,
   onSuccess,
 }) => {
   const { user } = useAuth()
   const bottomSheetRef = useRef<BottomSheetModal>(null)
+  const faturaBottomSheetRef = useRef<BottomSheetModal>(null)
   const carouselRef = useRef<ICarouselInstance>(null)
 
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null)
   const [currentIndex, setCurrentIndex] = useState(0)
   const progressValue = useSharedValue<number>(0)
+  const [faturaDetalhada, setFaturaDetalhada] =
+    useState<FaturaDetalhada | null>(null)
 
   const snapPoints = useMemo(() => ['80%'], [])
 
   // Mutation para reativar linha
-  const [reactivateLine, { isLoading: isReactivating }] = useReactivateLineMutation()
+  const [reactivateLine, { isLoading: isReactivating }] =
+    useReactivateLineMutation()
+  const [getFatura, { isLoading: isLoadingFatura }] = useGetFaturaMutation()
 
   // Query de planos
   const {
@@ -370,11 +437,13 @@ const ReactivateLineBottomSheet: React.FC<ReactivateLineBottomSheetProps> = ({
           style: 'default',
           onPress: async () => {
             try {
-              // 🔍 DEBUG: Log do msisdn original recebido
-              console.log('📞 [REATIVAR] ===== DEBUG MSISDN =====')
-              console.log('📞 [REATIVAR] msisdn original (prop):', msisdn)
-              console.log('📞 [REATIVAR] msisdn sem formatação:', msisdn.replace(/\D/g, ''))
-              console.log('📞 [REATIVAR] msisdn sem DDD 55:', msisdn.replace(/\D/g, '').slice(2))
+              // 🔍 DEBUG: Log do iccid original recebido
+              console.log('📞 [REATIVAR] ===== DEBUG ICCID =====')
+              console.log('📞 [REATIVAR] iccid original (prop):', iccid)
+              console.log(
+                '📞 [REATIVAR] iccid sem formatação:',
+                iccid.replace(/\D/g, ''),
+              )
 
               const payload = {
                 token: user?.token || '',
@@ -385,25 +454,79 @@ const ReactivateLineBottomSheet: React.FC<ReactivateLineBottomSheetProps> = ({
                 }),
                 planid: selectedPlan.planid,
                 planid_personalizado: selectedPlan.id?.toString() || '',
-                msisdn: msisdn.replace(/\D/g, '').slice(2), // Remove formatação e DDD (55)
+                iccid: iccid.replace(/\D/g, ''), // Remove formatação
+                cpfuser: user?.cpf,
               }
 
-              console.log('📦 [REATIVAR] Payload completo:', JSON.stringify(payload, null, 2))
-              console.log('📦 [REATIVAR] msisdn no payload:', payload.msisdn)
+              console.log(
+                '📦 [REATIVAR] Payload completo:',
+                JSON.stringify(payload, null, 2),
+              )
+              console.log('📦 [REATIVAR] iccid no payload:', payload.iccid)
               console.log('📞 [REATIVAR] ================================')
 
+              // Chamar API de reativação
               const result = await reactivateLine(payload).unwrap()
 
-              Toast.show({
-                type: 'success',
-                text1: 'Linha reativada!',
-                text2: 'Sua linha foi reativada com sucesso.',
-              })
+              console.log('✅ [REATIVAR] Resposta da API:', result)
 
-              onClose()
-              onSuccess?.()
+              // Verificar se tem payment_id na resposta (pode ser 'fatura' ou 'paymentasaasid')
+              const paymentId = result.fatura
+
+              if (paymentId) {
+                console.log('✅ [REATIVAR] PaymentId detectado:', paymentId)
+                console.log(
+                  '🔄 [REATIVAR] Buscando dados completos da fatura...',
+                )
+
+                try {
+                  // Busca a fatura completa usando o paymentId
+                  const faturaCompleta = await getFatura({
+                    payid: paymentId,
+                  }).unwrap()
+
+                  console.log('✅ [REATIVAR] Fatura completa recebida!')
+                  console.log(
+                    '📄 [REATIVAR] Dados da fatura:',
+                    JSON.stringify(faturaCompleta, null, 2),
+                  )
+
+                  // Setar fatura e abrir modal
+                  console.log('🎯 [REATIVAR] Setando faturaDetalhada...')
+                  setFaturaDetalhada(faturaCompleta)
+
+                  // Aguardar um pouco e abrir o modal de fatura
+                  setTimeout(() => {
+                    console.log('🎯 [REATIVAR] Abrindo modal de fatura...')
+                    faturaBottomSheetRef.current?.present()
+                    console.log(
+                      '✅ [REATIVAR] Modal de fatura deve abrir agora!',
+                    )
+                  }, 300)
+                } catch (faturaError) {
+                  console.error(
+                    '❌ [REATIVAR] Erro ao buscar fatura completa:',
+                    faturaError,
+                  )
+                  Toast.show({
+                    type: 'error',
+                    text1: 'Erro ao carregar fatura',
+                    text2: 'Tente novamente mais tarde',
+                  })
+                }
+              } else {
+                // Sem fatura, apenas sucesso
+                Toast.show({
+                  type: 'success',
+                  text1: 'Linha reativada!',
+                  text2: 'Sua linha foi reativada com sucesso.',
+                })
+
+                onClose()
+                onSuccess?.()
+              }
             } catch (error: any) {
-              console.error('Erro ao reativar linha:', error)
+              console.error('❌ [REATIVAR] Erro ao reativar linha:', error)
 
               Toast.show({
                 type: 'error',
@@ -454,7 +577,7 @@ const ReactivateLineBottomSheet: React.FC<ReactivateLineBottomSheetProps> = ({
         style={{
           justifyContent: 'center',
           gap: 8,
-          marginTop: 8,
+
           marginBottom: 4,
         }}
       >
@@ -494,150 +617,188 @@ const ReactivateLineBottomSheet: React.FC<ReactivateLineBottomSheetProps> = ({
     [],
   )
 
+  const handleCloseFatura = () => {
+    console.log('🔄 [REATIVAR] Modal de fatura sendo fechado...')
+    // Fechar modal de fatura
+    faturaBottomSheetRef.current?.dismiss()
+
+    // Aguarda um pouco antes de limpar e fechar modal principal
+    setTimeout(() => {
+      setFaturaDetalhada(null)
+      onClose()
+      onSuccess?.()
+      console.log('✅ [REATIVAR] Pagamento concluído e modais fechados!')
+    }, 300)
+  }
+
+  // Debug: Log antes de renderizar
+  console.log('🎨 [REATIVAR] Renderizando componente:', {
+    hasFaturaDetalhada: faturaDetalhada !== null,
+  })
+
   return (
-    <BottomSheetModal
-      ref={bottomSheetRef}
-      snapPoints={snapPoints}
-      enablePanDownToClose
-      onDismiss={onClose}
-      backdropComponent={renderBackdrop}
-      backgroundStyle={{ backgroundColor: colors.background }}
-      handleIndicatorStyle={{ backgroundColor: colors.disabled }}
-    >
-      <BottomSheetView style={{ flex: 1, paddingHorizontal: 20 }}>
-        {/* Header */}
-        <HStack
-          style={{
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: 16,
-          }}
-        >
-          <VStack style={{ flex: 1 }}>
-            <Text
-              style={{ fontSize: 22, fontWeight: 'bold', color: colors.text }}
-            >
-              Reativar Linha
-            </Text>
-            <Text
-              style={{
-                fontSize: 14,
-                color: colors.secondary,
-                marginTop: 4,
-              }}
-            >
-              Escolha um plano para reativar sua linha
-            </Text>
-          </VStack>
-          <Icon as={RefreshCw} size="lg" style={{ color: colors.primary }} />
-        </HStack>
-
-        {loadingPlans && (
-          <VStack
+    <>
+      <BottomSheetModal
+        ref={bottomSheetRef}
+        snapPoints={snapPoints}
+        enablePanDownToClose
+        onDismiss={onClose}
+        backdropComponent={renderBackdrop}
+        backgroundStyle={{ backgroundColor: colors.background }}
+        handleIndicatorStyle={{ backgroundColor: colors.disabled }}
+      >
+        <BottomSheetView style={{ flex: 1, paddingHorizontal: 20 }}>
+          {/* Header */}
+          <HStack
             style={{
-              flex: 1,
-              justifyContent: 'center',
+              justifyContent: 'space-between',
               alignItems: 'center',
+              marginBottom: 16,
             }}
           >
-            <Text style={{ fontSize: 16, color: colors.text }}>
-              Carregando planos...
-            </Text>
-          </VStack>
-        )}
-
-        {/* Erro */}
-        {hasPlansError && (
-          <VStack
-            style={{
-              flex: 1,
-              justifyContent: 'center',
-              alignItems: 'center',
-              gap: 16,
-            }}
-          >
-            <Text
-              style={{ fontSize: 16, color: colors.error, textAlign: 'center' }}
-            >
-              Erro ao carregar planos
-            </Text>
-            <TouchableOpacity
-              onPress={() => refetchPlans()}
-              style={{
-                backgroundColor: colors.primary,
-                borderRadius: 12,
-                paddingVertical: 12,
-                paddingHorizontal: 24,
-              }}
-            >
-              <Text style={{ color: 'white', fontSize: 16, fontWeight: '600' }}>
-                Tentar Novamente
+            <VStack style={{ flex: 1 }}>
+              <Text
+                style={{ fontSize: 22, fontWeight: 'bold', color: colors.text }}
+              >
+                Reativar Linha
               </Text>
-            </TouchableOpacity>
-          </VStack>
-        )}
-
-        {/* Planos vazios */}
-        {!loadingPlans && !hasPlansError && allPlans.length === 0 && (
-          <VStack
-            style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
-          >
-            <Text style={{ fontSize: 16, color: colors.text }}>
-              Nenhum plano disponível
-            </Text>
-          </VStack>
-        )}
-
-        {/* Carousel de planos */}
-        {!loadingPlans && !hasPlansError && allPlans.length > 0 && (
-          <>
-            <View style={{ flex: 1, alignItems: 'center' }}>
-              <Carousel
-                ref={carouselRef}
-                loop={false}
-                width={screenWidth}
-                height={CARD_HEIGHT + 40}
-                data={allPlans}
-                renderItem={renderPlanCard}
-                onProgressChange={onProgressChange}
-                onSnapToItem={onSnapToItem}
-                mode="parallax"
-                style={{ width: screenWidth }}
-                modeConfig={{
-                  parallaxScrollingScale: 0.9,
-                  parallaxScrollingOffset: 50,
-                  parallaxAdjacentItemScale: 0.8,
-                }}
-              />
-              {renderDots()}
-            </View>
-
-            {/* Footer com botão */}
-            <VStack style={{ paddingTop: 16, paddingBottom: 16 }}>
-              <TouchableOpacity
-                onPress={handleReactivateLine}
-                disabled={isReactivating || !selectedPlan}
+              <Text
                 style={{
-                  backgroundColor: !selectedPlan
-                    ? colors.disabled
-                    : colors.primary,
+                  fontSize: 14,
+                  color: colors.secondary,
+                  marginTop: 4,
+                }}
+              >
+                Escolha um plano para reativar sua linha
+              </Text>
+            </VStack>
+            <Icon as={RefreshCw} size="lg" style={{ color: colors.primary }} />
+          </HStack>
+
+          {loadingPlans && (
+            <VStack
+              style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <Text style={{ fontSize: 16, color: colors.text }}>
+                Carregando planos...
+              </Text>
+            </VStack>
+          )}
+
+          {/* Erro */}
+          {hasPlansError && (
+            <VStack
+              style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: 16,
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 16,
+                  color: colors.error,
+                  textAlign: 'center',
+                }}
+              >
+                Erro ao carregar planos
+              </Text>
+              <TouchableOpacity
+                onPress={() => refetchPlans()}
+                style={{
+                  backgroundColor: colors.primary,
                   borderRadius: 12,
-                  paddingVertical: 16,
-                  alignItems: 'center',
-                  opacity: isReactivating ? 0.6 : 1,
+                  paddingVertical: 12,
+                  paddingHorizontal: 24,
                 }}
               >
                 <Text
-                  style={{ fontSize: 16, fontWeight: '600', color: 'white' }}
+                  style={{ color: 'white', fontSize: 16, fontWeight: '600' }}
                 >
-                  {isReactivating ? 'Reativando...' : 'Reativar Linha'}
+                  Tentar Novamente
                 </Text>
               </TouchableOpacity>
             </VStack>
-          </>
-        )}
-      </BottomSheetView>
-    </BottomSheetModal>
+          )}
+
+          {/* Planos vazios */}
+          {!loadingPlans && !hasPlansError && allPlans.length === 0 && (
+            <VStack
+              style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <Text style={{ fontSize: 16, color: colors.text }}>
+                Nenhum plano disponível
+              </Text>
+            </VStack>
+          )}
+
+          {/* Carousel de planos */}
+          {!loadingPlans && !hasPlansError && allPlans.length > 0 && (
+            <>
+              <View style={{ flex: 1, alignItems: 'center' }}>
+                <Carousel
+                  ref={carouselRef}
+                  loop={false}
+                  width={screenWidth}
+                  height={CARD_HEIGHT}
+                  data={allPlans}
+                  renderItem={renderPlanCard}
+                  onProgressChange={onProgressChange}
+                  onSnapToItem={onSnapToItem}
+                  mode="parallax"
+                  style={{ width: screenWidth }}
+                  modeConfig={{
+                    parallaxScrollingScale: 0.9,
+                    parallaxScrollingOffset: 50,
+                    parallaxAdjacentItemScale: 0.8,
+                  }}
+                />
+                {renderDots()}
+              </View>
+
+              {/* Footer com botão */}
+              <VStack style={{ paddingTop: 16, paddingBottom: 16 }}>
+                <TouchableOpacity
+                  onPress={handleReactivateLine}
+                  disabled={isReactivating || !selectedPlan}
+                  style={{
+                    backgroundColor: !selectedPlan
+                      ? colors.disabled
+                      : colors.primary,
+                    borderRadius: 12,
+                    paddingVertical: 16,
+                    alignItems: 'center',
+                    opacity: isReactivating ? 0.6 : 1,
+                  }}
+                >
+                  <Text
+                    style={{ fontSize: 16, fontWeight: '600', color: 'white' }}
+                  >
+                    {isReactivating ? 'Reativando...' : 'Reativar Linha'}
+                  </Text>
+                </TouchableOpacity>
+              </VStack>
+            </>
+          )}
+        </BottomSheetView>
+      </BottomSheetModal>
+
+      {/* Modal de Fatura */}
+      <FaturaBottomSheet
+        ref={faturaBottomSheetRef}
+        fatura={faturaDetalhada}
+        onClose={handleCloseFatura}
+      />
+    </>
   )
 }
 

@@ -126,19 +126,53 @@ export interface MonthlyChartData {
 export const formatToMonthlyChart = (
   consumoData: ConsumoDaily[],
 ): MonthlyChartData[] => {
-  if (!consumoData || consumoData.length === 0) return []
+  // Obter o dia atual e o número de dias no mês atual
+  const now = new Date()
+  const currentMonth = now.getMonth()
+  const currentYear = now.getFullYear()
+  const currentDay = now.getDate()
 
-  return consumoData.map((item) => {
-    const date = new Date(item.dtConsumo)
-    return {
-      day: date.getDate(),
-      date: formatDateToDDMM(item.dtConsumo),
-      downloadGB: parseFloat(bytesToGB(item.qtUsadoDownload)),
-      downloadMB: parseFloat(bytesToMB(item.qtUsadoDownload)),
-      uploadGB: parseFloat(bytesToGB(item.qtUsadoUpload)),
-      uploadMB: parseFloat(bytesToMB(item.qtUsadoUpload)),
+  // Criar um mapa com os dados de consumo por dia
+  const consumoMap = new Map<number, ConsumoDaily>()
+  if (consumoData && consumoData.length > 0) {
+    consumoData.forEach((item) => {
+      const date = new Date(item.dtConsumo)
+      const day = date.getDate()
+      consumoMap.set(day, item)
+    })
+  }
+
+  // Criar array com todos os dias do mês até o dia atual
+  const allDaysData: MonthlyChartData[] = []
+
+  for (let day = 1; day <= currentDay; day++) {
+    const consumo = consumoMap.get(day)
+    const dateString = `${String(day).padStart(2, '0')}/${String(currentMonth + 1).padStart(2, '0')}`
+
+    if (consumo) {
+      // Tem dados de consumo para este dia
+      allDaysData.push({
+        day,
+        date: dateString,
+        downloadGB: parseFloat(bytesToGB(consumo.qtUsadoDownload)),
+        downloadMB: parseFloat(bytesToMB(consumo.qtUsadoDownload)),
+        uploadGB: parseFloat(bytesToGB(consumo.qtUsadoUpload)),
+        uploadMB: parseFloat(bytesToMB(consumo.qtUsadoUpload)),
+      })
+    } else {
+      // Não tem dados para este dia, usar valores zerados para mostrar o label
+      allDaysData.push({
+        day,
+        date: dateString,
+        downloadGB: 0,
+        downloadMB: 0,
+        uploadGB: 0,
+        uploadMB: 0,
+      })
     }
-  })
+  }
+
+  return allDaysData
 }
 
 /**

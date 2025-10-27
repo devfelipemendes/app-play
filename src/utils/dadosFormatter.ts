@@ -77,21 +77,42 @@ export const useDadosFormatter = (): DataConverterResult => {
     return (consumoData: any) => {
       if (!consumoData) return null
 
-      // Função auxiliar para calcular porcentagem de uso
+      // Função auxiliar para calcular porcentagem de uso ou acúmulo
       const calculateUsagePercentage = (
         restante: string | number,
         original: string | number,
-      ): number => {
+      ): { percentage: number; hasAccumulated: boolean; accumulatedValue?: number } => {
         const rest =
           typeof restante === 'string' ? parseFloat(restante) || 0 : restante
         const orig =
           typeof original === 'string' ? parseFloat(original) || 0 : original
 
-        if (orig === 0) return 0
+        if (orig === 0) return { percentage: 0, hasAccumulated: false }
 
+        // Se o restante é maior que o original, há acúmulo
+        if (rest > orig) {
+          const accumulated = rest - orig
+          return {
+            percentage: 0,
+            hasAccumulated: true,
+            accumulatedValue: accumulated
+          }
+        }
+
+        // Calcular porcentagem normalmente quando está consumindo do plano base
         const used = orig - rest
-        return Math.round((used / orig) * 100)
+        const percentage = (used / orig) * 100
+
+        return {
+          percentage: Math.min(Math.round(percentage), 100),
+          hasAccumulated: false
+        }
       }
+
+      const dadosCalc = calculateUsagePercentage(
+        consumoData.dados || 0,
+        consumoData.dadosoriginal || 0,
+      )
 
       return {
         dados: {
@@ -102,41 +123,56 @@ export const useDadosFormatter = (): DataConverterResult => {
             true,
             consumoData.dadosoriginal || 0,
           ),
-          percentage: calculateUsagePercentage(
-            consumoData.dados || 0,
-            consumoData.dadosoriginal || 0,
-          ),
+          percentage: dadosCalc.percentage,
+          hasAccumulated: dadosCalc.hasAccumulated,
+          accumulated: dadosCalc.accumulatedValue
+            ? convertMBtoGB(dadosCalc.accumulatedValue).formatted
+            : undefined,
           restanteMB: parseFloat(consumoData.dados || 0),
           originalMB: parseFloat(consumoData.dadosoriginal || 0),
         },
-        minutos: {
-          restante: `${consumoData.minutos || 0} min`,
-          original: `${consumoData.minutosoriginal || 0} min`,
-          usado: `${
-            parseFloat(consumoData.minutosoriginal || 0) -
-            parseFloat(consumoData.minutos || 0)
-          } min`,
-          percentage: calculateUsagePercentage(
+        minutos: (() => {
+          const minutosCalc = calculateUsagePercentage(
             consumoData.minutos || 0,
             consumoData.minutosoriginal || 0,
-          ),
-          restanteValue: parseFloat(consumoData.minutos || 0),
-          originalValue: parseFloat(consumoData.minutosoriginal || 0),
-        },
-        sms: {
-          restante: `${consumoData.smsrestante || 0} SMS`,
-          original: `${consumoData.smsoriginal || 0} SMS`,
-          usado: `${
-            parseFloat(consumoData.smsoriginal || 0) -
-            parseFloat(consumoData.smsrestante || 0)
-          } SMS`,
-          percentage: calculateUsagePercentage(
+          )
+          return {
+            restante: `${consumoData.minutos || 0} min`,
+            original: `${consumoData.minutosoriginal || 0} min`,
+            usado: `${
+              parseFloat(consumoData.minutosoriginal || 0) -
+              parseFloat(consumoData.minutos || 0)
+            } min`,
+            percentage: minutosCalc.percentage,
+            hasAccumulated: minutosCalc.hasAccumulated,
+            accumulated: minutosCalc.accumulatedValue
+              ? `${Math.round(minutosCalc.accumulatedValue)} min`
+              : undefined,
+            restanteValue: parseFloat(consumoData.minutos || 0),
+            originalValue: parseFloat(consumoData.minutosoriginal || 0),
+          }
+        })(),
+        sms: (() => {
+          const smsCalc = calculateUsagePercentage(
             consumoData.smsrestante || 0,
             consumoData.smsoriginal || 0,
-          ),
-          restanteValue: parseFloat(consumoData.smsrestante || 0),
-          originalValue: parseFloat(consumoData.smsoriginal || 0),
-        },
+          )
+          return {
+            restante: `${consumoData.smsrestante || 0} SMS`,
+            original: `${consumoData.smsoriginal || 0} SMS`,
+            usado: `${
+              parseFloat(consumoData.smsoriginal || 0) -
+              parseFloat(consumoData.smsrestante || 0)
+            } SMS`,
+            percentage: smsCalc.percentage,
+            hasAccumulated: smsCalc.hasAccumulated,
+            accumulated: smsCalc.accumulatedValue
+              ? `${Math.round(smsCalc.accumulatedValue)} SMS`
+              : undefined,
+            restanteValue: parseFloat(consumoData.smsrestante || 0),
+            originalValue: parseFloat(consumoData.smsoriginal || 0),
+          }
+        })(),
       }
     }
   }, [convertMBtoGB, formatDataUsage])

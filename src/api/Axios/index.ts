@@ -208,9 +208,9 @@ const axiosBaseQuery =
         headers,
       })
 
-      if (__DEV__) {
-        console.log('✅ RTK Query sucesso:', result.data)
-      }
+      // if (__DEV__) {
+      //   console.log('✅ RTK Query sucesso:', result.data)
+      // }
 
       return { data: result.data }
     } catch (axiosError) {

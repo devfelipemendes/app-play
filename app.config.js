@@ -73,6 +73,7 @@ module.exports = ({ config = {} }) => {
           bundleIdentifier: baseConfig.ios?.bundleIdentifier || 'com.appplay.default',
           infoPlist: {
             ...(baseConfig.ios?.infoPlist || {}),
+            ITSAppUsesNonExemptEncryption: false,
             NSFaceIDUsageDescription: 'Este app usa Face ID para autenticar seu login de forma segura.',
             UIViewControllerBasedStatusBarAppearance: false,
           },
@@ -120,6 +121,7 @@ module.exports = ({ config = {} }) => {
         infoPlist: {
           ...(baseConfig.ios?.infoPlist || {}),
           ...(partnerConfig.ios?.infoPlist || {}),
+          ITSAppUsesNonExemptEncryption: false,
           NSFaceIDUsageDescription: 'Este app usa Face ID para autenticar seu login de forma segura.',
           UIViewControllerBasedStatusBarAppearance: false,
         },

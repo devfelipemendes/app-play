@@ -1,6 +1,6 @@
 // app/_layout.tsx
 import '@/global.css'
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useCallback, useContext, useEffect, useState } from 'react'
 import { Stack } from 'expo-router'
 import { useFonts } from 'expo-font'
 import { StatusBar } from 'expo-status-bar'
@@ -8,6 +8,7 @@ import { GluestackUIProvider } from '@gluestack-ui/themed'
 import { useColorScheme } from 'nativewind'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
+import * as SplashScreen from 'expo-splash-screen'
 
 import { ThemeContext, ThemeProvider } from '@/contexts/theme-context'
 import {
@@ -28,8 +29,22 @@ import DevTools from '@/components/DevTools'
 import { useAuth } from '@/hooks/useAuth'
 import { ActivityIndicator, View } from 'react-native'
 
+// ⭐ SDK 52: Prevenir que a splash suma automaticamente
+// Isso garante que a splash screen (configurada por parceiro) fique visível
+// até que o app esteja completamente carregado (fontes + company info)
+SplashScreen.preventAutoHideAsync().catch(() => {
+  // Em alguns casos (web), pode não estar disponível
+  console.log('SplashScreen.preventAutoHideAsync não disponível')
+})
+
 // Componente para carregar informações da empresa ANTES de tudo
-const CompanyInfoLoader = ({ children }: { children: React.ReactNode }) => {
+const CompanyInfoLoader = ({
+  children,
+  onLoadComplete,
+}: {
+  children: React.ReactNode
+  onLoadComplete?: () => void
+}) => {
   const [isLoading, setIsLoading] = useState(true)
   const { getCompanyInfo } = useAuth()
 
@@ -43,6 +58,8 @@ const CompanyInfoLoader = ({ children }: { children: React.ReactNode }) => {
         console.error('❌ Erro ao carregar informações da empresa:', error)
       } finally {
         setIsLoading(false)
+        // Notifica que terminou de carregar
+        onLoadComplete?.()
       }
     }
 
@@ -67,9 +84,10 @@ const CompanyInfoLoader = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>
 }
 
-const MainLayout = () => {
+const MainLayout = ({ onAppReady }: { onAppReady: () => void }) => {
   const { colorMode }: any = useContext(ThemeContext)
   const { setColorScheme } = useColorScheme()
+  const [companyInfoLoaded, setCompanyInfoLoaded] = useState(false)
 
   const [fontsLoaded] = useFonts({
     'dm-sans-regular': DMSans_400Regular,
@@ -82,6 +100,22 @@ const MainLayout = () => {
     setColorScheme(colorMode)
   }, [colorMode, setColorScheme])
 
+  // Callback quando company info terminar de carregar
+  const handleCompanyInfoLoaded = useCallback(() => {
+    setCompanyInfoLoaded(true)
+  }, [])
+
+  // Quando fontes E company info estiverem carregados, notificar que o app está pronto
+  useEffect(() => {
+    if (fontsLoaded && companyInfoLoaded) {
+      console.log('✨ App totalmente carregado (fontes + company info)')
+      // Pequeno delay para garantir que a UI está renderizada
+      setTimeout(() => {
+        onAppReady()
+      }, 100)
+    }
+  }, [fontsLoaded, companyInfoLoaded, onAppReady])
+
   if (!fontsLoaded) {
     return null
   }
@@ -91,7 +125,7 @@ const MainLayout = () => {
       <BottomSheetModalProvider>
         <StatusBar style="light" translucent />
         <AuthProvider>
-          <CompanyInfoLoader>
+          <CompanyInfoLoader onLoadComplete={handleCompanyInfoLoaded}>
             <AuthGuard>
               <Stack>
                 <Stack.Screen name="index" options={{ headerShown: false }} />
@@ -107,12 +141,23 @@ const MainLayout = () => {
 }
 
 export default function RootLayout() {
+  // Callback para ocultar a splash screen quando o app estiver totalmente pronto
+  const handleAppReady = useCallback(async () => {
+    try {
+      console.log('🎉 Ocultando splash screen...')
+      await SplashScreen.hideAsync()
+      console.log('✅ Splash screen ocultada com sucesso')
+    } catch (error) {
+      console.warn('⚠️ Erro ao ocultar splash screen:', error)
+    }
+  }, [])
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Provider store={store}>
         <ThemeProvider>
           <PaperProvider>
-            <MainLayout />
+            <MainLayout onAppReady={handleAppReady} />
             <Toast />
           </PaperProvider>
         </ThemeProvider>

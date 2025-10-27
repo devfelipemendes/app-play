@@ -326,10 +326,10 @@ const Monthly = () => {
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <BarChart
               data={monthlyChartData}
-              width={Math.max(screenWidth - 80, monthlyChartData.length * 25)}
+              width={31 * 50}
               height={250}
-              barWidth={18}
-              spacing={10}
+              barWidth={22}
+              spacing={8}
               roundedTop
               hideRules={false}
               xAxisThickness={0}

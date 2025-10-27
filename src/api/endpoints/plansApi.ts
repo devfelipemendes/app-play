@@ -135,7 +135,8 @@ interface PayloadReactivateLine {
   userInfo: string // JSON string: {cpf, name, parceiro}
   planid: number | string
   planid_personalizado?: string
-  msisdn: string
+  iccid: string
+  cpfuser: string | undefined
 }
 
 interface ResponseReactivateLine {
