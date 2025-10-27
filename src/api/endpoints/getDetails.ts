@@ -35,6 +35,8 @@ export interface Det2Response {
   pospagotroca: string
   esim: boolean
   rede: string
+  pospago: boolean
+  contafatura: string | null
 }
 
 export const det2Api = apiPlay.injectEndpoints({

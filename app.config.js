@@ -87,9 +87,6 @@ module.exports = ({ config = {} }) => {
         extra: {
           ...(baseConfig.extra || {}),
           tenantId,
-          eas: {
-            projectId: '8bfa2423-69b5-48bf-94c1-c4ded0716494',
-          },
         },
       },
     };
@@ -178,9 +175,12 @@ module.exports = ({ config = {} }) => {
         tenantName: partnerConfig.name,
         tenantSlug: partnerConfig.slug,
         ...(partnerConfig.extra || {}),
-        eas: {
-          projectId: partnerConfig.eas?.projectId || '8bfa2423-69b5-48bf-94c1-c4ded0716494',
-        },
+        // ProjectId será adicionado pelo EAS automaticamente se não existir
+        ...(partnerConfig.eas?.projectId && {
+          eas: {
+            projectId: partnerConfig.eas.projectId,
+          },
+        }),
       },
     },
   };

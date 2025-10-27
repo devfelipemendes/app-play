@@ -1,8 +1,8 @@
 {
   "name": "Play Móvel",
   "slug": "playmovel",
-  "owner": "playmovel",
-  "version": "1.0.0",
+  "owner": "devfelipeplay",
+  "version": "5.0.0",
   "ios": {
     "supportsTablet": true,
     "bundleIdentifier": "com.playmovel.app",
@@ -12,8 +12,8 @@
     }
   },
   "android": {
-    "package": "com.playmovel.app",
-    "versionCode": 1,
+    "package": "app.mobile.ios.infiniti",
+    "versionCode": 85,
     "adaptiveIcon": {
       "backgroundColor": "#000624"
     }
@@ -28,6 +28,6 @@
     "websiteUrl": "https://playmovel.com.br"
   },
   "eas": {
-    "projectId": "your-expo-project-id-here"
+    "projectId": "8bfa2423-69b5-48bf-94c1-c4ded0716494"
   }
 }

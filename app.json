@@ -61,6 +61,14 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "tenantId": "46",
+      "tenantName": "Play Móvel",
+      "tenantSlug": "playmovel",
+      "supportEmail": "suporte@playmovel.com.br",
+      "supportPhone": "+55 11 0000-0000",
+      "websiteUrl": "https://playmovel.com.br"
     }
   }
 }

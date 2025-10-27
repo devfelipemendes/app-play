@@ -40,7 +40,8 @@ const Plans = () => {
   const hasMsisdn = !isNoMsisdn && Boolean(msisdn && msisdn.trim().length > 0)
 
   // Verificar se é pós-pago
-  const isPospago = user?.pospago === true
+  const isPospago = det2Data?.pospago
+  const isContaFatura = det2Data?.contafatura !== null
   const graceStatuses = ['GRACE 1', 'GRACE 2', 'GRACE 3', 'BLOQUEADO', 'EX']
   const isGrace = graceStatuses.includes(det2Data?.statusplan || '')
 
@@ -137,12 +138,14 @@ const Plans = () => {
         ) : (
           // Se NÃO é pós-pago e TEM MSISDN, mostra todos os botões
           <>
-            <RedirectCard
-              title="Alterar Plano"
-              icon={RefreshCcw}
-              onPress={handleChangePlan}
-            />
-            {!isGrace && (
+            {!isGrace && !isContaFatura && !isPospago && (
+              <RedirectCard
+                title="Alterar Plano"
+                icon={RefreshCcw}
+                onPress={handleChangePlan}
+              />
+            )}
+            {!isGrace && !isContaFatura && !isPospago && (
               <RedirectCard
                 title="Recarga Adicional"
                 icon={Plus}

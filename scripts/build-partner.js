@@ -19,9 +19,23 @@ const platformArg = process.argv.find(arg => arg.startsWith('--platform='))?.spl
 const profileArg = process.argv.find(arg => arg.startsWith('--profile='))?.split('=')[1] || 'production';
 const noWait = process.argv.includes('--no-wait');
 const autoSubmit = process.argv.includes('--auto-submit');
+const interactive = process.argv.includes('--interactive');
 
 if (!partnerId) {
-  console.error('❌ Usage: node scripts/build-partner.js <TENANT_ID|all> [--platform=ios|android|all] [--profile=production|preview] [--no-wait] [--auto-submit]');
+  console.error('❌ Usage: node scripts/build-partner.js <TENANT_ID|all> [OPTIONS]');
+  console.error('');
+  console.error('Options:');
+  console.error('  --platform=<ios|android|all>    Platform to build (default: all)');
+  console.error('  --profile=<dev|preview|prod>    Build profile (default: production)');
+  console.error('  --interactive                   Allow interactive prompts (for first build)');
+  console.error('  --no-wait                       Don\'t wait for build to complete');
+  console.error('  --auto-submit                   Auto-submit to stores (production only)');
+  console.error('  --list                          List recent builds');
+  console.error('');
+  console.error('Examples:');
+  console.error('  node scripts/build-partner.js 46 --platform=android --profile=preview');
+  console.error('  node scripts/build-partner.js 46 --platform=ios --profile=development --interactive');
+  console.error('  node scripts/build-partner.js all --platform=android --profile=production');
   process.exit(1);
 }
 
@@ -57,7 +71,7 @@ async function validateTenant(tenantId) {
 /**
  * Executa build para um parceiro
  */
-async function buildPartner(tenantId, platform, profile, easCmd = 'eas') {
+async function buildPartner(tenantId, platform, profile, easCmd = 'eas', isInteractive = false) {
   try {
     console.log(`\n${'='.repeat(70)}`);
     console.log(`🚀 Building app for Tenant ID: ${tenantId}`);
@@ -84,8 +98,12 @@ async function buildPartner(tenantId, platform, profile, easCmd = 'eas') {
         'build',
         `--platform ${plt}`,
         `--profile ${profile}`,
-        '--non-interactive',
       ];
+
+      // Só adiciona --non-interactive se não for modo interativo
+      if (!isInteractive) {
+        easBuildArgs.push('--non-interactive');
+      }
 
       if (noWait) {
         easBuildArgs.push('--no-wait');
@@ -129,7 +147,7 @@ async function buildPartner(tenantId, platform, profile, easCmd = 'eas') {
 /**
  * Build de todos os parceiros
  */
-async function buildAllPartners(platform, profile, easCmd = 'eas') {
+async function buildAllPartners(platform, profile, easCmd = 'eas', isInteractive = false) {
   try {
     console.log('\n🚀 Building apps for all tenants...\n');
 
@@ -147,7 +165,7 @@ async function buildAllPartners(platform, profile, easCmd = 'eas') {
 
     for (const tenantId of tenantIds) {
       try {
-        await buildPartner(tenantId, platform, profile, easCmd);
+        await buildPartner(tenantId, platform, profile, easCmd, isInteractive);
         successCount++;
       } catch (error) {
         failCount++;
@@ -233,11 +251,22 @@ async function main() {
       return;
     }
 
+    // Mostra aviso se for primeiro build sem --interactive
+    if (!interactive && (profileArg === 'preview' || profileArg === 'production' || profileArg === 'production-aab')) {
+      console.log('');
+      console.log('⚠️  Note: If this is your first build, you may need to use --interactive');
+      console.log('   This allows EAS to generate keystores/certificates interactively.');
+      console.log('');
+      console.log('   If build fails, retry with:');
+      console.log(`   node scripts/build-partner.js ${partnerId} --platform=${platformArg} --profile=${profileArg} --interactive`);
+      console.log('');
+    }
+
     // Build
     if (partnerId === 'all') {
-      await buildAllPartners(platformArg, profileArg, easCommand);
+      await buildAllPartners(platformArg, profileArg, easCommand, interactive);
     } else {
-      await buildPartner(partnerId, platformArg, profileArg, easCommand);
+      await buildPartner(partnerId, platformArg, profileArg, easCommand, interactive);
     }
 
   } catch (error) {
