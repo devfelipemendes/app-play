@@ -8,6 +8,7 @@ import {
   TextInput as RNTextInput,
   ActivityIndicator,
   Keyboard,
+  Linking,
 } from 'react-native'
 import { VStack } from '@/components/ui/vstack'
 import { HStack } from '@/components/ui/hstack'
@@ -30,6 +31,7 @@ import moment from 'moment'
 import 'moment/locale/pt-br'
 import { maskCelularSemDDD } from '@/src/utils/masks'
 import { maskCelular } from '@/utils/masks'
+import { useAppSelector } from '@/src/store/hooks'
 
 moment.locale('pt-br')
 
@@ -87,6 +89,7 @@ const PortabilityBottomSheet: React.FC<PortabilityBottomSheetProps> = ({
   onSuccess,
 }) => {
   const { user } = useAuth()
+  const companyInfo = useAppSelector((state) => state.auth.companyInfo)
   const bottomSheetRef = useRef<BottomSheet>(null)
   const phoneInputRef = useRef<RNTextInput>(null)
 
@@ -114,9 +117,45 @@ const PortabilityBottomSheet: React.FC<PortabilityBottomSheetProps> = ({
     useRequestPortabilityMutation()
 
   // Verificar se DDDs são iguais
-  const currentDdd = msisdn?.replace(/\D/g, '').slice(2, 4) || ''
+  const currentDdd = msisdn?.replace(/\D/g, '').slice(0, 2) || ''
   const portDdd = numPort.replace(/\D/g, '').slice(0, 2) || ''
   const isSameDdd = currentDdd === portDdd
+
+  // Função para abrir suporte
+  const handleOpenSupport = async () => {
+    const supportUrl = companyInfo?.link_chat || ''
+
+    if (!supportUrl) {
+      console.error('❌ Link de chat não configurado no companyInfo')
+      Toast.show({
+        type: 'error',
+        text1: 'Erro',
+        text2: 'Link de suporte não disponível',
+      })
+      return
+    }
+
+    try {
+      const canOpen = await Linking.canOpenURL(supportUrl)
+      if (canOpen) {
+        await Linking.openURL(supportUrl)
+      } else {
+        console.error('Não foi possível abrir o URL de suporte:', supportUrl)
+        Toast.show({
+          type: 'error',
+          text1: 'Erro',
+          text2: 'Não foi possível abrir o link de suporte',
+        })
+      }
+    } catch (error) {
+      console.error('Erro ao abrir chat de suporte:', error)
+      Toast.show({
+        type: 'error',
+        text1: 'Erro',
+        text2: 'Não foi possível abrir o suporte',
+      })
+    }
+  }
 
   // Buscar status da portabilidade ao abrir
   useEffect(() => {
@@ -207,7 +246,7 @@ const PortabilityBottomSheet: React.FC<PortabilityBottomSheetProps> = ({
             try {
               const payload = {
                 token: user?.token || '',
-                msisdn: msisdn.replace(/\D/g, '').slice(2), // Remove 55
+                msisdn: msisdn.replace(/\D/g, ''), // Remove 55
                 pmsisdn: cleanedNum,
                 operadora: operadora.cod.replace('55', '00'),
               }
@@ -225,7 +264,14 @@ const PortabilityBottomSheet: React.FC<PortabilityBottomSheetProps> = ({
             } catch (error: any) {
               console.error('Erro ao solicitar portabilidade:', error)
 
-              if (error.status === 520) {
+              // Verifica se é erro 88 (portabilidade duplicada)
+              if (error.status === 400 && error.data?.data?.portin?.erro === 88) {
+                Toast.show({
+                  type: 'info',
+                  text1: 'Portabilidade já solicitada',
+                  text2: 'Já temos uma portabilidade solicitada para este número.',
+                })
+              } else if (error.status === 520) {
                 Toast.show({
                   type: 'error',
                   text1: 'Solicitação Duplicada',
@@ -368,7 +414,7 @@ const PortabilityBottomSheet: React.FC<PortabilityBottomSheetProps> = ({
           </VStack>
 
           {/* Link para suporte */}
-          <TouchableOpacity style={{ paddingTop: 8 }}>
+          <TouchableOpacity style={{ paddingTop: 8 }} onPress={handleOpenSupport}>
             <Text
               style={{
                 fontSize: 14,
@@ -410,14 +456,14 @@ const PortabilityBottomSheet: React.FC<PortabilityBottomSheetProps> = ({
               <View style={{ flex: 1 }}>
                 <RNTextInput
                   ref={phoneInputRef}
-                  value={maskPhone(numPort)}
+                  value={maskCelular(numPort)}
                   onChangeText={(text) => {
                     const cleaned = text.replace(/\D/g, '')
-                    setNumPort(cleaned.slice(0, 11))
+                    setNumPort(cleaned)
                   }}
                   placeholder="99 99999-9999"
                   keyboardType="numeric"
-                  maxLength={13}
+                  maxLength={15}
                   style={{
                     borderWidth: 1,
                     borderColor:
@@ -492,7 +538,7 @@ const PortabilityBottomSheet: React.FC<PortabilityBottomSheetProps> = ({
           </TouchableOpacity>
 
           {/* Link para suporte */}
-          <TouchableOpacity style={{ paddingTop: 8 }}>
+          <TouchableOpacity style={{ paddingTop: 8 }} onPress={handleOpenSupport}>
             <Text
               style={{
                 fontSize: 14,

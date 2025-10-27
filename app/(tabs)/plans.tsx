@@ -31,7 +31,7 @@ const Plans = () => {
   const det2Error = useAppSelector(selectDet2Error)
 
   const msisdn = det2Data?.msisdn || ''
-  const currentPlanId = det2Data?.planid_personalizado || user?.planid_personalizado || ''
+  const currentPlanId = user?.planid_personalizado || ''
   const codigoP = user?.cp || ''
   const tempMsisdn = user?.tempmsisdn || ''
 
@@ -41,6 +41,8 @@ const Plans = () => {
 
   // Verificar se é pós-pago
   const isPospago = user?.pospago === true
+  const graceStatuses = ['GRACE 1', 'GRACE 2', 'GRACE 3', 'BLOQUEADO', 'EX']
+  const isGrace = graceStatuses.includes(det2Data?.statusplan || '')
 
   console.log('📱 [PLANS] det2Error:', det2Error)
   console.log('📱 [PLANS] det2Data?.msisdn:', det2Data?.msisdn)
@@ -140,11 +142,13 @@ const Plans = () => {
               icon={RefreshCcw}
               onPress={handleChangePlan}
             />
-            <RedirectCard
-              title="Recarga Adicional"
-              icon={Plus}
-              onPress={handleAdditionalRecharge}
-            />
+            {!isGrace && (
+              <RedirectCard
+                title="Recarga Adicional"
+                icon={Plus}
+                onPress={handleAdditionalRecharge}
+              />
+            )}
             <RedirectCard
               title="Portabilidade"
               icon={Repeat}

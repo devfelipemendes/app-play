@@ -13,8 +13,7 @@ import { VStack } from '@/components/ui/vstack'
 import { HStack } from '@/components/ui/hstack'
 import { Box } from '@/components/ui/box'
 import { Text } from '@/components/ui/text'
-import { X } from 'lucide-react-native'
-import { Icon } from '@/components/ui/icon'
+
 import {
   useGetPlansQuery,
   useActivateLineMutation,
@@ -29,6 +28,8 @@ import {
   Extrapolation,
 } from 'react-native-reanimated'
 import { BottomSheetModal, BottomSheetBackdrop } from '@gorhom/bottom-sheet'
+import { useAppSelector } from '@/src/store/hooks'
+import { selectDet2Data } from '@/src/store/slices/det2Slice'
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window')
 const CARD_WIDTH = screenWidth * 0.88
@@ -53,6 +54,7 @@ const RESPONSIVE = {
 }
 
 interface Plan {
+  id: number
   planid: number | string
   description: string
   bundle: number | string
@@ -84,30 +86,27 @@ interface ActivateLineBottomSheetProps {
   onSuccess?: () => void
 }
 
-const mockApps = [
+interface AppBenefit {
+  name: string
+  image: any // ImageSourcePropType
+}
+
+const mockApps: AppBenefit[] = [
   {
     name: 'WhatsApp',
-    icon: 'https://via.placeholder.com/40x40/25D366/FFFFFF?text=W',
+    image: require('@/assets/images/whatsApp.png'),
   },
   {
-    name: 'Instagram',
-    icon: 'https://via.placeholder.com/40x40/E4405F/FFFFFF?text=I',
+    name: 'Acúmulo de Gigas',
+    image: require('@/assets/images/acumuloDeGigas.png'),
   },
   {
-    name: 'YouTube',
-    icon: 'https://via.placeholder.com/40x40/FF0000/FFFFFF?text=Y',
+    name: "SMS's Ilimitados",
+    image: require('@/assets/images/smsIlimitado.png'),
   },
   {
-    name: 'Netflix',
-    icon: 'https://via.placeholder.com/40x40/E50914/FFFFFF?text=N',
-  },
-  {
-    name: 'Spotify',
-    icon: 'https://via.placeholder.com/40x40/1DB954/FFFFFF?text=S',
-  },
-  {
-    name: 'TikTok',
-    icon: 'https://via.placeholder.com/40x40/000000/FFFFFF?text=T',
+    name: 'Ligações Ilimitadas',
+    image: require('@/assets/images/ligaçõesIlimitadas.png'),
   },
 ]
 
@@ -149,7 +148,7 @@ const PlanCard: React.FC<PlanCardProps> = React.memo(
         style={[
           {
             width: CARD_WIDTH,
-            height: CARD_HEIGHT,
+            height: CARD_HEIGHT + 10,
             alignSelf: 'center',
           },
           animatedStyle,
@@ -230,7 +229,7 @@ const PlanCard: React.FC<PlanCardProps> = React.memo(
                 fontSize: RESPONSIVE.fontSize.appsTitle,
                 fontWeight: '600',
                 color: colors.text,
-                marginBottom: RESPONSIVE.spacing.sectionGap * 0.6,
+                marginBottom: RESPONSIVE.spacing.sectionGap * 0.1,
                 textAlign: 'center',
               }}
             >
@@ -246,41 +245,63 @@ const PlanCard: React.FC<PlanCardProps> = React.memo(
                 gap: 6,
               }}
             >
-              {mockApps.slice(0, 6).map((app, index) => (
+              {mockApps.map((app, index) => (
                 <View
                   key={index}
                   style={{
-                    width: RESPONSIVE.appIcon.size,
-                    aspectRatio: 1,
-                    borderRadius: 12,
-                    backgroundColor: '#F8F9FA',
-                    justifyContent: 'center',
                     alignItems: 'center',
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 1 },
-                    shadowOpacity: 0.08,
-                    shadowRadius: 2,
-                    elevation: 2,
+                    width: RESPONSIVE.appIcon.size,
+                    marginBottom: 4,
                   }}
                 >
-                  <Image
-                    source={{ uri: app.icon }}
+                  {/* Card com imagem */}
+                  <View
                     style={{
-                      width: '60%',
-                      height: '60%',
-                      borderRadius: 6,
+                      width: RESPONSIVE.appIcon.size - 20,
+                      aspectRatio: 1,
+                      borderRadius: 12,
+                      backgroundColor: '#F8F9FA',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      shadowColor: '#000',
+                      shadowOffset: { width: 0, height: 1 },
+                      shadowOpacity: 0.08,
+                      shadowRadius: 2,
+                      elevation: 2,
+                      marginBottom: 6,
+                      overflow: 'hidden', // Para respeitar o borderRadius
                     }}
-                    resizeMode="cover"
-                  />
+                  >
+                    {app.image ? (
+                      <Image
+                        source={app.image}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          borderRadius: 12,
+                        }}
+                        resizeMode="cover"
+                      />
+                    ) : (
+                      <Text
+                        style={{
+                          fontSize: RESPONSIVE.fontSize.benefits * 0.8,
+                          color: colors.text,
+                        }}
+                      >
+                        {app.name.charAt(0)}
+                      </Text>
+                    )}
+                  </View>
+                  {/* Texto abaixo do card */}
                   <Text
                     style={{
-                      fontSize: RESPONSIVE.fontSize.benefits * 0.65,
+                      fontSize: RESPONSIVE.fontSize.benefits * 0.55,
                       color: colors.text,
-                      fontWeight: '500',
-                      marginTop: 2,
                       textAlign: 'center',
+                      lineHeight: RESPONSIVE.fontSize.benefits * 0.65,
                     }}
-                    numberOfLines={1}
+                    numberOfLines={2}
                   >
                     {app.name}
                   </Text>
@@ -297,7 +318,10 @@ const PlanCard: React.FC<PlanCardProps> = React.memo(
             }}
           >
             <HStack
-              style={{ alignItems: 'baseline', justifyContent: 'center' }}
+              style={{
+                alignItems: 'baseline',
+                justifyContent: 'center',
+              }}
             >
               <Text
                 style={{
@@ -374,6 +398,8 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
   // Mutation para ativar linha
   const [activateLine, { isLoading: isActivating }] = useActivateLineMutation()
 
+  const det2Data = useAppSelector(selectDet2Data)
+
   // Mostrar apenas planos personalizados com mostraApp: true
   const allPlans = React.useMemo(() => {
     if (!plansData) return []
@@ -447,7 +473,6 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
         style={{
           justifyContent: 'center',
           gap: 8,
-          marginTop: 8,
           marginBottom: 4,
         }}
       >
@@ -473,6 +498,10 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
       </HStack>
     )
   }
+
+  const msisdnRaw = det2Data?.msisdn ?? ''
+  const digits = msisdnRaw.replace(/\D/g, '') // remove tudo que não é número
+  const ddd = digits.slice(0, 2)
 
   const handleActivateLine = async () => {
     if (!selectedPlan) {
@@ -501,10 +530,10 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
               try {
                 const payload = {
                   cpf: user?.cpf || '',
-                  ddd: '',
+                  ddd: ddd,
                   iccid: iccid,
                   planid: selectedPlan.planid.toString(),
-                  planid_personalizado: '',
+                  planid_personalizado: selectedPlan.id.toString(),
                   isApp: true,
                   pospago: false,
                   esim: false,
@@ -683,7 +712,7 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
                 ref={carouselRef}
                 loop={false}
                 width={screenWidth}
-                height={CARD_HEIGHT + 40}
+                height={CARD_HEIGHT}
                 data={allPlans}
                 renderItem={renderPlanCard}
                 onProgressChange={onProgressChange}

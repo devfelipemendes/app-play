@@ -70,7 +70,9 @@ const LineSelector = ({
                 color: colors.secondary,
               }}
             >
-              {selectedLine.plandescription}
+              {selectedLine.plandescription !== 'PLAY VOZ 0MIN | 1GB'
+                ? selectedLine.plandescription
+                : 'Ainda não temos um plano ativo'}
             </Text>
           </VStack>
         </HStack>
@@ -136,7 +138,9 @@ const LineSelector = ({
                   marginTop: 2,
                 }}
               >
-                {selectedLine.plandescription || selectedLine.iccid}
+                {(selectedLine.plandescription !== 'PLAY VOZ 0MIN | 1GB'
+                  ? selectedLine.plandescription
+                  : 'Ainda não temos um plano ativo') || selectedLine.iccid}
               </Text>
             </VStack>
 

@@ -495,7 +495,9 @@ const Home = () => {
               marginBottom: 8,
             }}
           >
-            {isSessionExpired ? 'Sessão Expirada' : 'Ops! Algo deu errado'}
+            {isSessionExpired
+              ? 'Sessão Expirada'
+              : 'Ops! Algo não saiu como o esperado :('}
           </Text>
 
           <Text
@@ -545,7 +547,8 @@ const Home = () => {
                 marginTop: 8,
               }}
             >
-              Puxe para baixo para tentar novamente
+              Puxe para baixo para tentar novamente, caso o erro persista entre
+              em contato com o suporte.
             </Text>
           )}
         </Box>
