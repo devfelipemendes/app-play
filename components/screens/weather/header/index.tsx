@@ -4,7 +4,7 @@ import { Icon, SearchIcon } from '@/components/ui/icon'
 import { VStack } from '@/components/ui/vstack'
 import { Box } from '@/components/ui/box'
 import { ImageBackground } from '@/components/ui/image-background'
-import { Image } from '@/components/ui/image'
+
 import { ThemeContext } from '@/contexts/theme-context'
 import Animated, {
   interpolate,
@@ -13,11 +13,7 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated'
 import { useAppSelector } from '@/src/store/hooks'
-import {
-  selectDet2Data,
-  selectDet2Loading,
-  selectDet2Error,
-} from '@/src/store/slices/det2Slice'
+import { selectDet2Data, selectDet2Error } from '@/src/store/slices/det2Slice'
 import { useDadosFormatter } from '@/src/utils/dadosFormatter'
 import { formatPhoneNumber } from '@/src/utils/PhoneFormatter'
 import { getCurrentFormattedDate } from '@/src/utils/getDateFormatter'
@@ -25,28 +21,13 @@ import { getCurrentFormattedDate } from '@/src/utils/getDateFormatter'
 const Header = ({ height }: { height: number }) => {
   const { colorMode }: any = useContext(ThemeContext)
   const det2Data = useAppSelector(selectDet2Data)
-  const loading = useAppSelector(selectDet2Loading)
+
   const det2Error = useAppSelector(selectDet2Error)
 
   const { convertMBtoGB } = useDadosFormatter()
 
   // Detectar se não tem MSISDN ativo
   const isNoMsisdn = det2Error === 'NO_MSISDN'
-
-  // Mensagens motivadoras aleatórias
-  const motivationalMessages = [
-    '🚀 Pronto para decolar?',
-    '✨ Comece sua jornada!',
-    '🌟 Hora de se conectar!',
-    '💫 Ative e aproveite!',
-
-    '📱 Conecte-se agora!',
-  ]
-
-  const randomMessage =
-    motivationalMessages[
-      Math.floor(Math.random() * motivationalMessages.length)
-    ]
 
   // Shared value para height suavizada
   const smoothHeight = useSharedValue(height)
@@ -58,6 +39,7 @@ const Header = ({ height }: { height: number }) => {
       stiffness: 100, // Menor = mais suave
       mass: 1.2, // Maior = mais inércia
     })
+    // eslint-disable-next-line
   }, [height])
 
   // Estilos animados usando smoothHeight e extrapolation 'clamp'
@@ -81,16 +63,6 @@ const Header = ({ height }: { height: number }) => {
 
   const feelsLikeTextStyle = useAnimatedStyle(() => ({
     fontSize: interpolate(smoothHeight.value, [340, 140], [18, 14], 'clamp'),
-  }))
-
-  const weatherTextStyle = useAnimatedStyle(() => ({
-    fontSize: interpolate(smoothHeight.value, [340, 140], [20, 14], 'clamp'),
-  }))
-
-  const imageStyle = useAnimatedStyle(() => ({
-    width: interpolate(smoothHeight.value, [340, 140], [124, 56], 'clamp'),
-    height: interpolate(smoothHeight.value, [340, 140], [112, 50], 'clamp'),
-    marginTop: interpolate(smoothHeight.value, [340, 140], [6, 0], 'clamp'),
   }))
 
   // Estilo animado para o container principal

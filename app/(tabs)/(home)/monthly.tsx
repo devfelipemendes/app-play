@@ -5,7 +5,7 @@ import { Box } from '@/components/ui/box'
 import { HStack } from '@/components/ui/hstack'
 import { Icon } from '@/components/ui/icon'
 import { Globe, Signal } from 'lucide-react-native'
-import { ScrollView, Dimensions } from 'react-native'
+import { ScrollView } from 'react-native'
 import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectDet2Data, selectDet2Error } from '@/src/store/slices/det2Slice'
@@ -14,7 +14,6 @@ import {
   getCurrentMonthYear,
   formatToMonthlyChart,
   normalizeMsisdn,
-  type MonthlyChartData,
 } from '@/src/utils/consumoFormatter'
 import { BarChart } from 'react-native-gifted-charts'
 import { WeatherTabContext } from '@/contexts/weather-screen-context'
@@ -58,20 +57,23 @@ const Monthly = () => {
 
         try {
           await retryApiCall(
-            () => getConsumo({
-              msisdn: normalizedMsisdn,
-              tipo: 'dados',
-              mes: month,
-              ano: year,
-            }).unwrap(),
+            () =>
+              getConsumo({
+                msisdn: normalizedMsisdn,
+                tipo: 'dados',
+                mes: month,
+                ano: year,
+              }).unwrap(),
             {
               onAttempt: (attempt, max) => {
-                console.log(`🔄 Tentativa ${attempt}/${max} de buscar consumo mensal...`)
+                console.log(
+                  `🔄 Tentativa ${attempt}/${max} de buscar consumo mensal...`,
+                )
               },
               onError: (attempt, err) => {
                 console.log(`❌ Tentativa ${attempt} falhou:`, err)
               },
-            }
+            },
           )
         } catch (err) {
           console.error('❌ Erro ao buscar consumo mensal:', err)
@@ -80,7 +82,7 @@ const Monthly = () => {
 
       fetchConsumo()
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [msisdn, isNoMsisdn])
 
   // Registrar função de refresh no contexto (tab 2 = monthly)
@@ -98,7 +100,11 @@ const Monthly = () => {
 
   // Processar dados para o gráfico
   const monthlyChartData = useMemo(() => {
-    if (!consumoData || consumoData.length === 0 || !consumoData[0]?.resultados) {
+    if (
+      !consumoData ||
+      consumoData.length === 0 ||
+      !consumoData[0]?.resultados
+    ) {
       console.log('📊 Sem dados de consumo mensal:', { consumoData })
       return []
     }
@@ -276,8 +282,6 @@ const Monthly = () => {
       </VStack>
     )
   }
-
-  const screenWidth = Dimensions.get('window').width
 
   console.log('📊 Exibindo: Gráfico com', monthlyChartData.length, 'dias')
 

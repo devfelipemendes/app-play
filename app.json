@@ -1,29 +1,35 @@
 {
   "expo": {
-    "name": "new-app-play",
-    "slug": "new-app-play",
-    "version": "1.0.0",
+    "name": "Play Móvel",
+    "slug": "PlayMovel",
+    "owner": "playmovel",
+    "version": "5.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/AssetsPartners/icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.appplay.default",
+      "bundleIdentifier": "com.playmovel.app",
+      "buildNumber": "1",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSCameraUsageDescription": "Precisamos acessar sua câmera para escanear o código de barras do seu chip SIM Card durante o cadastro.",
         "NSPhotoLibraryUsageDescription": "Precisamos acessar suas fotos para permitir que você escolha uma imagem de perfil.",
         "NSLocationWhenInUseUsageDescription": "Precisamos acessar sua localização para mostrar lojas e serviços próximos a você.",
         "NSLocationAlwaysUsageDescription": "Precisamos acessar sua localização mesmo quando o app está em segundo plano para fornecer serviços baseados em localização.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "Precisamos acessar sua localização para fornecer serviços baseados em localização."
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Precisamos acessar sua localização para fornecer serviços baseados em localização.",
+        "NSFaceIDUsageDescription": "Este app usa Face ID para autenticar seu login de forma segura.",
+        "UIViewControllerBasedStatusBarAppearance": false
       }
     },
     "android": {
+      "package": "app.mobile.ios.infiniti",
+      "versionCode": 85,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/AssetsPartners/adaptive-icon.png",
+        "backgroundColor": "#000624"
       },
       "softwareKeyboardLayoutMode": "pan",
       "screenOrientation": "portrait",
@@ -32,7 +38,9 @@
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
         "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE"
+        "WRITE_EXTERNAL_STORAGE",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
       ]
     },
     "web": {
@@ -45,10 +53,10 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/AssetsPartners/splash.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#000624"
         }
       ],
       "expo-secure-store",
@@ -63,12 +71,15 @@
       "typedRoutes": true
     },
     "extra": {
-      "tenantId": "46",
-      "tenantName": "Play Móvel",
-      "tenantSlug": "playmovel",
       "supportEmail": "suporte@playmovel.com.br",
       "supportPhone": "+55 11 0000-0000",
-      "websiteUrl": "https://playmovel.com.br"
+      "websiteUrl": "https://playmovel.com.br",
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "a2c2d022-685b-4ca6-9cd1-57d4c26e5468"
+      }
     }
   }
 }

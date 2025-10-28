@@ -24,7 +24,6 @@ import {
   BottomSheetModal,
   BottomSheetBackdrop,
   BottomSheetView,
-  BottomSheetScrollView,
 } from '@gorhom/bottom-sheet'
 import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel'
 import {
@@ -120,7 +119,7 @@ interface PlanCardProps {
   onSelect: () => void
   colors: any
 }
-
+// eslint-disable-next-line
 const PlanCard: React.FC<PlanCardProps> = React.memo(
   ({ plan, animationValue, isSelected, onSelect, colors }) => {
     const animatedStyle = useAnimatedStyle(() => {
@@ -376,7 +375,7 @@ const ReactivateLineBottomSheet: React.FC<ReactivateLineBottomSheetProps> = ({
   // Mutation para reativar linha
   const [reactivateLine, { isLoading: isReactivating }] =
     useReactivateLineMutation()
-  const [getFatura, { isLoading: isLoadingFatura }] = useGetFaturaMutation()
+  const [getFatura] = useGetFaturaMutation()
 
   // Query de planos
   const {

@@ -5,7 +5,7 @@ import { VStack } from '@/components/ui/vstack'
 import { Text } from '@/components/ui/text'
 import { Divider } from '@/components/ui/divider'
 import { Box } from '@/components/ui/box'
-import { ChevronDownIcon, Icon } from '@/components/ui/icon'
+import { Icon } from '@/components/ui/icon'
 import { CheckCircle, Clock, XCircle } from 'lucide-react-native'
 import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
 
@@ -13,7 +13,7 @@ interface IDaysCard {
   name: string // Tipo da fatura (ex: "Muda Plano", "Recarga")
   created: string // Data de criação (ex: "2024-08-15 15:55:08")
   highest: string | number // Valor bruto (valuetopup)
-  lowest: string | number // Valor líquido (netvalue)
+
   paymentStatus: number // 1 = pago, 0 = pendente, 2 = estornado
   onPress?: () => void // Callback quando clicar no card
 }
@@ -35,14 +35,13 @@ const DaysCard = ({
   name,
   created,
   highest,
-  lowest,
+
   paymentStatus,
   onPress,
 }: IDaysCard) => {
   const formattedDateCreated = formatDate(created)
 
   const valorBruto = typeof highest === 'string' ? parseFloat(highest) : highest
-  const valorLiquido = typeof lowest === 'string' ? parseFloat(lowest) : lowest
 
   const { colors } = useCompanyThemeSimple()
 
@@ -129,7 +128,10 @@ const DaysCard = ({
   // Se tiver onPress, envolver com Pressable
   if (onPress) {
     return (
-      <Pressable onPress={onPress} android_ripple={{ color: colors.primary + '20' }}>
+      <Pressable
+        onPress={onPress}
+        android_ripple={{ color: colors.primary + '20' }}
+      >
         {CardContent}
       </Pressable>
     )

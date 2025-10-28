@@ -28,7 +28,6 @@ import {
   setLoading,
   setData,
   setError,
-  loadFromCache,
   setSelectedLineIccid,
   setHasInitialized,
   setUserLines as setReduxUserLines,
@@ -37,18 +36,16 @@ import {
   selectDet2Error,
   selectDet2HasInitialized,
   selectDet2UserLines,
-  selectHasCacheForIccid,
 } from '@/src/store/slices/det2Slice'
 
 import {
   useGetUserLinesMutation,
-  type GetUserLinesResponse,
   type UserLine,
 } from '@/src/api/endpoints/verLinhas'
 import LineSelector from '@/components/layout/lineSelector'
 import { useDadosFormatter } from '@/src/utils/dadosFormatter'
 import { TouchableOpacity } from 'react-native'
-import ActivateLineModal from '@/components/layout/ActivateLineModal'
+
 import ActivateLineBottomSheet from '@/components/layout/ActivateLineBottomSheet'
 import ActivateLineBottomSheetWithSteps from '@/components/layout/ActivateLineBottomSheetWithSteps'
 import ReactivateLineBottomSheet from '@/components/layout/ReactivateLineBottomSheet'
@@ -88,7 +85,7 @@ const Home = () => {
   const [selectedLine, setSelectedLine] = useState<UserLine | null>(null)
   const [loadingLines, setLoadingLines] = useState(false)
   const [loadingLineChange, setLoadingLineChange] = useState(false)
-  const [showActivateModal, setShowActivateModal] = useState(false)
+
   const [
     showActivateWithStepsBottomSheet,
     setShowActivateWithStepsBottomSheet,
@@ -383,6 +380,7 @@ const Home = () => {
       console.log('🚀 Primeira inicialização, carregando dados...')
       dispatch(setHasInitialized(true))
       fetchUserData()
+      // eslint-disable-next-line
     }, [
       hasInitialized,
       reduxUserLines,

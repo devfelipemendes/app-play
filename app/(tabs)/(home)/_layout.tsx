@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect, useRef } from 'react'
+import React, { useContext, useState, useEffect } from 'react'
 import { Slot } from 'expo-router'
 import { RefreshControl } from 'react-native'
 import { ScrollView } from '@/components/ui/scroll-view'
@@ -22,7 +22,8 @@ import { useRefresh } from '@/hooks/useRefresh'
 import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
 
 const WeatherLayout = () => {
-  const { scrollViewRef, selectedTabIndex, refreshCurrentTab }: any = useContext(WeatherTabContext)
+  const { scrollViewRef, selectedTabIndex, refreshCurrentTab }: any =
+    useContext(WeatherTabContext)
   const { handleScroll } = useChildVisibility()
   const scrollY = useSharedValue(0)
   const [height, setHeight] = useState(340)
@@ -63,6 +64,7 @@ const WeatherLayout = () => {
         },
       )
     }
+    // eslint-disable-next-line
   }, [selectedTabIndex])
 
   const handleScrollWithPosition = (event: any) => {

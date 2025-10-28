@@ -34,13 +34,12 @@ const Days = () => {
 
   // Verificar se tem MSISDN ativo
   const isNoMsisdn = det2Error === 'NO_MSISDN'
-  const hasLineData = det2Data?.iccid && user?.token && !isNoMsisdn
 
   // Estados para o modal de fatura
   const faturaBottomSheetRef = useRef<BottomSheetModal>(null)
   const [faturaDetalhada, setFaturaDetalhada] =
     useState<FaturaDetalhada | null>(null)
-  const [getFatura, { isLoading: loadingFatura }] = useGetFaturaMutation()
+  const [getFatura] = useGetFaturaMutation()
 
   // 🔍 Determinar parâmetro de busca: CPF ou ICCID
   // Se não tem linha ativa (isNoMsisdn), busca por CPF do usuário logado
@@ -76,6 +75,7 @@ const Days = () => {
 
   useEffect(() => {
     hasDaysTabAnimated.current = true
+    // eslint-disable-next-line
   }, [])
 
   // Registrar função de refresh no contexto (tab 1 = faturas)
@@ -247,7 +247,6 @@ const Days = () => {
                 name={fatura.tipo}
                 created={fatura.created}
                 highest={fatura.valuetopup}
-                lowest={fatura.netvalue}
                 paymentStatus={fatura.paymentstatus}
                 onPress={() =>
                   handleOpenFatura(fatura.paymentasaasid.toString())

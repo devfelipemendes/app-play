@@ -1,5 +1,5 @@
 // components/layout/ActivateLineModal.tsx
-import React, { useState, useRef, useCallback, useEffect } from 'react'
+import React, { useState, useRef, useCallback, useEffect, memo } from 'react'
 import {
   Modal,
   TouchableOpacity,
@@ -121,7 +121,8 @@ interface PlanCardProps {
   colors: any
 }
 
-const PlanCard: React.FC<PlanCardProps> = React.memo(
+// eslint-disable-next-line
+const PlanCard: React.FC<PlanCardProps> = memo(
   ({ plan, animationValue, isSelected, onSelect, colors }) => {
     const animatedStyle = useAnimatedStyle(() => {
       const scale = interpolate(

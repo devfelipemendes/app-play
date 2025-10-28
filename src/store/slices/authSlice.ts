@@ -62,7 +62,7 @@ interface User {
   etapaCadastro: any | null // Pode ser especificado mais detalhadamente se necessário
   super: any | null // Pode ser especificado mais detalhadamente se necessário
   idIndicacao: any | null // Pode ser especificado mais detalhadamente se necessário
-  primeiroAcesso: boolean
+  primeiroAcesso?: boolean
   airtime_company: boolean
   airtime_comissao: boolean
   rede_company: string

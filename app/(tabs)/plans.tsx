@@ -1,7 +1,7 @@
-import React, { useState, useContext } from 'react'
+import React, { useState } from 'react'
 import { VStack } from '@/components/ui/vstack'
 import RedirectCard from '@/components/screens/settings/redirect-card'
-import { RefreshCcw, Plus, Smartphone, Repeat, Box } from 'lucide-react-native'
+import { RefreshCcw, Plus, Smartphone, Repeat } from 'lucide-react-native'
 import CustomHeader from '@/components/shared/custom-header'
 import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
 import ActivateLineBottomSheet from '@/components/layout/ActivateLineBottomSheetWithSteps'
@@ -11,15 +11,12 @@ import PortabilityBottomSheet from '@/components/layout/PortabilityBottomSheet'
 import { useAppSelector } from '@/src/store/hooks'
 import type { RootState } from '@/src/store'
 import { StatusBar } from 'expo-status-bar'
-import { ThemeContext } from '@/contexts/theme-context'
-import { useRouter } from 'expo-router'
+
 import { selectDet2Data, selectDet2Error } from '@/src/store/slices/det2Slice'
-import { maskCelular } from '@/utils/masks'
 
 const Plans = () => {
   const { colors } = useCompanyThemeSimple()
-  const { colorMode }: any = useContext(ThemeContext)
-  const router = useRouter()
+
   const [showChangePlanModal, setShowChangePlanModal] = useState(false)
   const [showRechargeModal, setShowRechargeModal] = useState(false)
   const [showActivateLineModal, setShowActivateLineModal] = useState(false)
@@ -44,12 +41,6 @@ const Plans = () => {
   const isContaFatura = det2Data?.contafatura !== null
   const graceStatuses = ['GRACE 1', 'GRACE 2', 'GRACE 3', 'BLOQUEADO', 'EX']
   const isGrace = graceStatuses.includes(det2Data?.statusplan || '')
-
-  console.log('📱 [PLANS] det2Error:', det2Error)
-  console.log('📱 [PLANS] det2Data?.msisdn:', det2Data?.msisdn)
-  console.log('📱 [PLANS] isNoMsisdn:', isNoMsisdn)
-  console.log('📱 [PLANS] hasMsisdn:', hasMsisdn)
-  console.log('📱 [PLANS] isPospago:', isPospago)
 
   const handleChangePlan = () => {
     setShowChangePlanModal(true)

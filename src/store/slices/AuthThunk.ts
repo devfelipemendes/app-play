@@ -1,35 +1,10 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
 
 import { env } from '@/config/env'
-import type { RootState, AppDispatch } from '../index'
+
 import { apiPlay } from '@/src/api/endpoints/AuthApi'
 
 // ✅ Helper para dispatch de endpoints RTK
-const createRTKThunk = <TRequest, TResponse>(
-  typePrefix: string,
-  endpoint: any,
-) => {
-  return createAsyncThunk<
-    TResponse,
-    TRequest,
-    {
-      state: RootState
-      dispatch: AppDispatch
-    }
-  >(typePrefix, async (params: TRequest, { dispatch, rejectWithValue }) => {
-    try {
-      const result = await dispatch(endpoint(params))
-
-      if ('error' in result) {
-        return rejectWithValue(result.error)
-      }
-
-      return result.data as TResponse
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Erro na requisição')
-    }
-  })
-}
 
 // ✅ Company Info thunk
 export const getCompanyInfo = createAsyncThunk(

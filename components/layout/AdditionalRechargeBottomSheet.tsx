@@ -11,14 +11,13 @@ import { VStack } from '@/components/ui/vstack'
 import { HStack } from '@/components/ui/hstack'
 import { Box } from '@/components/ui/box'
 import { Text } from '@/components/ui/text'
-import { X } from 'lucide-react-native'
-import { Icon } from '@/components/ui/icon'
+
 import {
   useGetAdditionalPlansQuery,
   useAdditionalRechargeMutation,
 } from '@/src/api/endpoints/plansApi'
 import { useAuth } from '@/hooks/useAuth'
-import { env } from '@/config/env'
+
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetView,
@@ -85,6 +84,7 @@ interface PlanCardProps {
   colors: any
 }
 
+// eslint-disable-next-line
 const PlanCard: React.FC<PlanCardProps> = React.memo(
   ({ plan, animationValue, isSelected, onSelect, colors }) => {
     const animatedStyle = useAnimatedStyle(() => {
@@ -269,6 +269,7 @@ const AdditionalRechargeBottomSheet: React.FC<
   const [additionalRecharge, { isLoading: isRecharging }] =
     useAdditionalRechargeMutation()
 
+  // eslint-disable-next-line
   const allPlans = plansData?.personalizado || []
 
   // Auto-selecionar primeiro plano quando os planos carregarem
@@ -287,10 +288,6 @@ const AdditionalRechargeBottomSheet: React.FC<
       bottomSheetRef.current?.close()
     }
   }, [isOpen])
-
-  const handleSelectPlan = (plan: AdditionalPlan) => {
-    setSelectedPlan(plan)
-  }
 
   const renderPlanCard = useCallback(
     ({

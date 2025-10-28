@@ -3,6 +3,9 @@ import React, { useMemo } from 'react'
 import { GluestackUIProvider } from '@gluestack-ui/themed'
 import { createCustomConfig } from '@/config/theme'
 
+import { Box, Text, Button, ButtonText } from '@gluestack-ui/themed'
+import { useTheme } from '@/contexts/theme-context'
+
 interface ThemeWrapperProps {
   children: React.ReactNode
   colorMode?: 'light' | 'dark'
@@ -12,7 +15,7 @@ export const ThemeWrapper: React.FC<ThemeWrapperProps> = ({
   children,
   colorMode = 'light',
 }) => {
-  const { theme, isLoading } = useWhitelabelTheme()
+  const { theme, isLoading } = useTheme()
 
   // ✅ Gerar configuração customizada baseada no tema
   const customConfig = useMemo(() => {
@@ -43,8 +46,6 @@ export const ThemeWrapper: React.FC<ThemeWrapperProps> = ({
 }
 
 // ✅ Componente exemplo usando as cores customizadas
-import { Box, Text, Button, ButtonText } from '@gluestack-ui/themed'
-import { useWhitelabelTheme } from '@/contexts/theme-context/whitelabel-the,e-context'
 
 export const ThemedComponentExample: React.FC = () => {
   return (

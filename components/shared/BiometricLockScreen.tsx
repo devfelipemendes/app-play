@@ -13,12 +13,11 @@ import { useRouter } from 'expo-router'
 import {
   TYPOGRAPHY,
   SPACING,
-  BORDER_RADIUS,
   moderateScale,
   scale,
   widthPercentage,
 } from '@/utils/responsive'
-import { BUTTON, ICON, ALERT } from '@/config/responsiveDimensions'
+import { BUTTON, ALERT } from '@/config/responsiveDimensions'
 
 const BiometricLockScreen = () => {
   const { colors } = useCompanyThemeSimple()
@@ -39,6 +38,7 @@ const BiometricLockScreen = () => {
     if (isBiometricSupported && hasStoredCredentials) {
       handleBiometricAuth()
     }
+    // eslint-disable-next-line
   }, [isBiometricSupported, hasStoredCredentials])
 
   const handleBiometricAuth = async () => {
@@ -95,11 +95,7 @@ const BiometricLockScreen = () => {
               { backgroundColor: colors.primary + '15' },
             ]}
           >
-            <Icon
-              as={getBiometricIcon()}
-              size="4xl"
-              style={{ color: colors.primary }}
-            />
+            <Icon as={getBiometricIcon()} style={{ color: colors.primary }} />
           </View>
         </View>
 

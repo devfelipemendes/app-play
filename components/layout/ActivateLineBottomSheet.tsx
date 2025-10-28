@@ -118,6 +118,7 @@ interface PlanCardProps {
   colors: any
 }
 
+// eslint-disable-next-line
 const PlanCard: React.FC<PlanCardProps> = React.memo(
   ({ plan, animationValue, isSelected, onSelect, colors }) => {
     const animatedStyle = useAnimatedStyle(() => {
@@ -430,10 +431,6 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
       setSelectedPlan(allPlans[0])
     }
   }, [allPlans, selectedPlan])
-
-  const handleSelectPlan = (plan: Plan) => {
-    setSelectedPlan(plan)
-  }
 
   const renderPlanCard = useCallback(
     ({ item, animationValue }: { item: Plan; animationValue: any }) => {

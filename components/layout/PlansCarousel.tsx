@@ -33,7 +33,6 @@ import {
   useGetFaturaMutation,
 } from '@/src/api/endpoints/faturaApi'
 import { setMode } from '@/src/store/slices/screenFlowSlice'
-import { useRouter } from 'expo-router'
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window')
 const CARD_WIDTH = screenWidth * 0.9
@@ -112,7 +111,7 @@ interface PlanCardProps {
   onBuy: () => void
   isActivating?: boolean // Indica se este plano está sendo ativado
 }
-
+// eslint-disable-next-line
 const PlanCard: React.FC<PlanCardProps> = React.memo(
   ({ plan, animationValue, onBuy, isActivating = false }) => {
     const { colors } = useCompanyThemeSimple()
@@ -402,6 +401,7 @@ const PlansCarousel: React.FC = () => {
     useState<FaturaDetalhada | null>(null)
   const [activatingPlanId, setActivatingPlanId] = useState<number | null>(null) // Controla qual plano está sendo ativado
   const progressValue = useSharedValue<number>(0)
+  const singleCardAnimationValue = useSharedValue<number>(0) // Para quando há apenas 1 plano
   const { colors } = useCompanyThemeSimple()
   const dispatch = useAppDispatch()
 
@@ -422,10 +422,10 @@ const PlansCarousel: React.FC = () => {
   })
 
   // Mutation para ativar linha
-  const [activateLine, { isLoading: isActivating }] = useActivateLineMutation()
+  const [activateLine] = useActivateLineMutation()
 
   // Mutation para buscar fatura completa
-  const [getFatura, { isLoading: isLoadingFatura }] = useGetFaturaMutation()
+  const [getFatura] = useGetFaturaMutation()
 
   const canShowPlans = env.COMPANY_ID
 
@@ -588,8 +588,10 @@ const PlansCarousel: React.FC = () => {
         )
       } catch (error) {
         // Silently fail
+        console.log(error)
       }
     },
+    // eslint-disable-next-line
     [cpf, dddToUse, iccid, userInfo, activateLine, dispatch],
   )
 
@@ -756,7 +758,7 @@ const PlansCarousel: React.FC = () => {
       >
         <PlanCard
           plan={allPlans[0]}
-          animationValue={useSharedValue(0)}
+          animationValue={singleCardAnimationValue}
           onBuy={() => handleBuyPlan(allPlans[0])}
           isActivating={activatingPlanId === allPlans[0].id}
         />

@@ -40,7 +40,7 @@ export interface FaturaDetalhada {
   payment: string
   companyid: number
 }
-
+// eslint-disable-next-line
 export interface GetFaturaResponse extends FaturaDetalhada {}
 
 // ========================================

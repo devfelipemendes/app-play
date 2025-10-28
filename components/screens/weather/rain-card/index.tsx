@@ -1,40 +1,41 @@
-import React, { useContext, useEffect } from "react";
-import { Progress, ProgressFilledTrack } from "@/components/ui/progress";
-import { HStack } from "@/components/ui/hstack";
-import { Text } from "@/components/ui/text";
-import { Box } from "@/components/ui/box";
+import React, { useContext, useEffect } from 'react'
+import { Progress, ProgressFilledTrack } from '@/components/ui/progress'
+import { HStack } from '@/components/ui/hstack'
+import { Text } from '@/components/ui/text'
+import { Box } from '@/components/ui/box'
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
-} from "react-native-reanimated";
-import { WeatherTabContext } from "@/contexts/weather-screen-context";
+} from 'react-native-reanimated'
+import { WeatherTabContext } from '@/contexts/weather-screen-context'
 
 interface IRainCard {
-  time: number;
-  value: number;
+  time: number
+  value: number
 }
 
 const RainCard = ({ time, value }: IRainCard) => {
   const { childRefs, hasProgressBarAnimated }: any =
-    useContext(WeatherTabContext);
+    useContext(WeatherTabContext)
   const AnimatedProgressFilledTrack =
-    Animated.createAnimatedComponent(ProgressFilledTrack);
-  const progressAnim = useSharedValue(0);
+    Animated.createAnimatedComponent(ProgressFilledTrack)
+  const progressAnim = useSharedValue(0)
 
   // Use useEffect to trigger animation only when fourth view becomes visible
   useEffect(() => {
     if (childRefs[1].isVisible && hasProgressBarAnimated.current < 4) {
-      progressAnim.value = withTiming(value, { duration: 500 });
-      hasProgressBarAnimated.current += 1;
+      progressAnim.value = withTiming(value, { duration: 500 })
+      hasProgressBarAnimated.current += 1
     }
-  }, [childRefs[1].isVisible, value]);
+    // eslint-disable-next-line
+  }, [childRefs[1].isVisible, value])
 
   const progressStyle = useAnimatedStyle(() => {
     return {
       width: `${progressAnim.value}%`,
-    };
-  });
+    }
+  })
 
   return (
     <HStack className="justify-between items-center gap-2">
@@ -58,7 +59,7 @@ const RainCard = ({ time, value }: IRainCard) => {
         {value}%
       </Text>
     </HStack>
-  );
-};
+  )
+}
 
-export default RainCard;
+export default RainCard

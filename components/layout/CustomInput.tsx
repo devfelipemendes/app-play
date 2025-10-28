@@ -1,11 +1,10 @@
 import React, { type ComponentProps } from 'react'
 import { Input, InputField, InputIcon, InputSlot } from '../ui/input'
 import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
-import { Text } from '@gluestack-ui/themed'
+
 import { KeyboardTypeOptions } from 'react-native'
-import { any, boolean } from 'valibot'
-import { ArrowUpToLineIcon } from 'lucide-react-native'
-import { TYPOGRAPHY, BORDER_RADIUS } from '@/utils/responsive'
+
+import { TYPOGRAPHY } from '@/utils/responsive'
 import { INPUT } from '@/config/responsiveDimensions'
 
 interface CustomInputProps extends InputFieldProps {

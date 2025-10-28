@@ -25,7 +25,7 @@ import Toast from 'react-native-toast-message'
 import { createCustomConfig } from '@/config/theme'
 import { PaperProvider } from 'react-native-paper'
 import AuthGuard from '@/src/components/auth/AuthGuard'
-import DevTools from '@/components/DevTools'
+
 import { useAuth } from '@/hooks/useAuth'
 import { ActivityIndicator, View } from 'react-native'
 
@@ -64,6 +64,7 @@ const CompanyInfoLoader = ({
     }
 
     loadCompanyInfo()
+    // eslint-disable-next-line
   }, [])
 
   if (isLoading) {

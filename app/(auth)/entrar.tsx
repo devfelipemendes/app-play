@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { SafeAreaView } from '@/components/ui/safe-area-view'
 import { Box } from '@/components/ui/box'
 
-import { Keyboard, Animated, Platform, Image, Dimensions } from 'react-native'
+import { Keyboard, Animated, Platform, Dimensions } from 'react-native'
 import { StatusBar } from 'expo-status-bar'
 
 import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
@@ -45,6 +45,7 @@ export default function LoginScreen() {
       duration: 500,
       useNativeDriver: false,
     }).start()
+    // eslint-disable-next-line
   }, [mode])
 
   useEffect(() => {
@@ -100,7 +101,7 @@ export default function LoginScreen() {
               source={
                 companyInfo?.logotipo
                   ? { uri: companyInfo?.logotipo }
-                  : require('@/assets/AssetsPartners/adaptive-icon.png')
+                  : require('@/assets/AssetsPartners/iconHome.png')
               }
               style={{
                 // Tamanho menor do logo em telas pequenas

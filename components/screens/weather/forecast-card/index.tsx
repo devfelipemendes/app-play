@@ -3,10 +3,7 @@ import { Box } from '@/components/ui/box'
 import { VStack } from '@/components/ui/vstack'
 import { Text } from '@/components/ui/text'
 import { Image } from '@/components/ui/image'
-import {
-  useCompanyTheme,
-  useCompanyThemeSimple,
-} from '@/hooks/theme/useThemeLoader'
+import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
 
 interface IForeCastCard {
   time: string

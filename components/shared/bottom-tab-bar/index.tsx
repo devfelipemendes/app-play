@@ -15,7 +15,7 @@ import {
 } from 'lucide-react-native'
 import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
 import { useEffect, useRef, useState } from 'react'
-import { moderateScale, scaleHeight, scaleWidth } from '@/utils/responsive'
+import { moderateScale } from '@/utils/responsive'
 import { TAB_BAR, SHADOW } from '@/config/responsiveDimensions'
 
 interface TabItem {
@@ -109,6 +109,7 @@ function BottomTabBar() {
         useNativeDriver: false,
       }),
     ]).start()
+    // eslint-disable-next-line
   }, [activeIndex, tabLayouts])
 
   return (

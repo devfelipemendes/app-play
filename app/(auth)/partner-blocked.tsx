@@ -7,16 +7,14 @@ import { Text } from '@/components/ui/text'
 import { StatusBar } from 'expo-status-bar'
 import { AlertCircle, MessageCircle, LogOut } from 'lucide-react-native'
 import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
-import { TouchableOpacity, Linking, ScrollView, Image } from 'react-native'
+import { TouchableOpacity, Linking, ScrollView } from 'react-native'
 import { Icon } from '@/components/ui/icon'
 import { env } from '@/config/env'
 import { useAuth } from '@/hooks/useAuth'
-import { useRouter } from 'expo-router'
 
 const PartnerBlockedScreen = () => {
   const { colors } = useCompanyThemeSimple()
   const { signOut } = useAuth()
-  const router = useRouter()
 
   const handleOpenSupport = async () => {
     const supportUrl = env.SUPPORT_CHAT_URL || 'https://wa.me/5511999999999'
@@ -62,7 +60,11 @@ const PartnerBlockedScreen = () => {
               alignItems: 'center',
             }}
           >
-            <Icon as={AlertCircle} size="xl" style={{ color: colors.error, width: 64, height: 64 }} />
+            <Icon
+              as={AlertCircle}
+              size="xl"
+              style={{ color: colors.error, width: 64, height: 64 }}
+            />
           </Box>
 
           {/* Mensagem principal */}

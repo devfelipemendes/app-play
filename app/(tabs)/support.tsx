@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React from 'react'
 import { VStack } from '@/components/ui/vstack'
 import { HStack } from '@/components/ui/hstack'
 import { Box } from '@/components/ui/box'
@@ -9,7 +9,7 @@ import { MessageCircle, Headphones, Clock } from 'lucide-react-native'
 import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
 import { TouchableOpacity, Linking, ScrollView } from 'react-native'
 import { Icon } from '@/components/ui/icon'
-import { env } from '@/config/env'
+
 import { useAppSelector } from '@/src/store/hooks'
 
 const Support = () => {

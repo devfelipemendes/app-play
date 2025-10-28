@@ -65,6 +65,7 @@ export const useCompanyTheme = ({
     if (autoLoad && authData.companyid && authData.token) {
       loadCompanyTheme()
     }
+    // eslint-disable-next-line
   }, [autoLoad, authData.companyid, authData.token])
 
   return {

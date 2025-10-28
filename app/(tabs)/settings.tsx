@@ -1,11 +1,4 @@
-import React, {
-  useContext,
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-  useMemo,
-} from 'react'
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { Text } from '@/components/ui/text'
 import { VStack } from '@/components/ui/vstack'
 import { HStack } from '@/components/ui/hstack'
@@ -27,7 +20,6 @@ import {
   TouchableOpacity,
   ScrollView,
   Switch,
-  TextInput,
   ActivityIndicator,
   View,
   Keyboard,
@@ -36,7 +28,7 @@ import Countdown, { CountdownRenderProps } from 'react-countdown'
 
 import CustomHeader from '@/components/shared/custom-header'
 import { useAuth } from '@/hooks/useAuth'
-import { ThemeContext } from '@/contexts/theme-context'
+
 import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
 import { Pressable } from '@/components/ui/pressable'
 import { useAppSelector } from '@/src/store/hooks'
@@ -54,10 +46,8 @@ import { Icon } from '@/components/ui/icon'
 import { useLoginMutation } from '@/src/api/endpoints/AuthApi'
 import { CustomInput } from '@/components/layout/CustomInput'
 import { LockKeyhole } from 'lucide-react-native'
-import { TesteFaturaButton } from '@/src/components/screens/TesteFaturaButton'
 
 const Settings = () => {
-  const { colorMode }: any = useContext(ThemeContext)
   const { signOut, loadingAuth } = useAuth()
   const { colors } = useCompanyThemeSimple()
 
@@ -71,7 +61,7 @@ const Settings = () => {
   const [deleteAccount, { isLoading: loadingDelete }] =
     useDeleteAccountMutation()
   const [deleteLine] = useDeleteLineByIccidMutation()
-  const [getUserLines, { isLoading: loadingLines }] = useGetUserLinesMutation()
+  const [getUserLines] = useGetUserLinesMutation()
 
   // Biometria
   const {
@@ -113,6 +103,7 @@ const Settings = () => {
           console.error('Erro ao buscar linhas:', error)
         })
     }
+    // eslint-disable-next-line
   }, [user?.token, user?.cpf])
 
   const handleDeleteAccount = async () => {
@@ -249,14 +240,6 @@ const Settings = () => {
     setIsValidating(true)
 
     try {
-      // Validar senha fazendo login
-      const result = await loginMutation({
-        cpf: user.cpf,
-        password: password,
-      }).unwrap()
-
-      // Se chegou aqui, a senha está correta
-      // Salvar credenciais
       const saved = await saveCredentials(user.cpf, password)
 
       if (saved) {
@@ -285,6 +268,7 @@ const Settings = () => {
     } finally {
       setIsValidating(false)
     }
+    // eslint-disable-next-line
   }, [
     password,
     user?.cpf,

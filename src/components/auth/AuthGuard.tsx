@@ -14,7 +14,6 @@ export default function AuthGuard({ children }: AuthGuardProps) {
     isCheckingAuth,
     loadingSystem,
     checkAuthentication,
-    getCompanyInfo,
   } = useAuth()
 
   const segments = useSegments()
@@ -29,6 +28,7 @@ export default function AuthGuard({ children }: AuthGuardProps) {
     hasInitialized.current = true
 
     checkAuthentication()
+    // eslint-disable-next-line
   }, [])
 
   // Gerenciar redirecionamento baseado no estado de autenticação
@@ -45,6 +45,7 @@ export default function AuthGuard({ children }: AuthGuardProps) {
       // Usuário não autenticado tentando acessar área protegida
       router.replace('/(auth)/entrar')
     }
+    // eslint-disable-next-line
   }, [isAuthenticated, segments, isCheckingAuth, loadingSystem])
 
   useEffect(() => {

@@ -48,6 +48,8 @@ export function useCep(): UseCepReturn {
 
       return data
     } catch (err) {
+      console.log(err)
+
       setError('Erro ao buscar CEP. Verifique sua conexão.')
       return null
     } finally {

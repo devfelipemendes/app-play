@@ -4,7 +4,6 @@ import {
   TouchableOpacity,
   Alert,
   View,
-  Dimensions,
   TextInput as RNTextInput,
   ActivityIndicator,
   Keyboard,
@@ -13,7 +12,7 @@ import {
 import { VStack } from '@/components/ui/vstack'
 import { HStack } from '@/components/ui/hstack'
 import { Text } from '@/components/ui/text'
-import { X, Info } from 'lucide-react-native'
+import { Info } from 'lucide-react-native'
 import { Icon } from '@/components/ui/icon'
 import {
   useLazyGetPortabilityStatusQuery,
@@ -29,13 +28,11 @@ import BottomSheet, {
 import Toast from 'react-native-toast-message'
 import moment from 'moment'
 import 'moment/locale/pt-br'
-import { maskCelularSemDDD } from '@/src/utils/masks'
+
 import { maskCelular } from '@/utils/masks'
 import { useAppSelector } from '@/src/store/hooks'
 
 moment.locale('pt-br')
-
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window')
 
 interface PortabilityBottomSheetProps {
   isOpen: boolean
@@ -65,18 +62,6 @@ const formatPhone = (phone: string) => {
   }
 
   return phone
-}
-
-const maskPhone = (value: string) => {
-  const cleaned = value.replace(/\D/g, '')
-
-  if (cleaned.length <= 2) {
-    return cleaned
-  } else if (cleaned.length <= 7) {
-    return cleaned.replace(/(\d{2})(\d{0,5})/, '$1 $2')
-  } else {
-    return cleaned.replace(/(\d{2})(\d{5})(\d{0,4})/, '$1 $2-$3')
-  }
 }
 
 const PortabilityBottomSheet: React.FC<PortabilityBottomSheetProps> = ({
@@ -167,6 +152,7 @@ const PortabilityBottomSheet: React.FC<PortabilityBottomSheetProps> = ({
         msisdnOutraOperadora: tempMsisdn,
       })
     }
+    // eslint-disable-next-line
   }, [isOpen, tempMsisdn, codigoP, msisdn, user?.token])
 
   // Buscar operadora quando número tiver 11 dígitos
@@ -192,6 +178,7 @@ const PortabilityBottomSheet: React.FC<PortabilityBottomSheetProps> = ({
     } else {
       setOperadora({ name: '', cod: '' })
     }
+    // eslint-disable-next-line
   }, [numPort, user?.token])
 
   // Controlar abertura/fechamento
@@ -265,11 +252,15 @@ const PortabilityBottomSheet: React.FC<PortabilityBottomSheetProps> = ({
               console.error('Erro ao solicitar portabilidade:', error)
 
               // Verifica se é erro 88 (portabilidade duplicada)
-              if (error.status === 400 && error.data?.data?.portin?.erro === 88) {
+              if (
+                error.status === 400 &&
+                error.data?.data?.portin?.erro === 88
+              ) {
                 Toast.show({
                   type: 'info',
                   text1: 'Portabilidade já solicitada',
-                  text2: 'Já temos uma portabilidade solicitada para este número.',
+                  text2:
+                    'Já temos uma portabilidade solicitada para este número.',
                 })
               } else if (error.status === 520) {
                 Toast.show({
@@ -414,7 +405,10 @@ const PortabilityBottomSheet: React.FC<PortabilityBottomSheetProps> = ({
           </VStack>
 
           {/* Link para suporte */}
-          <TouchableOpacity style={{ paddingTop: 8 }} onPress={handleOpenSupport}>
+          <TouchableOpacity
+            style={{ paddingTop: 8 }}
+            onPress={handleOpenSupport}
+          >
             <Text
               style={{
                 fontSize: 14,
@@ -538,7 +532,10 @@ const PortabilityBottomSheet: React.FC<PortabilityBottomSheetProps> = ({
           </TouchableOpacity>
 
           {/* Link para suporte */}
-          <TouchableOpacity style={{ paddingTop: 8 }} onPress={handleOpenSupport}>
+          <TouchableOpacity
+            style={{ paddingTop: 8 }}
+            onPress={handleOpenSupport}
+          >
             <Text
               style={{
                 fontSize: 14,

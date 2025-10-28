@@ -32,7 +32,6 @@ import { useBiometricAuth } from '@/hooks/useBiometricAuth'
 
 import { IconButton } from '@/components/ui/iconButton'
 import { env } from '@/config/env'
-import { useGetCompanyInfoQuery } from '@/src/api/endpoints/companyInfoApi'
 
 const loginSchema = v.object({
   cpfCnpj: v.pipe(v.string('CPF/CPNJ é obrigatório')),
@@ -47,10 +46,9 @@ const loginSchema = v.object({
 type LoginFormData = v.InferInput<typeof loginSchema>
 
 export default function FormLogin() {
-  const { signIn, loadingAuth, user: userInfo } = useAuth()
+  const { signIn, loadingAuth } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [saveBiometric, setSaveBiometric] = useState(false)
-  const [loginSuccess, setLoginSuccess] = useState(false)
 
   // Pegar companyInfo do authSlice (onde está sendo salvo)
   const companyInfo = useAppSelector((state) => state.auth.companyInfo)
@@ -58,9 +56,9 @@ export default function FormLogin() {
   const {
     control,
     handleSubmit,
-    watch,
+
     setValue,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<LoginFormData>({
     resolver: valibotResolver(loginSchema),
     defaultValues: {
@@ -114,7 +112,7 @@ export default function FormLogin() {
           Alert.alert(
             'Acesso Rápido Removido',
             'Você está fazendo login com um usuário diferente. O acesso rápido anterior foi removido.',
-            [{ text: 'OK' }]
+            [{ text: 'OK' }],
           )
         }
       }
@@ -129,8 +127,6 @@ export default function FormLogin() {
         'login',
         'app',
       )
-
-      setLoginSuccess(true)
 
       // Se o checkbox de biometria estiver marcado, salva as credenciais
       if (saveBiometric && isBiometricSupported) {

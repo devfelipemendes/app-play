@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Pressable, Animated, LayoutAnimation, Platform, UIManager } from 'react-native'
+import { Pressable, LayoutAnimation, Platform, UIManager } from 'react-native'
 import { Text } from '@/components/ui/text'
 import { Icon } from '@/components/ui/icon'
 import { ChevronDown, ChevronUp } from 'lucide-react-native'
@@ -9,7 +9,10 @@ import { HStack } from '@/components/ui/hstack'
 import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
 
 // Habilita animações de layout no Android
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+if (
+  Platform.OS === 'android' &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
   UIManager.setLayoutAnimationEnabledExperimental(true)
 }
 

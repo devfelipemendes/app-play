@@ -12,8 +12,7 @@ import { VStack } from '@/components/ui/vstack'
 import { HStack } from '@/components/ui/hstack'
 import { Box } from '@/components/ui/box'
 import { Text } from '@/components/ui/text'
-import { X, Check } from 'lucide-react-native'
-import { Icon } from '@/components/ui/icon'
+
 import {
   useGetPlansQuery,
   useChangePlanMutation,
@@ -23,7 +22,6 @@ import { env } from '@/config/env'
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetView,
-  BottomSheetScrollView,
 } from '@gorhom/bottom-sheet'
 import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel'
 import {
@@ -118,7 +116,7 @@ interface PlanCardProps {
   onSelect: () => void
   colors: any
 }
-
+// eslint-disable-next-line
 const PlanCard: React.FC<PlanCardProps> = React.memo(
   ({ plan, animationValue, isSelected, isCurrent, onSelect, colors }) => {
     const animatedStyle = useAnimatedStyle(() => {

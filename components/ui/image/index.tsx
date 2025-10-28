@@ -1,35 +1,35 @@
-'use client';
-import React from 'react';
-import { createImage } from '@gluestack-ui/image';
-import { Platform } from 'react-native';
-import { tva } from '@gluestack-ui/nativewind-utils/tva';
-import type { VariantProps } from '@gluestack-ui/nativewind-utils';
-import { Image as ExpoImage } from 'expo-image';
-import { cssInterop } from 'nativewind';
+'use client'
+import React from 'react'
+import { createImage } from '@gluestack-ui/image'
+import { Platform } from 'react-native'
+import { tva } from '@gluestack-ui/nativewind-utils/tva'
+import type { VariantProps } from '@gluestack-ui/nativewind-utils'
+import { Image as ExpoImage } from 'expo-image'
+import { cssInterop } from 'nativewind'
 
-const UIImage = createImage({ Root: ExpoImage });
+const UIImage = createImage({ Root: ExpoImage })
 
 const imageStyle = tva({
   base: 'max-w-full',
   variants: {
     size: {
       '2xs': 'h-6 w-6',
-      'xs': 'h-10 w-10',
-      'sm': 'h-16 w-16',
-      'md': 'h-20 w-20',
-      'lg': 'h-24 w-24',
-      'xl': 'h-32 w-32',
+      xs: 'h-10 w-10',
+      sm: 'h-16 w-16',
+      md: 'h-20 w-20',
+      lg: 'h-24 w-24',
+      xl: 'h-32 w-32',
       '2xl': 'h-64 w-64',
-      'full': 'h-full w-full',
-      'none': '',
+      full: 'h-full w-full',
+      none: '',
     },
   },
-});
+})
 
-cssInterop(UIImage, {className: 'style'});
+cssInterop(UIImage, { className: 'style' })
 
 type ImageProps = VariantProps<typeof imageStyle> &
-  React.ComponentProps<typeof UIImage>;
+  React.ComponentProps<typeof UIImage>
 const Image = React.forwardRef<
   React.ElementRef<typeof UIImage>,
   ImageProps & { className?: string }
@@ -43,13 +43,12 @@ const Image = React.forwardRef<
       // @ts-expect-error
       style={
         Platform.OS === 'web'
-          ? // eslint-disable-next-line react-native/no-inline-styles
-            { height: 'revert-layer', width: 'revert-layer' }
+          ? { height: 'revert-layer', width: 'revert-layer' }
           : undefined
       }
     />
-  );
-});
+  )
+})
 
-Image.displayName = 'Image';
-export { Image };
+Image.displayName = 'Image'
+export { Image }

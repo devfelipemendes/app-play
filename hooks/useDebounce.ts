@@ -7,6 +7,7 @@ export function useDebounce<T extends (...args: any[]) => any>(
 ): T & { cancel: () => void } {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
+  // eslint-disable-next-line
   const debouncedCallback = useCallback(
     ((...args: Parameters<T>) => {
       // Cancela o timeout anterior se existir

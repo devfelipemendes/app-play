@@ -4,48 +4,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a **WhiteLabel Multi-Tenant React Native + Expo** mobile application for MVNOs (operadoras virtuais). The app supports multiple partners/tenants from a single codebase with automated builds via CI/CD. Each tenant gets customized branding, themes, and configurations while maintaining a single source of truth.
+This is a **React Native + Expo** mobile application for Play Móvel MVNO (operadora virtual). The app provides services for mobile plan management, recharges, portability, and customer support.
 
 **Stack**: React Native, Expo SDK 52, TypeScript, Redux Toolkit, RTK Query
 **Node Version**: v22.12.0 (minimum v22.6.0)
-
-## 🏗️ Multi-Tenant Architecture
-
-### Tenant System
-- **Single codebase → Multiple apps**: One source generates N customized apps
-- **Tenant ID**: Each partner identified by numeric ID (e.g., 46 for Play Móvel)
-- **Dynamic configuration**: Theme, branding, and env vars loaded per tenant
-- **Build-time customization**: app.config.js generates unique configs per build
-
-### Directory Structure
-```
-/partners/
-  ├── partner-46-playmovel/
-  │   ├── app.config.json        # Expo config (name, bundle ID, etc.)
-  │   ├── env.json                # Environment variables
-  │   ├── theme.json              # Colors, branding, fonts
-  │   ├── assets/                 # Icons, splash, logo
-  │   └── README.md               # Partner documentation
-  └── partner-{id}-{slug}/        # Additional tenants
-
-/scripts/
-  ├── sync-configs.js             # Syncs tenant data from backend API
-  ├── build-partner.js            # Automates EAS builds per tenant
-  └── prepare-build.sh            # Validates tenant configs before build
-
-/.github/workflows/
-  └── build-whitelabel.yml        # CI/CD pipeline for automated builds
-```
 
 ## Common Commands
 
 ### Development
 ```bash
-# Start with specific tenant (defaults to 46)
-TENANT_ID=46 npx expo start
-
-# Or use environment variable
-export EXPO_PUBLIC_TENANT_ID=46
+# Start development server
 npm start
 
 # Platform-specific
@@ -58,40 +26,14 @@ npm run lint
 npm run test
 ```
 
-### Multi-Tenant Operations
-
-#### Sync Tenant Configs from Backend
+### Build Commands
 ```bash
-# Sync all tenants
-node scripts/sync-configs.js
+# Build for all platforms
+eas build --platform all --profile production
 
-# Sync specific tenant
-node scripts/sync-configs.js 46
-
-# Dry run (preview without changes)
-node scripts/sync-configs.js --dry-run
-```
-
-#### Build for Tenants
-```bash
-# Build specific tenant
-node scripts/build-partner.js 46
-
-# Build all tenants
-node scripts/build-partner.js all
-
-# Build with options
-node scripts/build-partner.js 46 --platform=ios --profile=production
-node scripts/build-partner.js 46 --auto-submit --no-wait
-
-# Validate tenant configuration
-./scripts/prepare-build.sh 46 --validate
-```
-
-#### EAS Build Commands
-```bash
-# Direct EAS build for tenant
-TENANT_ID=46 eas build --platform all --profile production
+# Build for specific platform
+eas build --platform android --profile production
+eas build --platform ios --profile production
 
 # List recent builds
 eas build:list --limit 10
@@ -99,42 +41,37 @@ eas build:list --limit 10
 
 ## Architecture & Key Concepts
 
-### Tenant Configuration Flow
-1. **Build-time**: `app.config.js` reads tenant files from `/partners/{id}/`
-2. **Runtime**: `config/env.ts` loads tenant-specific environment variables
-3. **Theme**: `WhitelabelThemeProvider` loads colors from local file → then fetches from API
-
-### Dynamic App Configuration
-- **File**: `app.config.js` (replaces static `app.json`)
-- **Environment variable**: `TENANT_ID` determines which partner config to load
-- **Output**: Generates unique app name, bundle ID, icons, splash per tenant
-
 ### Environment Configuration
 - **File**: `config/env.ts`
-- **Sources** (priority order):
-  1. `expo-constants` (build-time)
-  2. `/partners/partner-{id}-*/env.json`
-  3. Hardcoded fallback
-- **Exports**: `env.TENANT_ID`, `env.API_URL`, `env.COMPANY_ID`, feature flags
+- **Contains**: API URLs, company ID, access tokens, feature flags
+- **Exports**: Fixed configuration for Play Móvel (Partner 46)
 
-### Theming System (Dual-Layer)
+```typescript
+import { env } from '@/config/env';
 
-**Layer 1: Local Theme** (`/partners/{id}/theme.json`)
-- Loaded immediately on app start (prevents flash)
-- Contains colors, fonts, branding
-- Used as fallback if API fails
+console.log(env.COMPANY_ID);     // 46
+console.log(env.PARCEIRO);       // "PLAY MÓVEL"
+console.log(env.API_URL);        // "https://sistema.playmovel.com.br"
+console.log(env.FEATURES.recharge); // true
+```
 
-**Layer 2: API Theme** (fetched from backend)
-- Endpoint: `GET /api/tenants/{id}`
-- Overwrites local theme with latest from backend
-- Supports hot updates without rebuilding
+### Theming System
 
-**Implementation**: `contexts/theme-context/whitelabel-theme-context.tsx`
+The app supports dynamic theming with colors loaded from the backend API.
+
+**Default Theme**: Play Móvel brand colors (primary: #007AFF, secondary: #5856D6)
+**API Integration**: Colors can be updated via `getCompany` endpoint
+**Implementation**: `contexts/theme-context/index.tsx`
 
 ```typescript
 // Access theme in components
-const { theme } = useWhitelabelTheme();
-// theme.colors.primary, theme.colors.secondary, theme.branding
+import { useTheme } from '@/contexts/theme-context';
+
+const { theme, loadThemeFromCompany } = useTheme();
+// theme.colors.primary, theme.colors.secondary, theme.colors.accent
+
+// Load theme from API response
+loadThemeFromCompany(companyData);
 ```
 
 ### State Management Architecture
@@ -166,73 +103,39 @@ Uses **Redux Toolkit** with RTK Query:
 
 Configured in `tsconfig.json` and `babel.config.js`
 
-## Backend Integration Requirements
+## Backend Integration
 
-The PHP backend must expose these endpoints:
+The PHP backend provides these key endpoints:
 
-### 1. List Tenants
+### Get Company Info
 ```
-GET /api/tenants
-Response: [{ id, name, slug, appTheme, ... }]
-```
-
-### 2. Get Tenant Details
-```
-GET /api/tenants/{id}
+GET /api/getCompany?companyId=46
 Response: {
-  id: 46,
-  name: "PLAY MÓVEL",
-  slug: "playmovel",
-  appTheme: { colors: { primary, secondary }, ... },
-  ios: { bundleIdentifier },
-  android: { packageName },
-  assets: { icon, splash, logo },
-  accessToken: "...",
+  companyId: 46,
+  companyname: "PLAY MÓVEL",
+  appTheme: "{\"colors\":{\"primary\":\"#007AFF\",\"secondary\":\"#5856D6\"}}",
+  logotipo: "url...",
   ...
 }
 ```
 
-### 3. Assets CDN
-- Serve icons, splash screens, logos via public URLs
-- Format: PNG with appropriate dimensions
+### Other Endpoints
+- Authentication: `/api/login`, `/api/verify-token`
+- Plans: `/api/plans`
+- Recharge: `/api/recharge`
+- Portability: `/api/portability`
+- Consumption: `/api/consumption`
 
-**📖 Para especificação completa da API, consulte: [API-BACKEND.md](./API-BACKEND.md)**
+## App Configuration
 
-Este documento contém:
-- Estrutura detalhada de todas as respostas JSON
-- Campos obrigatórios vs opcionais
-- Estrutura de banco de dados SQL
-- Exemplo completo de implementação PHP
-- Guia de validação e testes
+**File**: `app.json` (static configuration)
 
-## CI/CD Pipeline (GitHub Actions)
-
-### Workflow: `.github/workflows/build-whitelabel.yml`
-
-**Triggers**:
-- Manual dispatch (workflow_dispatch)
-- Weekly schedule (Sundays 2 AM UTC)
-- Push to `main` with changes to `partners/`
-
-**Jobs**:
-1. **sync-configs**: Fetches tenant data from backend
-2. **prepare-matrix**: Generates build matrix (tenant IDs)
-3. **build**: Builds apps for each tenant in parallel
-4. **submit**: (Optional) Submits to App Store / Google Play
-5. **summary**: Generates build report
-
-**Usage**:
-```bash
-# Via GitHub UI: Actions → Build WhiteLabel Apps → Run workflow
-# Select: partner ID, platform, profile, auto-submit
-```
-
-### Secrets Required
-- `EXPO_TOKEN` - Expo authentication
-- `BACKEND_URL` - Backend API URL
-- `BACKEND_API_KEY` - Backend API key
-- `APPLE_ID`, `ASC_APP_ID`, `APPLE_TEAM_ID` - iOS submission
-- Google Play service account JSON in `secrets/google-play-{TENANT_ID}.json`
+Key settings:
+- **Name**: Play Móvel
+- **Bundle ID (iOS)**: com.playmovel.app
+- **Package (Android)**: app.mobile.ios.infiniti
+- **Version**: 5.0.0
+- **EAS Project ID**: 8bfa2423-69b5-48bf-94c1-c4ded0716494
 
 ## EAS Build Configuration
 
@@ -243,19 +146,6 @@ Este documento contém:
 - `preview` - Internal testing (APK/simulator)
 - `production` - Production builds (auto-increment)
 - `production-aab` - Android App Bundle for Play Store
-
-**Environment Variables**:
-- `TENANT_ID` - Passed to build process
-- `EXPO_PUBLIC_TENANT_ID` - Available in app runtime
-
-## Adding a New Tenant
-
-1. **Backend**: Add tenant to database with complete configuration
-2. **Sync**: Run `node scripts/sync-configs.js` to pull tenant data
-3. **Validate**: Run `./scripts/prepare-build.sh {TENANT_ID} --validate`
-4. **Test locally**: `TENANT_ID={ID} npx expo start`
-5. **Build**: `node scripts/build-partner.js {TENANT_ID}`
-6. **CI/CD**: Push to `main` or trigger GitHub Action
 
 ## Styling
 
@@ -284,34 +174,32 @@ Este documento contém:
 ### Babel Configuration
 `react-native-reanimated/plugin` **MUST** be the last plugin in `babel.config.js`
 
-### Tenant Detection Priority
-1. Expo Constants (`Constants.expoConfig.extra.tenantId`)
-2. Environment variable (`process.env.EXPO_PUBLIC_TENANT_ID`)
-3. Default fallback (46)
-
 ### Theme Loading Strategy
-1. Load local theme immediately (prevent flash)
-2. Fetch API theme asynchronously
-3. Apply API theme when ready (may override local)
+1. Load default theme immediately (Play Móvel colors)
+2. Fetch theme from API asynchronously via `getCompany`
+3. Apply API theme when ready (may override defaults)
 
 ## Common Patterns
 
-### Access Tenant Config
+### Access Environment Config
 ```typescript
 import { env } from '@/config/env';
 
-console.log(env.TENANT_ID);      // "46"
-console.log(env.COMPANY_ID);     // 46
-console.log(env.PARCEIRO);       // "PLAY MÓVEL"
+console.log(env.COMPANY_ID);      // 46
+console.log(env.PARCEIRO);         // "PLAY MÓVEL"
+console.log(env.API_URL);          // "https://sistema.playmovel.com.br"
 console.log(env.FEATURES.recharge); // true
 ```
 
 ### Access Theme
 ```typescript
-import { useWhitelabelTheme } from '@/contexts/theme-context/whitelabel-theme-context';
+import { useTheme } from '@/contexts/theme-context';
 
-const { theme, loadThemeFromAPI } = useWhitelabelTheme();
+const { theme, loadThemeFromCompany } = useTheme();
 // theme.colors.primary, theme.colors.secondary
+
+// Load from API
+loadThemeFromCompany(companyData);
 ```
 
 ### Redux Usage
@@ -341,37 +229,26 @@ export const { useYourQueryQuery } = yourApi;
 
 ## Troubleshooting
 
-### Build fails with "tenant not found"
-- Run `node scripts/sync-configs.js {TENANT_ID}`
-- Verify `/partners/partner-{id}-{slug}/` exists
+### Build fails
+- Verify `app.json` has correct bundle identifiers
+- Check `eas.json` profile configuration
+- Ensure all native dependencies are properly installed
 
 ### Theme not loading
-- Check `theme.json` format
-- Verify API endpoint `/api/tenants/{id}` returns valid `appTheme`
-- Check network logs in development
+- Check `getCompany` API endpoint returns valid `appTheme` JSON
+- Verify network connectivity in development
+- Check browser/metro console for errors
 
-### Wrong app name/bundle ID in build
-- Verify `TENANT_ID` environment variable is set
-- Check `app.config.js` is reading correct tenant directory
-- Validate `partners/partner-{id}-*/app.config.json`
+### Redux state issues
+- Verify store is properly configured in `app/_layout.tsx`
+- Check if slices are properly imported
+- Use Redux DevTools for debugging
 
 ## Resources
-
-### Documentation
-- [API Backend Specification](./API-BACKEND.md) - Complete API structure and implementation guide
-- [WhiteLabel Onboarding Guide](./WHITELABEL.md) - Step-by-step partner onboarding process
-- [Partner Configuration](./partners/) - Tenant-specific configurations
 
 ### External Resources
 - [Expo Documentation](https://docs.expo.dev/)
 - [EAS Build](https://docs.expo.dev/build/introduction/)
 - [Gluestack UI](https://ui.gluestack.io/)
 - [NativeWind](https://www.nativewind.dev/)
-
-### Quick Reference
-| Document | Purpose |
-|----------|---------|
-| `CLAUDE.md` | Technical architecture and development guide |
-| `API-BACKEND.md` | Backend API specification and implementation |
-| `WHITELABEL.md` | Onboarding process for new partners |
-| `partners/{id}/README.md` | Partner-specific documentation |
+- [Redux Toolkit](https://redux-toolkit.js.org/)

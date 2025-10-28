@@ -5,7 +5,7 @@ import { VStack } from '@/components/ui/vstack'
 import { Text } from '@/components/ui/text'
 import { Box } from '@/components/ui/box'
 import { ImageBackground } from '@/components/ui/image-background'
-import { Image } from '@/components/ui/image'
+
 import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input'
 import { Mic } from 'lucide-react-native'
 import { ThemeContext } from '@/contexts/theme-context'

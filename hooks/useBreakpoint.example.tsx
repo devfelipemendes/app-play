@@ -1,10 +1,3 @@
-/**
- * Exemplos de uso do hook useBreakpoint e utilitários responsive
- *
- * Este arquivo demonstra diferentes casos de uso para criar layouts responsivos
- * em React Native.
- */
-
 import React from 'react'
 import {
   View,
@@ -29,17 +22,13 @@ import {
   BORDER_RADIUS,
   TYPOGRAPHY,
   widthPercentage,
-  heightPercentage,
   responsiveValue,
   responsiveMultiValue,
   normalize,
 } from '../utils/responsive'
 
-// ============================================================================
-// EXEMPLO 1: Layout básico responsivo
-// ============================================================================
 export function ResponsiveLayoutExample() {
-  const { isSmall, isMobile, isTablet, breakpoint } = useBreakpoint()
+  const { isSmall, isMobile, breakpoint } = useBreakpoint()
 
   return (
     <View style={styles.container}>
@@ -249,8 +238,6 @@ export function ResponsiveCardExample() {
 // EXEMPLO 6: Imagem responsiva
 // ============================================================================
 export function ResponsiveImageExample() {
-  const { isMobile } = useBreakpoint()
-
   // Tamanho da imagem baseado no dispositivo
   const imageSize = responsiveMultiValue({
     xs: 80,
@@ -433,7 +420,7 @@ export function ResponsiveFormExample() {
 // EXEMPLO 9: Navegação responsiva
 // ============================================================================
 export function ResponsiveNavigationExample() {
-  const { isMobile, isTablet } = useBreakpoint()
+  const { isMobile } = useBreakpoint()
 
   return (
     <View style={{ flex: 1 }}>
@@ -532,9 +519,8 @@ export function ResponsiveDebugExample() {
     width,
     height,
     isPortrait,
-    isLandscape,
+
     isMobile,
-    isTablet,
   } = useBreakpoint()
 
   return (

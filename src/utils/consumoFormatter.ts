@@ -129,7 +129,7 @@ export const formatToMonthlyChart = (
   // Obter o dia atual e o número de dias no mês atual
   const now = new Date()
   const currentMonth = now.getMonth()
-  const currentYear = now.getFullYear()
+
   const currentDay = now.getDate()
 
   // Criar um mapa com os dados de consumo por dia
@@ -147,7 +147,9 @@ export const formatToMonthlyChart = (
 
   for (let day = 1; day <= currentDay; day++) {
     const consumo = consumoMap.get(day)
-    const dateString = `${String(day).padStart(2, '0')}/${String(currentMonth + 1).padStart(2, '0')}`
+    const dateString = `${String(day).padStart(2, '0')}/${String(
+      currentMonth + 1,
+    ).padStart(2, '0')}`
 
     if (consumo) {
       // Tem dados de consumo para este dia

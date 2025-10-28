@@ -4,23 +4,16 @@ import { VStack } from '@/components/ui/vstack'
 import { Box } from '@/components/ui/box'
 import { Icon } from '@/components/ui/icon'
 import { Text } from '@/components/ui/text'
-import { ArrowUpIcon, ArrowDownIcon } from '@/components/shared/icon'
+
 import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
-import {
-  ArrowRight,
-  ArrowRightIcon,
-  ChevronUpIcon,
-  GalleryVertical,
-  Phone,
-  Smartphone,
-} from 'lucide-react-native'
+import { GalleryVertical, Smartphone } from 'lucide-react-native'
 import {
   TYPOGRAPHY,
   BORDER_RADIUS,
   moderateScale,
   scale,
 } from '@/utils/responsive'
-import { CARD, ICON, SHADOW } from '@/config/responsiveDimensions'
+import { CARD } from '@/config/responsiveDimensions'
 
 interface IHourlyCard {
   icon: any

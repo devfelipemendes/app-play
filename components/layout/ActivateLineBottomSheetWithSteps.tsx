@@ -31,7 +31,7 @@ import {
 import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel'
 import Toast from 'react-native-toast-message'
 import { listaDdd } from '@/utils/listaDdd'
-import { Camera, CameraView, useCameraPermissions } from 'expo-camera'
+import { Camera, CameraView } from 'expo-camera'
 import { FaturaBottomSheet } from '@/src/components/screens/FaturaBottomSheet'
 import {
   type FaturaDetalhada,
@@ -127,17 +127,13 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
   const carouselRef = useRef<ICarouselInstance>(null)
   const iccidInputRef = useRef<RNTextInput>(null)
 
-  // Camera permissions - NÃO usar hook na raiz
-  // const [permission, requestPermission] = useCameraPermissions()
-  const [hasPermission, setHasPermission] = useState<boolean | null>(null)
-
   // Estados do fluxo
   const [currentStep, setCurrentStep] = useState<ActivationStep>(
     ActivationStep.ICCID_INPUT,
   )
   const [formData, setFormData] = useState({ iccid: '', ddd: '' })
   const [isIccidValid, setIsIccidValid] = useState<boolean | null>(null)
-  const [iccidNetwork, setIccidNetwork] = useState<string>('')
+
   const [showScanner, setShowScanner] = useState(false)
 
   // Estados do carousel de planos
@@ -153,15 +149,10 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
   // Mutations e queries
   const [checkIccid, { isLoading: loadingIccid }] = useChecaICCIDMutation()
   const [activateLine, { isLoading: isActivating }] = useActivateLineMutation()
-  const [getFatura, { isLoading: isLoadingFatura }] = useGetFaturaMutation()
+  const [getFatura] = useGetFaturaMutation()
 
   // Query de planos - só busca quando ICCID é válido
-  const {
-    data: plansData,
-    isLoading: loadingPlans,
-    error: plansError,
-    refetch: refetchPlans,
-  } = useGetPlansQuery(
+  const { data: plansData, isLoading: loadingPlans } = useGetPlansQuery(
     { companyid: env.COMPANY_ID },
     { skip: !isIccidValid || currentStep === ActivationStep.ICCID_INPUT },
   )
@@ -218,6 +209,7 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
     } else {
       setIsIccidValid(null)
     }
+    // eslint-disable-next-line
   }, [formData.iccid])
 
   const handleValidateICCID = async () => {
@@ -252,7 +244,6 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
       console.log('✅ ICCID válido:', result)
 
       setIsIccidValid(true)
-      setIccidNetwork(result.rede || '')
 
       Toast.show({
         type: 'success',
@@ -263,7 +254,6 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
       console.error('❌ Erro ao validar ICCID:', error)
 
       setIsIccidValid(false)
-      setIccidNetwork('')
 
       // Mensagem específica para erro 404
       const errorMessage =
@@ -320,16 +310,9 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
       const currentPermission = await Camera.getCameraPermissionsAsync()
       console.log('📷 [CAMERA] Permissão atual:', currentPermission.status)
 
-      if (currentPermission.status === 'granted') {
-        setHasPermission(true)
-        return true
-      }
-
       // Se não tem, solicita
       const { status } = await Camera.requestCameraPermissionsAsync()
       console.log('📷 [CAMERA] Permissão após solicitar:', status)
-
-      setHasPermission(status === 'granted')
 
       if (status === 'denied') {
         Toast.show({
@@ -344,7 +327,6 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
     } catch (error: any) {
       console.error('❌ [CAMERA] Erro ao solicitar permissão:', error)
       console.error('❌ [CAMERA] Stack:', error?.stack)
-      setHasPermission(false)
 
       Toast.show({
         type: 'error',

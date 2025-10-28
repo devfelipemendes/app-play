@@ -44,6 +44,7 @@ interface FaturaBottomSheetProps {
   onClose: () => void
 }
 
+// eslint-disable-next-line
 export const FaturaBottomSheet = forwardRef<
   BottomSheetModal,
   FaturaBottomSheetProps
@@ -61,7 +62,10 @@ export const FaturaBottomSheet = forwardRef<
 
   // 🔍 DEBUG: Log sempre que a prop fatura mudar
   useEffect(() => {
-    console.log('📨 [FATURA_MODAL] Prop fatura recebida:', fatura ? '✅ existe' : '❌ null/undefined')
+    console.log(
+      '📨 [FATURA_MODAL] Prop fatura recebida:',
+      fatura ? '✅ existe' : '❌ null/undefined',
+    )
     if (fatura) {
       console.log('📨 [FATURA_MODAL] fatura.payment:', fatura.payment)
       console.log('📨 [FATURA_MODAL] Dados da fatura:', {
@@ -80,22 +84,39 @@ export const FaturaBottomSheet = forwardRef<
       // Define automaticamente a aba de pagamento baseada no campo payment
       if (fatura.payment) {
         const paymentLower = fatura.payment.toLowerCase()
-        console.log('🔄 [FATURA_MODAL] fatura.payment (lowercase):', paymentLower)
+        console.log(
+          '🔄 [FATURA_MODAL] fatura.payment (lowercase):',
+          paymentLower,
+        )
 
         if (paymentLower.includes('pix') || paymentLower === 'pix') {
           console.log('✅ [FATURA_MODAL] Definindo paymentMethod como: pix')
           setPaymentMethod('pix')
-        } else if (paymentLower.includes('boleto') || paymentLower === 'boleto' || paymentLower === 'bank_slip') {
+        } else if (
+          paymentLower.includes('boleto') ||
+          paymentLower === 'boleto' ||
+          paymentLower === 'bank_slip'
+        ) {
           console.log('✅ [FATURA_MODAL] Definindo paymentMethod como: boleto')
           setPaymentMethod('boleto')
-        } else if (paymentLower.includes('credit') || paymentLower.includes('card') || paymentLower === 'credit_card') {
-          console.log('✅ [FATURA_MODAL] Definindo paymentMethod como: recorrente')
+        } else if (
+          paymentLower.includes('credit') ||
+          paymentLower.includes('card') ||
+          paymentLower === 'credit_card'
+        ) {
+          console.log(
+            '✅ [FATURA_MODAL] Definindo paymentMethod como: recorrente',
+          )
           setPaymentMethod('recorrente')
         } else {
-          console.log('⚠️ [FATURA_MODAL] Payment não reconhecido, mantendo default: pix')
+          console.log(
+            '⚠️ [FATURA_MODAL] Payment não reconhecido, mantendo default: pix',
+          )
         }
       } else {
-        console.log('⚠️ [FATURA_MODAL] fatura.payment está vazio/null, mantendo default: pix')
+        console.log(
+          '⚠️ [FATURA_MODAL] fatura.payment está vazio/null, mantendo default: pix',
+        )
       }
     }
   }, [fatura])
@@ -251,6 +272,7 @@ export const FaturaBottomSheet = forwardRef<
         throw new Error('Falha no download')
       }
     } catch (error) {
+      console.log(error)
       Toast.show({
         text1: 'Erro ao baixar PDF',
         text2: 'Verifique sua conexão e tente novamente',
@@ -268,6 +290,7 @@ export const FaturaBottomSheet = forwardRef<
       })
     } catch (error) {
       // Silently fail
+      console.log(error)
     }
   }
 
@@ -296,6 +319,7 @@ export const FaturaBottomSheet = forwardRef<
       })
     } catch (error) {
       // Silently fail
+      console.log(error)
     }
   }
 
@@ -311,6 +335,7 @@ export const FaturaBottomSheet = forwardRef<
         position: 'bottom',
       })
     } catch (error) {
+      console.log(error)
       Toast.show({
         text1: 'Erro ao copiar código PIX',
         type: 'error',
@@ -330,6 +355,7 @@ export const FaturaBottomSheet = forwardRef<
         position: 'bottom',
       })
     } catch (error) {
+      console.log(error)
       Toast.show({
         text1: 'Erro ao copiar código de barras',
         type: 'error',
@@ -342,6 +368,7 @@ export const FaturaBottomSheet = forwardRef<
     if (paymentMethod === 'recorrente' && fatura && cartoes.length === 0) {
       carregarCartoes()
     }
+    // eslint-disable-next-line
   }, [paymentMethod, fatura])
 
   const carregarCartoes = async () => {
@@ -362,6 +389,8 @@ export const FaturaBottomSheet = forwardRef<
         setIsRecActive(temCartaoPrincipal)
       }
     } catch (error: any) {
+      // eslint-disable-next-line
+      console.log(error)
       // Silently fail - cartões não carregados
     } finally {
       setLoadingCartoes(false)
@@ -480,17 +509,6 @@ export const FaturaBottomSheet = forwardRef<
         })
       }
     }
-  }
-
-  const getBandeira = (numero: string): string => {
-    const num = numero.replace(/\s/g, '')
-    if (/^4/.test(num)) return 'Visa'
-    if (/^5[1-5]/.test(num)) return 'Mastercard'
-    if (/^3[47]/.test(num)) return 'American Express'
-    if (/^6(?:011|5)/.test(num)) return 'Discover'
-    if (/^636[2-9]|^637[0-9]|^638[0-9]/.test(num)) return 'Elo'
-    if (/^606282/.test(num)) return 'Hipercard'
-    return 'Desconhecido'
   }
 
   const formatCardNumber = (text: string) => {
@@ -727,406 +745,429 @@ export const FaturaBottomSheet = forwardRef<
                   </View>
 
                   {/* Conteúdo PIX */}
-                  {paymentMethod === 'pix' && (() => {
-                    console.log('🔍 [RENDER] Tentando renderizar PIX')
-                    console.log('🔍 [RENDER] paymentMethod === "pix"?', paymentMethod === 'pix')
-                    console.log('🔍 [RENDER] fatura.payload existe?', !!fatura.payload)
-                    return fatura.payload
-                  })() && (
-                    <View style={styles.paymentContent}>
-                      <View style={styles.qrCodeContainer}>
-                        <QRCode
-                          value={fatura.payload}
-                          size={200}
-                          backgroundColor="white"
-                          color="black"
-                        />
-                      </View>
-
-                      <Text style={styles.paymentInstruction}>
-                        Escaneie o QR Code acima ou copie o código PIX:
-                      </Text>
-
-                      <View style={styles.pixCodeContainer}>
-                        <Text style={styles.pixCode} numberOfLines={3}>
-                          {fatura.payload}
-                        </Text>
-                      </View>
-
-                      <Pressable
-                        style={[
-                          styles.copyButton,
-                          { backgroundColor: colors.primary },
-                        ]}
-                        onPress={handleCopiarPix}
-                      >
-                        <Ionicons
-                          name="copy-outline"
-                          size={18}
-                          color="#ffffff"
-                        />
-                        <Text style={styles.copyButtonText}>
-                          Copiar Código PIX
-                        </Text>
-                      </Pressable>
-                    </View>
-                  )}
-
-                  {/* Conteúdo Boleto */}
-                  {paymentMethod === 'boleto' && (() => {
-                    console.log('🔍 [RENDER] Tentando renderizar Boleto')
-                    console.log('🔍 [RENDER] paymentMethod === "boleto"?', paymentMethod === 'boleto')
-                    console.log('🔍 [RENDER] fatura.barcode existe?', !!fatura.barcode)
-                    return fatura.barcode
-                  })() && (
-                    <View style={styles.paymentContent}>
-                      <Text style={styles.paymentInstruction}>
-                        Código de barras do boleto:
-                      </Text>
-
-                      <View style={styles.barcodeContainer}>
-                        <Text style={styles.barcodeText}>{fatura.barcode}</Text>
-                      </View>
-
-                      <Pressable
-                        style={[
-                          styles.copyButton,
-                          { backgroundColor: colors.primary },
-                        ]}
-                        onPress={handleCopiarBarcode}
-                      >
-                        <Ionicons
-                          name="copy-outline"
-                          size={18}
-                          color="#ffffff"
-                        />
-                        <Text style={styles.copyButtonText}>
-                          Copiar Código de Barras
-                        </Text>
-                      </Pressable>
-
-                      {fatura.codigoboleto && (
-                        <Text style={styles.barcodeLabel}>
-                          Nosso Número: {fatura.codigoboleto}
-                        </Text>
-                      )}
-                    </View>
-                  )}
-
-                  {/* Conteúdo Recorrente/Cartão */}
-                  {paymentMethod === 'recorrente' && (() => {
-                    console.log('🔍 [RENDER] Renderizando Cartão/Recorrente')
-                    console.log('🔍 [RENDER] paymentMethod === "recorrente"?', paymentMethod === 'recorrente')
-                    return true
-                  })() && (
-                    <View style={styles.paymentContent}>
-                      {loadingCartoes ? (
-                        <View style={styles.loadingContainer}>
-                          <ActivityIndicator
-                            size="large"
-                            color={colors.primary}
+                  {paymentMethod === 'pix' &&
+                    (() => {
+                      console.log('🔍 [RENDER] Tentando renderizar PIX')
+                      console.log(
+                        '🔍 [RENDER] paymentMethod === "pix"?',
+                        paymentMethod === 'pix',
+                      )
+                      console.log(
+                        '🔍 [RENDER] fatura.payload existe?',
+                        !!fatura.payload,
+                      )
+                      return fatura.payload
+                    })() && (
+                      <View style={styles.paymentContent}>
+                        <View style={styles.qrCodeContainer}>
+                          <QRCode
+                            value={fatura.payload}
+                            size={200}
+                            backgroundColor="white"
+                            color="black"
                           />
-                          <Text style={styles.loadingText}>
-                            Carregando cartões...
+                        </View>
+
+                        <Text style={styles.paymentInstruction}>
+                          Escaneie o QR Code acima ou copie o código PIX:
+                        </Text>
+
+                        <View style={styles.pixCodeContainer}>
+                          <Text style={styles.pixCode} numberOfLines={3}>
+                            {fatura.payload}
                           </Text>
                         </View>
-                      ) : (
-                        <>
-                          {/* Lista de Cartões */}
-                          {cartoes.length > 0 && (
-                            <View style={styles.cartoesSection}>
-                              <View style={styles.recorrenciaHeader}>
-                                <Text style={styles.sectionTitle}>
-                                  Pagamento Recorrente
-                                </Text>
-                                <Switch
-                                  value={isRecActive}
-                                  onValueChange={handleToggleRecorrencia}
-                                  disabled={loadingStatus}
-                                  trackColor={{
-                                    false: '#d1d5db',
-                                    true: colors.primary + '50',
-                                  }}
-                                  thumbColor={
-                                    isRecActive ? colors.primary : '#f3f4f6'
-                                  }
-                                />
-                              </View>
 
-                              <Text style={styles.recorrenciaDesc}>
-                                {isRecActive
-                                  ? 'Cobrança automática ativada. Seus cartões serão cobrados automaticamente todo mês.'
-                                  : 'Ative a cobrança recorrente para não se preocupar mais com vencimentos.'}
-                              </Text>
+                        <Pressable
+                          style={[
+                            styles.copyButton,
+                            { backgroundColor: colors.primary },
+                          ]}
+                          onPress={handleCopiarPix}
+                        >
+                          <Ionicons
+                            name="copy-outline"
+                            size={18}
+                            color="#ffffff"
+                          />
+                          <Text style={styles.copyButtonText}>
+                            Copiar Código PIX
+                          </Text>
+                        </Pressable>
+                      </View>
+                    )}
 
-                              {cartoes.length > 1 && (
-                                <View style={styles.prioridadeAlert}>
-                                  <Ionicons
-                                    name="information-circle"
-                                    size={20}
-                                    color="#3b82f6"
-                                  />
-                                  <Text style={styles.prioridadeText}>
-                                    A cobrança será feita no primeiro cartão. Se
-                                    não for possível, tentaremos no segundo e
-                                    terceiro.
+                  {/* Conteúdo Boleto */}
+                  {paymentMethod === 'boleto' &&
+                    (() => {
+                      console.log('🔍 [RENDER] Tentando renderizar Boleto')
+                      console.log(
+                        '🔍 [RENDER] paymentMethod === "boleto"?',
+                        paymentMethod === 'boleto',
+                      )
+                      console.log(
+                        '🔍 [RENDER] fatura.barcode existe?',
+                        !!fatura.barcode,
+                      )
+                      return fatura.barcode
+                    })() && (
+                      <View style={styles.paymentContent}>
+                        <Text style={styles.paymentInstruction}>
+                          Código de barras do boleto:
+                        </Text>
+
+                        <View style={styles.barcodeContainer}>
+                          <Text style={styles.barcodeText}>
+                            {fatura.barcode}
+                          </Text>
+                        </View>
+
+                        <Pressable
+                          style={[
+                            styles.copyButton,
+                            { backgroundColor: colors.primary },
+                          ]}
+                          onPress={handleCopiarBarcode}
+                        >
+                          <Ionicons
+                            name="copy-outline"
+                            size={18}
+                            color="#ffffff"
+                          />
+                          <Text style={styles.copyButtonText}>
+                            Copiar Código de Barras
+                          </Text>
+                        </Pressable>
+
+                        {fatura.codigoboleto && (
+                          <Text style={styles.barcodeLabel}>
+                            Nosso Número: {fatura.codigoboleto}
+                          </Text>
+                        )}
+                      </View>
+                    )}
+
+                  {/* Conteúdo Recorrente/Cartão */}
+                  {paymentMethod === 'recorrente' &&
+                    (() => {
+                      console.log('🔍 [RENDER] Renderizando Cartão/Recorrente')
+                      console.log(
+                        '🔍 [RENDER] paymentMethod === "recorrente"?',
+                        paymentMethod === 'recorrente',
+                      )
+                      return true
+                    })() && (
+                      <View style={styles.paymentContent}>
+                        {loadingCartoes ? (
+                          <View style={styles.loadingContainer}>
+                            <ActivityIndicator
+                              size="large"
+                              color={colors.primary}
+                            />
+                            <Text style={styles.loadingText}>
+                              Carregando cartões...
+                            </Text>
+                          </View>
+                        ) : (
+                          <>
+                            {/* Lista de Cartões */}
+                            {cartoes.length > 0 && (
+                              <View style={styles.cartoesSection}>
+                                <View style={styles.recorrenciaHeader}>
+                                  <Text style={styles.sectionTitle}>
+                                    Pagamento Recorrente
                                   </Text>
+                                  <Switch
+                                    value={isRecActive}
+                                    onValueChange={handleToggleRecorrencia}
+                                    disabled={loadingStatus}
+                                    trackColor={{
+                                      false: '#d1d5db',
+                                      true: colors.primary + '50',
+                                    }}
+                                    thumbColor={
+                                      isRecActive ? colors.primary : '#f3f4f6'
+                                    }
+                                  />
                                 </View>
-                              )}
 
-                              {cartoes.map((cartao, index) => (
-                                <View key={cartao.id} style={styles.cartaoItem}>
-                                  <View style={styles.cartaoInfo}>
+                                <Text style={styles.recorrenciaDesc}>
+                                  {isRecActive
+                                    ? 'Cobrança automática ativada. Seus cartões serão cobrados automaticamente todo mês.'
+                                    : 'Ative a cobrança recorrente para não se preocupar mais com vencimentos.'}
+                                </Text>
+
+                                {cartoes.length > 1 && (
+                                  <View style={styles.prioridadeAlert}>
                                     <Ionicons
-                                      name="card"
-                                      size={24}
-                                      color={colors.primary}
+                                      name="information-circle"
+                                      size={20}
+                                      color="#3b82f6"
                                     />
-                                    <View style={styles.cartaoDetails}>
-                                      <Text style={styles.cartaoNome}>
-                                        {cartao.nome}
-                                      </Text>
-                                      <Text style={styles.cartaoNumero}>
-                                        {cartao.bandeira} •••• {cartao.final}
-                                      </Text>
-                                    </View>
+                                    <Text style={styles.prioridadeText}>
+                                      A cobrança será feita no primeiro cartão.
+                                      Se não for possível, tentaremos no segundo
+                                      e terceiro.
+                                    </Text>
                                   </View>
-                                  {index === 0 && (
-                                    <View style={styles.principalBadge}>
-                                      <Text style={styles.principalText}>
-                                        Principal
-                                      </Text>
-                                    </View>
-                                  )}
-                                </View>
-                              ))}
+                                )}
 
-                              {cartoes.length < 3 && !showAddCard && (
-                                <Pressable
-                                  style={[
-                                    styles.addCardButton,
-                                    { borderColor: colors.primary },
-                                  ]}
-                                  onPress={() => setShowAddCard(true)}
-                                >
-                                  <Ionicons
-                                    name="add-circle-outline"
-                                    size={20}
-                                    color={colors.primary}
-                                  />
-                                  <Text
-                                    style={[
-                                      styles.addCardButtonText,
-                                      { color: colors.primary },
-                                    ]}
+                                {cartoes.map((cartao, index) => (
+                                  <View
+                                    key={cartao.id}
+                                    style={styles.cartaoItem}
                                   >
-                                    Adicionar Outro Cartão
-                                  </Text>
-                                </Pressable>
-                              )}
-                            </View>
-                          )}
+                                    <View style={styles.cartaoInfo}>
+                                      <Ionicons
+                                        name="card"
+                                        size={24}
+                                        color={colors.primary}
+                                      />
+                                      <View style={styles.cartaoDetails}>
+                                        <Text style={styles.cartaoNome}>
+                                          {cartao.nome}
+                                        </Text>
+                                        <Text style={styles.cartaoNumero}>
+                                          {cartao.bandeira} •••• {cartao.final}
+                                        </Text>
+                                      </View>
+                                    </View>
+                                    {index === 0 && (
+                                      <View style={styles.principalBadge}>
+                                        <Text style={styles.principalText}>
+                                          Principal
+                                        </Text>
+                                      </View>
+                                    )}
+                                  </View>
+                                ))}
 
-                          {/* Formulário Adicionar Cartão */}
-                          {(cartoes.length === 0 || showAddCard) && (
-                            <View style={styles.formContainer}>
-                              <View style={styles.formHeader}>
-                                <Ionicons
-                                  name="card"
-                                  size={40}
-                                  color={colors.primary}
-                                />
-                                <Text style={styles.formTitle}>
-                                  {cartoes.length === 0
-                                    ? 'Pagamento Recorrente'
-                                    : 'Adicionar Novo Cartão'}
-                                </Text>
-                                <Text style={styles.formSubtitle}>
-                                  Configure o pagamento automático e nunca mais
-                                  se preocupe com vencimentos.
-                                </Text>
-                              </View>
-
-                              <View style={styles.benefitsList}>
-                                <View style={styles.benefitItem}>
-                                  <Ionicons
-                                    name="checkmark-circle"
-                                    size={20}
-                                    color="#10b981"
-                                  />
-                                  <Text style={styles.benefitText}>
-                                    Pagamento automático todo mês
-                                  </Text>
-                                </View>
-                                <View style={styles.benefitItem}>
-                                  <Ionicons
-                                    name="checkmark-circle"
-                                    size={20}
-                                    color="#10b981"
-                                  />
-                                  <Text style={styles.benefitText}>
-                                    Sem preocupação com vencimentos
-                                  </Text>
-                                </View>
-                                <View style={styles.benefitItem}>
-                                  <Ionicons
-                                    name="checkmark-circle"
-                                    size={20}
-                                    color="#10b981"
-                                  />
-                                  <Text style={styles.benefitText}>
-                                    Cobrança segura e protegida
-                                  </Text>
-                                </View>
-                                <View style={styles.benefitItem}>
-                                  <Ionicons
-                                    name="checkmark-circle"
-                                    size={20}
-                                    color="#10b981"
-                                  />
-                                  <Text style={styles.benefitText}>
-                                    Cancele quando quiser
-                                  </Text>
-                                </View>
-                              </View>
-
-                              <View style={styles.divider} />
-
-                              <Text style={styles.formSectionTitle}>
-                                Dados do Cartão
-                              </Text>
-
-                              <TextInput
-                                style={styles.input}
-                                placeholder="Nome no cartão"
-                                value={nomeCartao}
-                                onChangeText={setNomeCartao}
-                                autoCapitalize="words"
-                              />
-
-                              <TextInput
-                                style={styles.input}
-                                placeholder="Número do cartão"
-                                value={numCartao}
-                                onChangeText={(text) =>
-                                  setNumCartao(formatCardNumber(text))
-                                }
-                                keyboardType="numeric"
-                                maxLength={19}
-                              />
-
-                              <View style={styles.rowInputs}>
-                                <TextInput
-                                  style={[styles.input, styles.inputSmall]}
-                                  placeholder="Mês"
-                                  value={mesVencimento}
-                                  onChangeText={setMesVencimento}
-                                  keyboardType="numeric"
-                                  maxLength={2}
-                                />
-                                <TextInput
-                                  style={[styles.input, styles.inputSmall]}
-                                  placeholder="Ano"
-                                  value={anoVencimento}
-                                  onChangeText={setAnoVencimento}
-                                  keyboardType="numeric"
-                                  maxLength={2}
-                                />
-                                <TextInput
-                                  style={[styles.input, styles.inputSmall]}
-                                  placeholder="CVV"
-                                  value={cvv}
-                                  onChangeText={setCvv}
-                                  keyboardType="numeric"
-                                  maxLength={4}
-                                  secureTextEntry
-                                />
-                              </View>
-
-                              <TextInput
-                                style={styles.input}
-                                placeholder="CPF do titular"
-                                value={cpfCartao}
-                                onChangeText={setCpfCartao}
-                                keyboardType="numeric"
-                                maxLength={14}
-                              />
-
-                              <TextInput
-                                style={styles.input}
-                                placeholder="E-mail"
-                                value={emailTitular}
-                                onChangeText={setEmailTitular}
-                                keyboardType="email-address"
-                                autoCapitalize="none"
-                              />
-
-                              <TextInput
-                                style={styles.input}
-                                placeholder="CEP"
-                                value={cep}
-                                onChangeText={setCep}
-                                keyboardType="numeric"
-                                maxLength={9}
-                              />
-
-                              <TextInput
-                                style={styles.input}
-                                placeholder="Endereço completo"
-                                value={endereco}
-                                onChangeText={setEndereco}
-                                multiline
-                              />
-
-                              <View style={styles.formButtons}>
-                                {showAddCard && (
+                                {cartoes.length < 3 && !showAddCard && (
                                   <Pressable
                                     style={[
-                                      styles.formButton,
-                                      styles.cancelButton,
+                                      styles.addCardButton,
+                                      { borderColor: colors.primary },
                                     ]}
-                                    onPress={() => setShowAddCard(false)}
+                                    onPress={() => setShowAddCard(true)}
                                   >
-                                    <Text style={styles.cancelButtonText}>
-                                      Cancelar
+                                    <Ionicons
+                                      name="add-circle-outline"
+                                      size={20}
+                                      color={colors.primary}
+                                    />
+                                    <Text
+                                      style={[
+                                        styles.addCardButtonText,
+                                        { color: colors.primary },
+                                      ]}
+                                    >
+                                      Adicionar Outro Cartão
                                     </Text>
                                   </Pressable>
                                 )}
-
-                                <Pressable
-                                  style={[
-                                    styles.formButton,
-                                    styles.submitButton,
-                                    { backgroundColor: colors.primary },
-                                    loadingCadastro && styles.buttonDisabled,
-                                  ]}
-                                  onPress={handleAdicionarCartao}
-                                  disabled={loadingCadastro}
-                                >
-                                  {loadingCadastro ? (
-                                    <ActivityIndicator color="#ffffff" />
-                                  ) : (
-                                    <>
-                                      <Ionicons
-                                        name="checkmark-circle"
-                                        size={20}
-                                        color="#ffffff"
-                                      />
-                                      <Text style={styles.submitButtonText}>
-                                        {cartoes.length === 0
-                                          ? 'Adicionar Cartão'
-                                          : 'Salvar Cartão'}
-                                      </Text>
-                                    </>
-                                  )}
-                                </Pressable>
                               </View>
-                            </View>
-                          )}
-                        </>
-                      )}
-                    </View>
-                  )}
+                            )}
+
+                            {/* Formulário Adicionar Cartão */}
+                            {(cartoes.length === 0 || showAddCard) && (
+                              <View style={styles.formContainer}>
+                                <View style={styles.formHeader}>
+                                  <Ionicons
+                                    name="card"
+                                    size={40}
+                                    color={colors.primary}
+                                  />
+                                  <Text style={styles.formTitle}>
+                                    {cartoes.length === 0
+                                      ? 'Pagamento Recorrente'
+                                      : 'Adicionar Novo Cartão'}
+                                  </Text>
+                                  <Text style={styles.formSubtitle}>
+                                    Configure o pagamento automático e nunca
+                                    mais se preocupe com vencimentos.
+                                  </Text>
+                                </View>
+
+                                <View style={styles.benefitsList}>
+                                  <View style={styles.benefitItem}>
+                                    <Ionicons
+                                      name="checkmark-circle"
+                                      size={20}
+                                      color="#10b981"
+                                    />
+                                    <Text style={styles.benefitText}>
+                                      Pagamento automático todo mês
+                                    </Text>
+                                  </View>
+                                  <View style={styles.benefitItem}>
+                                    <Ionicons
+                                      name="checkmark-circle"
+                                      size={20}
+                                      color="#10b981"
+                                    />
+                                    <Text style={styles.benefitText}>
+                                      Sem preocupação com vencimentos
+                                    </Text>
+                                  </View>
+                                  <View style={styles.benefitItem}>
+                                    <Ionicons
+                                      name="checkmark-circle"
+                                      size={20}
+                                      color="#10b981"
+                                    />
+                                    <Text style={styles.benefitText}>
+                                      Cobrança segura e protegida
+                                    </Text>
+                                  </View>
+                                  <View style={styles.benefitItem}>
+                                    <Ionicons
+                                      name="checkmark-circle"
+                                      size={20}
+                                      color="#10b981"
+                                    />
+                                    <Text style={styles.benefitText}>
+                                      Cancele quando quiser
+                                    </Text>
+                                  </View>
+                                </View>
+
+                                <View style={styles.divider} />
+
+                                <Text style={styles.formSectionTitle}>
+                                  Dados do Cartão
+                                </Text>
+
+                                <TextInput
+                                  style={styles.input}
+                                  placeholder="Nome no cartão"
+                                  value={nomeCartao}
+                                  onChangeText={setNomeCartao}
+                                  autoCapitalize="words"
+                                />
+
+                                <TextInput
+                                  style={styles.input}
+                                  placeholder="Número do cartão"
+                                  value={numCartao}
+                                  onChangeText={(text) =>
+                                    setNumCartao(formatCardNumber(text))
+                                  }
+                                  keyboardType="numeric"
+                                  maxLength={19}
+                                />
+
+                                <View style={styles.rowInputs}>
+                                  <TextInput
+                                    style={[styles.input, styles.inputSmall]}
+                                    placeholder="Mês"
+                                    value={mesVencimento}
+                                    onChangeText={setMesVencimento}
+                                    keyboardType="numeric"
+                                    maxLength={2}
+                                  />
+                                  <TextInput
+                                    style={[styles.input, styles.inputSmall]}
+                                    placeholder="Ano"
+                                    value={anoVencimento}
+                                    onChangeText={setAnoVencimento}
+                                    keyboardType="numeric"
+                                    maxLength={2}
+                                  />
+                                  <TextInput
+                                    style={[styles.input, styles.inputSmall]}
+                                    placeholder="CVV"
+                                    value={cvv}
+                                    onChangeText={setCvv}
+                                    keyboardType="numeric"
+                                    maxLength={4}
+                                    secureTextEntry
+                                  />
+                                </View>
+
+                                <TextInput
+                                  style={styles.input}
+                                  placeholder="CPF do titular"
+                                  value={cpfCartao}
+                                  onChangeText={setCpfCartao}
+                                  keyboardType="numeric"
+                                  maxLength={14}
+                                />
+
+                                <TextInput
+                                  style={styles.input}
+                                  placeholder="E-mail"
+                                  value={emailTitular}
+                                  onChangeText={setEmailTitular}
+                                  keyboardType="email-address"
+                                  autoCapitalize="none"
+                                />
+
+                                <TextInput
+                                  style={styles.input}
+                                  placeholder="CEP"
+                                  value={cep}
+                                  onChangeText={setCep}
+                                  keyboardType="numeric"
+                                  maxLength={9}
+                                />
+
+                                <TextInput
+                                  style={styles.input}
+                                  placeholder="Endereço completo"
+                                  value={endereco}
+                                  onChangeText={setEndereco}
+                                  multiline
+                                />
+
+                                <View style={styles.formButtons}>
+                                  {showAddCard && (
+                                    <Pressable
+                                      style={[
+                                        styles.formButton,
+                                        styles.cancelButton,
+                                      ]}
+                                      onPress={() => setShowAddCard(false)}
+                                    >
+                                      <Text style={styles.cancelButtonText}>
+                                        Cancelar
+                                      </Text>
+                                    </Pressable>
+                                  )}
+
+                                  <Pressable
+                                    style={[
+                                      styles.formButton,
+                                      styles.submitButton,
+                                      { backgroundColor: colors.primary },
+                                      loadingCadastro && styles.buttonDisabled,
+                                    ]}
+                                    onPress={handleAdicionarCartao}
+                                    disabled={loadingCadastro}
+                                  >
+                                    {loadingCadastro ? (
+                                      <ActivityIndicator color="#ffffff" />
+                                    ) : (
+                                      <>
+                                        <Ionicons
+                                          name="checkmark-circle"
+                                          size={20}
+                                          color="#ffffff"
+                                        />
+                                        <Text style={styles.submitButtonText}>
+                                          {cartoes.length === 0
+                                            ? 'Adicionar Cartão'
+                                            : 'Salvar Cartão'}
+                                        </Text>
+                                      </>
+                                    )}
+                                  </Pressable>
+                                </View>
+                              </View>
+                            )}
+                          </>
+                        )}
+                      </View>
+                    )}
                 </View>
               )}
 

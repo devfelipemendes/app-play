@@ -4,10 +4,7 @@ import { HStack } from '@/components/ui/hstack'
 import { Pressable } from '@/components/ui/pressable'
 import { Text } from '@/components/ui/text'
 import { WeatherTabContext } from '@/contexts/weather-screen-context'
-import {
-  useCompanyTheme,
-  useCompanyThemeSimple,
-} from '@/hooks/theme/useThemeLoader'
+import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
 import { lightenHexColor } from '@/src/utils/lightColorPrimary'
 
 const tabs = [

@@ -3,13 +3,11 @@ import { useRouter } from 'expo-router'
 import { Alert } from 'react-native'
 import { useAppSelector, useAppDispatch } from '@/src/store/hooks'
 import {
-  clearUser,
   setLoadingAuth,
   setLoadingSystem,
   setCheckingAuth,
   setUser,
   setCompanyInfo,
-  setError,
   resetAuthState,
 } from '@/src/store/slices/authSlice'
 import { clearCompanyData } from '@/src/store/slices/companySlice'
@@ -164,7 +162,7 @@ export function useAuth() {
         return showToast('Erro ao fazer login!', 'error')
       }
 
-      const userData = result.data
+      const userData = result.data || ''
 
       // Verificar se usuário está inativo
       if (userData.profileid === 5) {
@@ -288,6 +286,7 @@ export function useAuth() {
       dispatch(setLoadingAuth(false))
       router.push('/(auth)/entrar' as any)
     } catch (error: any) {
+      console.log(error)
       dispatch(setLoadingAuth(false))
       showToast('Erro ao solicitar recuperação!', 'error')
     }
@@ -317,6 +316,7 @@ export function useAuth() {
       showToast('Senha alterada com sucesso!', 'success')
       router.replace('/(tabs)/(home)' as any)
     } catch (error) {
+      console.log(error)
       dispatch(setLoadingAuth(false))
       showToast('Erro ao alterar senha!', 'error')
     }

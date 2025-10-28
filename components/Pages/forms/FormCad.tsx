@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Box } from '@/components/ui/box'
 import { Text } from '@/components/ui/text'
 import { Button, ButtonText } from '@/components/ui/button'
@@ -9,9 +9,6 @@ import { setMode } from '@/src/store/slices/screenFlowSlice'
 import { useForm, Controller } from 'react-hook-form'
 import { mask, unMask } from 'remask'
 import { Camera, CameraView } from 'expo-camera'
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
-import { FaturaBottomSheet } from '@/src/components/screens/FaturaBottomSheet'
-import type { FaturaDetalhada } from '@/src/api/endpoints/faturaApi'
 
 import * as v from 'valibot'
 import { valibotResolver } from '@hookform/resolvers/valibot'
@@ -29,7 +26,6 @@ import {
   Phone,
   MessageCircle,
   CardSim,
-  Smartphone,
   CheckCircle,
   XCircle,
   ScanBarcode,
@@ -48,22 +44,16 @@ import Toast from 'react-native-toast-message'
 import { BackHandler, Dimensions, View, TouchableOpacity } from 'react-native'
 import { useCpfCnpjCheck } from '@/hooks/useCpfCnpjValidator'
 import { useCreateUserMutation } from '@/src/api/endpoints/cad'
-import { useGetFaturaMutation } from '@/src/api/endpoints/faturaApi'
+
 import { useCep } from '@/hooks/useGetCep'
 import DatePickerInput from '@/components/layout/CustomIputDatePicker'
 import { Modal, Portal, ProgressBar } from 'react-native-paper'
 import { env } from '@/config/env'
-import { CloseIcon } from '@/components/ui/icon'
-import {
-  useChecaICCID,
-  type ChecaIccidRes,
-} from '@/src/api/endpoints/checkIccid'
+
+import { useChecaICCID } from '@/src/api/endpoints/checkIccid'
 import { useDebounce } from '@/hooks/useDebounce'
 import PlansCarousel from '@/components/layout/PlansCarousel'
 import { setUserInfo } from '@/src/store/slices/ativarLinhaSlice'
-import { useAuth } from '@/hooks/useAuth'
-import type { Fatura } from '@/src/api/endpoints/faturaApi'
-import type { ResponseActiveLine } from '@/src/api/endpoints/plansApi'
 
 const cadastroSchema = v.pipe(
   v.object({
@@ -179,17 +169,11 @@ export default function FormCadastro() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [activeTab, setActiveTab] = useState<string>('tab1')
-  const [activeTypeChipsTabs, setActiveTypeChipsTabs] =
-    useState<string>('simCard')
+  const [activeTypeChipsTabs] = useState<string>('simCard')
   const [step, setStep] = useState(1)
-  const [loading, setLoading] = useState(false)
+
   const [showTextInfo1, setShowTextInfo1] = useState(false)
-  const [showTextInfo2, setShowTextInfo2] = useState(false)
-  const [showEmailField, setShowEmailField] = useState(false)
-  const [statusCpf, setStatusCpf] = useState<
-    'semLinhaAtiva' | 'cpfAtivo' | 'semCadastro' | null
-  >(null)
-  const [hasPermission, setHasPermission] = useState<boolean | null>(null)
+
   const [showScan, setShowScan] = useState(false)
   const [iccidValue, setIccidValue] = useState('')
   const [isIccidValid, setIsIccidValid] = useState<boolean | null>(null)
@@ -197,22 +181,16 @@ export default function FormCadastro() {
   const [selectedDDD, setSelectedDDD] = useState('')
 
   // Estados para modal de fatura
-  const faturaBottomSheetRef = useRef<BottomSheetModal>(null)
-  const [faturaDetalhada, setFaturaDetalhada] =
-    useState<ResponseActiveLine | null>(null)
-
-  const { user } = useAuth()
 
   // NÃO chamar useCameraPermissions na raiz - só quando necessário
   // const [permission, requestPermission] = useCameraPermissions()
 
-  const { validateAndCheck, isLoading: isCheckingCpf } = useCpfCnpjCheck()
+  const { validateAndCheck } = useCpfCnpjCheck()
 
   const { validateICCID, isLoading: loadingIccid } = useChecaICCID()
 
-  const { fetchCep, loading: loadingCep, error } = useCep()
+  const { fetchCep, loading: loadingCep } = useCep()
   const [createUser, { isLoading: isCreatingUser }] = useCreateUserMutation()
-  const [getFatura, { isLoading: isLoadingFatura }] = useGetFaturaMutation()
 
   const { colors } = useCompanyThemeSimple()
   const dispatch = useAppDispatch()
@@ -222,11 +200,6 @@ export default function FormCadastro() {
   const tabs = [
     { id: 'tab1', title: 'Para Mim', icon: User2 },
     { id: 'tab2', title: 'Para Minha Empresa', icon: Briefcase },
-  ]
-
-  const typeChipTabs = [
-    { id: 'simCard', title: 'SIM Card', icon: CardSim },
-    { id: 'eSim', title: 'eSIM', icon: Smartphone },
   ]
 
   const {
@@ -268,7 +241,6 @@ export default function FormCadastro() {
     try {
       // Usa API direta da Camera ao invés do hook
       const { status } = await Camera.requestCameraPermissionsAsync()
-      setHasPermission(status === 'granted')
 
       if (status === 'denied') {
         Toast.show({
@@ -281,7 +253,7 @@ export default function FormCadastro() {
 
       return status === 'granted'
     } catch (error) {
-      setHasPermission(false)
+      console.log(error)
       return false
     }
   }
@@ -316,6 +288,7 @@ export default function FormCadastro() {
       }
     } catch (error) {
       // Silently fail and return original
+      console.log(error)
     }
 
     return dateString // Retorna a string original se não conseguir formatar
@@ -346,7 +319,7 @@ export default function FormCadastro() {
         parentcompany: data.parentcompany || 0,
         password: data.password,
         companyid: env?.COMPANY_ID,
-        parceiro: env.PARCEIRO,
+        parceiro: parseInt(env.PARCEIRO),
       }
 
       const result = await createUser(payload).unwrap()
@@ -375,17 +348,6 @@ export default function FormCadastro() {
           'Algo de inesperado aconteceu ao cadastrar, tente novamente em instantes',
       })
     }
-  }
-
-  const handleCloseFatura = () => {
-    // Primeiro fecha o modal
-    faturaBottomSheetRef.current?.dismiss()
-
-    // Aguarda um pouco antes de redirecionar para garantir que o modal foi desmontado
-    setTimeout(() => {
-      setFaturaDetalhada(null) // Limpa a fatura
-      dispatch(setMode('login'))
-    }, 300)
   }
 
   const handleCepChange = async (cep: string) => {
@@ -432,6 +394,7 @@ export default function FormCadastro() {
         })
       }
     } catch (error) {
+      console.log(error)
       // Captura qualquer erro não tratado
       setIsIccidValid(false)
       Toast.show({
@@ -446,20 +409,14 @@ export default function FormCadastro() {
     setShowTextInfo1(!showTextInfo1)
   }
 
-  const toggleButton2 = () => {
-    setShowTextInfo2(!showTextInfo2)
-  }
-
   useEffect(() => {
     // Limpa os campos e reseta status quando mudar de aba
     setValue('cpf', '')
     setValue('cnpj', '')
-    setStatusCpf(null)
-    setStep(1)
-  }, [activeTab])
 
-  const cpfValue = watch('cpf')
-  const cnpjValue = watch('cnpj')
+    setStep(1)
+    // eslint-disable-next-line
+  }, [activeTab])
 
   useEffect(() => {
     const checkDocumentStatus = async (value: string, type: any) => {
@@ -467,7 +424,6 @@ export default function FormCadastro() {
       const expectedLength = type === 'cpf' ? 11 : 14
 
       if (cleanValue.length !== expectedLength) {
-        setStatusCpf(null)
         setStep(1)
         return
       }
@@ -492,7 +448,6 @@ export default function FormCadastro() {
 
         // 👉 Caso já cadastrado mas sem linha ativa
         if (result?.data) {
-          setStatusCpf('semLinhaAtiva')
           setStep(3)
           Toast.show({
             type: 'info',
@@ -504,11 +459,11 @@ export default function FormCadastro() {
 
         // 👉 Caso não encontrado (sem cadastro)
         if (result?.error?.includes('não encontrado')) {
-          setStatusCpf('semCadastro')
           setStep(2)
           return
         }
       } catch (err) {
+        console.log(err)
         Toast.show({
           type: 'error',
           text1: 'Erro na verificação',
@@ -525,6 +480,7 @@ export default function FormCadastro() {
     if (cleanCpf.length === 11) checkDocumentStatus(cpfValue || '', 'cpf')
     else if (cleanCnpj.length === 14)
       checkDocumentStatus(cnpjValue || '', 'cnpj')
+    // eslint-disable-next-line
   }, [watch('cpf'), watch('cnpj')])
 
   const debouncedValidateICCID = useDebounce(handleValidateICCID, 500)
@@ -553,12 +509,6 @@ export default function FormCadastro() {
   }, [iccidValue, debouncedValidateICCID])
 
   // Só mostra o campo email depois que o nome for preenchido
-  useEffect(() => {
-    const nameValue = watch('name')
-    if (nameValue && nameValue.length > 2) {
-      setTimeout(() => setShowEmailField(true), 100)
-    }
-  }, [watch('name')])
 
   useEffect(() => {
     const backAction = () => {
@@ -580,6 +530,7 @@ export default function FormCadastro() {
     )
 
     return () => backHandler.remove()
+    // eslint-disable-next-line
   }, [step])
 
   useEffect(() => {
@@ -1324,20 +1275,14 @@ export default function FormCadastro() {
                 backgroundColor: colors.primary,
                 marginBottom: 24,
               }}
-              disabled={isCreatingUser || isLoadingFatura}
+              disabled={isCreatingUser}
             >
               <ButtonText
                 style={{ color: 'white', fontSize: 16, fontWeight: '600' }}
               >
-                {isCreatingUser
-                  ? 'Cadastrando...'
-                  : isLoadingFatura
-                  ? 'Carregando fatura...'
-                  : 'Cadastrar'}
+                {isCreatingUser ? 'Carregando fatura...' : 'Cadastrar'}
               </ButtonText>
-              {(isCreatingUser || isLoadingFatura) && (
-                <ButtonSpinner color={colors.secondary} />
-              )}
+              {isCreatingUser && <ButtonSpinner color={colors.secondary} />}
             </Button>
 
             {/* Link para voltar ao login */}

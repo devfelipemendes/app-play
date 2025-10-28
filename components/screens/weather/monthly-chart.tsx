@@ -5,7 +5,7 @@ import { Box } from '@/components/ui/box'
 import { Text } from '@/components/ui/text'
 import { Icon } from '@/components/ui/icon'
 import { Globe, Signal } from 'lucide-react-native'
-import { ScrollView, Dimensions } from 'react-native'
+import { ScrollView } from 'react-native'
 import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
 import { useGetConsumoMutation } from '@/src/api/endpoints/consumoApi'
 import {
@@ -156,8 +156,6 @@ const MonthlyChart: React.FC<MonthlyChartProps> = ({ msisdn }) => {
       </VStack>
     )
   }
-
-  const screenWidth = Dimensions.get('window').width
 
   console.log(
     '📊 MonthlyChart - Renderizando gráfico com',
