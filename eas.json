@@ -10,6 +10,9 @@
     },
     "preview": {
       "distribution": "internal",
+      "env": {
+        "NODE_ENV": "production"
+      },
       "ios": {
         "simulator": true,
         "buildConfiguration": "Release"
