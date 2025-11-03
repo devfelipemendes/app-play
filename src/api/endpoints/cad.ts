@@ -10,7 +10,7 @@ export interface CadastroRequest {
   cpf: string
   phone: string
   whats: string
-  parceiro: number
+  parceiro: number | string
   nivel: number
   cep: string
   uf: string

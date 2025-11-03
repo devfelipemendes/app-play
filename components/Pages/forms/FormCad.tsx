@@ -32,7 +32,7 @@ import {
   PanelRightCloseIcon,
 } from 'lucide-react-native'
 import { ButtonIcon, ButtonSpinner } from '@gluestack-ui/themed'
-import { cpf, cnpj } from 'cpf-cnpj-validator'
+import { isValidCPF, isValidCNPJ } from '@/utils/documentValidator'
 
 import ThemeCard from '@/components/screens/settings/theme-card'
 import { VStack } from '@/components/ui/vstack'
@@ -87,7 +87,7 @@ const cadastroSchema = v.pipe(
         v.string(),
         v.custom((value: any) => {
           const clean = unMask(value)
-          return clean === '' || cnpj.isValid(clean)
+          return clean === '' || isValidCNPJ(clean)
         }, 'CNPJ inválido'),
       ),
     ),
@@ -96,7 +96,7 @@ const cadastroSchema = v.pipe(
         v.string(),
         v.custom((value: any) => {
           const clean = unMask(value)
-          return clean === '' || cpf.isValid(clean)
+          return clean === '' || isValidCPF(clean)
         }, 'CPF inválido'),
       ),
     ),
@@ -319,7 +319,7 @@ export default function FormCadastro() {
         parentcompany: data.parentcompany || 0,
         password: data.password,
         companyid: env?.COMPANY_ID,
-        parceiro: parseInt(env.PARCEIRO),
+        parceiro: env.PARCEIRO,
       }
 
       const result = await createUser(payload).unwrap()
@@ -431,11 +431,10 @@ export default function FormCadastro() {
       try {
         const result = await validateAndCheck(cleanValue, type)
 
-        // 👉 Caso com linha ativa
+        // 👉 LÓGICA ORIGINAL: Caso com linha ativa
         if (
-          !result.isValid &&
-          (result.descricao === 'Linha Ativa' ||
-            result.detalhes?.includes('linha ativa'))
+          result.descricao?.toLowerCase().includes('linha ativa') ||
+          result.detalhes?.toLowerCase().includes('linha ativa')
         ) {
           Toast.show({
             type: 'info',
@@ -446,7 +445,7 @@ export default function FormCadastro() {
           return
         }
 
-        // 👉 Caso já cadastrado mas sem linha ativa
+        // 👉 LÓGICA ORIGINAL: Caso já cadastrado mas sem linha ativa
         if (result?.data) {
           setStep(3)
           Toast.show({
@@ -457,8 +456,8 @@ export default function FormCadastro() {
           return
         }
 
-        // 👉 Caso não encontrado (sem cadastro)
-        if (result?.error?.includes('não encontrado')) {
+        // 👉 LÓGICA ORIGINAL: Caso não encontrado (sem cadastro)
+        if (result?.descricao?.includes('não encontrado')) {
           setStep(2)
           return
         }
@@ -567,7 +566,7 @@ export default function FormCadastro() {
           tipoChip: activeTypeChipsTabs,
 
           // Sistema
-          parceiro: env.PARCEIRO || '46',
+          parceiro: env.PARCEIRO,
           token: '30684d5f2e7cfdd198e58f6a1efedf6f8da743c85ef0ef6558',
           companyid: env.COMPANY_ID,
         }),
@@ -575,25 +574,16 @@ export default function FormCadastro() {
     }
   }, [step, dispatch, watch, iccidValue, selectedDDD, activeTypeChipsTabs])
 
-  const handleCpfChange = async (text: string) => {
+  const handleCpfChange = (text: string) => {
     const cleanText = unMask(text)
     setValue('cpf', cleanText)
-
-    if (cleanText.length === 11) {
-      const result = await validateAndCheck(cleanText, 'cpf')
-      if (!result.isValid)
-        Toast.show({ type: 'info', text1: 'CPF ainda não possui cadastro' })
-    }
+    // ✅ Validação é feita automaticamente pelo useEffect
   }
 
-  const handleCnpjChange = async (text: string) => {
+  const handleCnpjChange = (text: string) => {
     const cleanText = unMask(text)
     setValue('cnpj', cleanText)
-
-    if (cleanText.length === 14) {
-      const result = await validateAndCheck(cleanText, 'cnpj')
-      if (!result.isValid) Toast.show({ type: 'error', text1: result.error })
-    }
+    // ✅ Validação é feita automaticamente pelo useEffect
   }
 
   const renderStep = () => {
@@ -1613,26 +1603,12 @@ export default function FormCadastro() {
                 <Controller
                   control={control}
                   name="cpf"
-                  render={(
-                    { field: { onChange, value } }, // ✅ Adicione onChange
-                  ) => (
+                  render={({ field: { value } }) => (
                     <CustomInput
                       placeholder="000.000.000-00"
                       value={value ? mask(value, ['999.999.999-99']) : value}
                       maxlength={14}
-                      onChangeText={(text) => {
-                        const cleanText = unMask(text)
-                        onChange(cleanText) // ✅ Atualiza o form corretamente
-
-                        // Validação apenas se necessário
-                        if (cleanText.length === 11) {
-                          validateAndCheck(cleanText, 'cpf').then((result) => {
-                            if (!result.isValid) {
-                              Toast.show({ type: 'error', text1: result.error })
-                            }
-                          })
-                        }
-                      }}
+                      onChangeText={handleCpfChange}
                       leftIcon={User}
                       keyboardType="number-pad"
                     />

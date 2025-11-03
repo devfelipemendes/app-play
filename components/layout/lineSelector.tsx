@@ -106,7 +106,13 @@ const LineSelector = ({
             style={{ justifyContent: 'space-between', alignItems: 'center' }}
           >
             <VStack style={{ flex: 1 }}>
-              <HStack style={{ alignItems: 'center', gap: 8 }}>
+              <HStack
+                style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: 8,
+                }}
+              >
                 <Text
                   style={{
                     fontSize: 16,
@@ -127,7 +133,7 @@ const LineSelector = ({
                       borderRadius: 8,
                     }}
                   >
-                    {allLines.length} linhas
+                    Clique aqui e veja as suas {allLines.length} linhas
                   </Text>
                 )}
               </HStack>

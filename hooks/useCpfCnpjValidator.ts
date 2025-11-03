@@ -1,12 +1,20 @@
 import { useCheckCpfMutation } from '@/src/api/endpoints/checkCpf'
-import { cpf, cnpj } from 'cpf-cnpj-validator'
+import { isValidCPF, isValidCNPJ } from '@/utils/documentValidator'
 import { useState } from 'react'
 import { unMask } from 'remask'
 
 type DocumentType = 'cpf' | 'cnpj'
 
 export interface ValidationResult {
-  isValid: boolean
+  // Validação local
+  formatValid: boolean // Se o formato/algoritmo do CPF/CNPJ está correto
+
+  // Validação no servidor
+  serverChecked: boolean // Se a verificação no servidor foi feita
+  hasAccount: boolean // Se já tem conta cadastrada
+  hasActiveLine: boolean // Se tem linha ativa (deve ir para login)
+
+  // Dados adicionais
   data?: any
   error?: string
   descricao?: string
@@ -18,54 +26,129 @@ export function useCpfCnpjCheck() {
   const [checkCpf, { isLoading }] = useCheckCpfMutation()
   const [localError, setLocalError] = useState<string | null>(null)
 
-  const validateDocumentLocally = (value: string, type: DocumentType) => {
+  /**
+   * Valida apenas o formato/algoritmo do documento (SEM chamar API)
+   */
+  const validateDocumentLocally = (value: string, type: DocumentType): boolean => {
     const cleanValue = unMask(value)
-    return type === 'cpf' ? cpf.isValid(cleanValue) : cnpj.isValid(cleanValue)
+    return type === 'cpf' ? isValidCPF(cleanValue) : isValidCNPJ(cleanValue)
   }
 
+  /**
+   * Validação COMPLETA: formato local + verificação no servidor
+   * Retorna objeto com todas as informações necessárias para decidir o fluxo
+   */
   const validateAndCheck = async (
     value: string,
     type: DocumentType,
   ): Promise<ValidationResult> => {
     const cleanValue = unMask(value)
+    const expectedLength = type === 'cpf' ? 11 : 14
 
-    // 🧩 Validação local
-    if (!validateDocumentLocally(cleanValue, type)) {
-      const errorMsg = type === 'cpf' ? 'CPF inválido' : 'CNPJ inválido'
-      setLocalError(errorMsg)
-      return { isValid: false, error: errorMsg }
+    // 🔍 ETAPA 1: Validação de formato/tamanho
+    if (cleanValue.length !== expectedLength) {
+      return {
+        formatValid: false,
+        serverChecked: false,
+        hasAccount: false,
+        hasActiveLine: false,
+        error: 'Documento incompleto',
+      }
     }
 
-    // 🧩 Se o documento ainda está incompleto, não chama API
-    const expectedLength = type === 'cpf' ? 11 : 14
-    if (cleanValue.length !== expectedLength) {
-      setLocalError(null)
-      return { isValid: true }
+    // 🔍 ETAPA 2: Validação local do algoritmo
+    const isFormatValid = validateDocumentLocally(cleanValue, type)
+
+    if (!isFormatValid) {
+      const errorMsg = type === 'cpf' ? 'CPF inválido' : 'CNPJ inválido'
+      setLocalError(errorMsg)
+      return {
+        formatValid: false,
+        serverChecked: false,
+        hasAccount: false,
+        hasActiveLine: false,
+        error: errorMsg,
+      }
     }
 
     setLocalError(null)
 
+    // 🔍 ETAPA 3: Verificação no servidor
     try {
       const response = await checkCpf({ cpf: cleanValue }).unwrap()
 
-      // 🟢 Caso sucesso
-      if (response?.success) {
-        return { isValid: true, data: response }
+      // ✅ CASO 1: Documento não encontrado (sem cadastro)
+      if (response?.success === false && response?.descricao?.includes('não encontrado')) {
+        return {
+          formatValid: true,
+          serverChecked: true,
+          hasAccount: false,
+          hasActiveLine: false,
+          descricao: response.descricao,
+          codigo: response.codigo,
+        }
       }
 
-      // 🔴 Caso com erro de "linha ativa" ou outro tipo
+      // ✅ CASO 2: Documento com linha ativa (deve fazer login)
+      if (
+        response?.success === false &&
+        (response?.descricao?.toLowerCase().includes('linha ativa') ||
+          response?.detalhes?.toLowerCase().includes('linha ativa'))
+      ) {
+        return {
+          formatValid: true,
+          serverChecked: true,
+          hasAccount: true,
+          hasActiveLine: true,
+          descricao: response.descricao,
+          detalhes: response.detalhes,
+          codigo: response.codigo,
+        }
+      }
+
+      // ✅ CASO 3: Documento cadastrado mas sem linha ativa (pode ativar)
+      if (response?.success === true) {
+        return {
+          formatValid: true,
+          serverChecked: true,
+          hasAccount: true,
+          hasActiveLine: false,
+          data: response,
+          descricao: response.descricao,
+        }
+      }
+
+      // ✅ CASO 4: Outro tipo de erro do servidor
       return {
-        isValid: false,
+        formatValid: true,
+        serverChecked: true,
+        hasAccount: false,
+        hasActiveLine: false,
         descricao: response?.descricao,
         detalhes: response?.detalhes,
         codigo: response?.codigo,
         error: response?.descricao || 'Erro ao validar documento',
       }
     } catch (err: any) {
-      // 🔴 Falha de rede ou resposta 4xx/5xx
+      // ❌ Erro de rede ou resposta 4xx/5xx
       const data = err?.data || {}
+
+      // Trata erro de "não encontrado" mesmo em catch
+      if (data?.descricao?.includes('não encontrado')) {
+        return {
+          formatValid: true,
+          serverChecked: true,
+          hasAccount: false,
+          hasActiveLine: false,
+          descricao: data.descricao,
+        }
+      }
+
       return {
-        isValid: false,
+        formatValid: true,
+        serverChecked: true,
+        hasAccount: false,
+        hasActiveLine: false,
         descricao: data.descricao,
         detalhes: data.detalhes,
         codigo: data.codigo,
