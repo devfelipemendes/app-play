@@ -13,6 +13,8 @@ import { VStack } from '@/components/ui/vstack'
 import { HStack } from '@/components/ui/hstack'
 import { Box } from '@/components/ui/box'
 import { Text } from '@/components/ui/text'
+import { Icon } from '@/components/ui/icon'
+import { X } from 'lucide-react-native'
 
 import {
   useGetPlansQuery,
@@ -635,6 +637,17 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
             >
               Escolha seu Plano
             </Text>
+            <TouchableOpacity
+              onPress={onClose}
+              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+              style={{
+                padding: 4,
+                borderRadius: 20,
+                backgroundColor: '#ffffff' + '40',
+              }}
+            >
+              <Icon as={X} size="md" color={colors.disabled} />
+            </TouchableOpacity>
           </HStack>
         </View>
 

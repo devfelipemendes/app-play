@@ -1347,6 +1347,17 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
             </VStack>
 
             {/* Botão fechar */}
+            <TouchableOpacity
+              onPress={onClose}
+              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+              style={{
+                padding: 4,
+                borderRadius: 20,
+                backgroundColor: '#ffffff' + '40',
+              }}
+            >
+              <Icon as={X} size="md" color={colors.disabled} />
+            </TouchableOpacity>
           </HStack>
 
           {/* Indicador de progresso */}

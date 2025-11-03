@@ -541,7 +541,11 @@ export const FaturaBottomSheet = forwardRef<
                 Fatura
               </Text>
             </View>
-            <Pressable onPress={onClose} style={styles.closeButton}>
+            <Pressable
+              onPress={onClose}
+              style={styles.closeButton}
+              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+            >
               <Ionicons name="close" size={24} color="#6b7280" />
             </Pressable>
           </View>

@@ -13,7 +13,7 @@ import { HStack } from '@/components/ui/hstack'
 import { Box } from '@/components/ui/box'
 import { Text } from '@/components/ui/text'
 import { Icon } from '@/components/ui/icon'
-import { RefreshCw } from 'lucide-react-native'
+import { X } from 'lucide-react-native'
 import {
   useGetPlansQuery,
   useReactivateLineMutation,
@@ -671,7 +671,17 @@ const ReactivateLineBottomSheet: React.FC<ReactivateLineBottomSheetProps> = ({
                 Escolha um plano para reativar sua linha
               </Text>
             </VStack>
-            <Icon as={RefreshCw} size="lg" style={{ color: colors.primary }} />
+            <TouchableOpacity
+              onPress={onClose}
+              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+              style={{
+                padding: 4,
+                borderRadius: 20,
+                backgroundColor: '#ffffff' + '40',
+              }}
+            >
+              <Icon as={X} size="md" color={colors.disabled} />
+            </TouchableOpacity>
           </HStack>
 
           {loadingPlans && (

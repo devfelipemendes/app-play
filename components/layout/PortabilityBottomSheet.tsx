@@ -12,7 +12,7 @@ import {
 import { VStack } from '@/components/ui/vstack'
 import { HStack } from '@/components/ui/hstack'
 import { Text } from '@/components/ui/text'
-import { Info } from 'lucide-react-native'
+import { Info, X } from 'lucide-react-native'
 import { Icon } from '@/components/ui/icon'
 import {
   useLazyGetPortabilityStatusQuery,
@@ -262,6 +262,8 @@ const PortabilityBottomSheet: React.FC<PortabilityBottomSheetProps> = ({
                   text2:
                     'Já temos uma portabilidade solicitada para este número.',
                 })
+                onClose() // ✅ Fecha o modal quando detectar duplicação
+                onSuccess?.()
               } else if (error.status === 520) {
                 Toast.show({
                   type: 'error',
@@ -269,6 +271,8 @@ const PortabilityBottomSheet: React.FC<PortabilityBottomSheetProps> = ({
                   text2:
                     'Já existe uma solicitação de portabilidade para este número.',
                 })
+                onClose() // ✅ Fecha o modal quando detectar duplicação
+                onSuccess?.()
               } else if (error.status === 521) {
                 Toast.show({
                   type: 'error',
@@ -578,6 +582,17 @@ const PortabilityBottomSheet: React.FC<PortabilityBottomSheetProps> = ({
           >
             Portabilidade
           </Text>
+          <TouchableOpacity
+            onPress={onClose}
+            hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+            style={{
+              padding: 4,
+              borderRadius: 20,
+              backgroundColor: '#ffffff' + '40',
+            }}
+          >
+            <Icon as={X} size="md" color={colors.disabled} />
+          </TouchableOpacity>
         </HStack>
 
         {/* Subtítulo */}
