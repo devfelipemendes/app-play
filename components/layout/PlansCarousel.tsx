@@ -429,10 +429,14 @@ const PlansCarousel: React.FC = () => {
 
   const canShowPlans = env.COMPANY_ID
 
-  // Mostrar apenas planos personalizados com mostraApp: true
-  const allPlans = (plansData?.personalizado || []).filter(
-    (plan) => plan.mostraApp === true,
-  )
+  // Mostrar apenas planos personalizados com mostraApp: true e ordenar por gigas (menor para maior)
+  const allPlans = (plansData?.personalizado || [])
+    .filter((plan) => plan.mostraApp === true)
+    .sort((a, b) => {
+      const gigasA = parseFloat(a.gigas) || 0
+      const gigasB = parseFloat(b.gigas) || 0
+      return gigasA - gigasB
+    })
 
   const handleCloseFatura = () => {
     // Primeiro fecha o modal

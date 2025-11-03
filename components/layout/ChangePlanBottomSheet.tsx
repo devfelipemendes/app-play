@@ -417,6 +417,11 @@ const ChangePlanBottomSheet: React.FC<ChangePlanBottomSheetProps> = ({
     if (!plansData) return []
     const personalizado = (plansData.personalizado || [])
       .filter((plan: any) => plan.mostraApp === true)
+      .sort((a, b) => {
+        const gigasA = parseFloat(a.gigas) || 0
+        const gigasB = parseFloat(b.gigas) || 0
+        return gigasA - gigasB
+      })
       .map((plan: any, index) => ({
         ...plan,
         uniqueId: `personalizado-${plan.planid}-${index}`,

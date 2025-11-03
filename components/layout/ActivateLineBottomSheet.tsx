@@ -403,12 +403,17 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
 
   const det2Data = useAppSelector(selectDet2Data)
 
-  // Mostrar apenas planos personalizados com mostraApp: true
+  // Mostrar apenas planos personalizados com mostraApp: true e ordenar por gigas (menor para maior)
   const allPlans = React.useMemo(() => {
     if (!plansData) return []
 
     const personalizado = (plansData.personalizado || [])
       .filter((plan) => plan.mostraApp === true)
+      .sort((a, b) => {
+        const gigasA = parseFloat(a.gigas) || 0
+        const gigasB = parseFloat(b.gigas) || 0
+        return gigasA - gigasB
+      })
       .map((plan, index) => ({
         ...plan,
         uniqueId: `personalizado-${plan.planid}-${index}`,

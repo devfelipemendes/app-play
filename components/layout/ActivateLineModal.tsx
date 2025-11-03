@@ -381,6 +381,11 @@ const ActivateLineModal: React.FC<ActivateLineModalProps> = ({
 
     const personalizado = (plansData.personalizado || [])
       .filter((plan) => plan.mostraApp === true)
+      .sort((a, b) => {
+        const gigasA = parseFloat(a.gigas) || 0
+        const gigasB = parseFloat(b.gigas) || 0
+        return gigasA - gigasB
+      })
       .map((plan, index) => ({
         ...plan,
         uniqueId: `personalizado-${plan.planid}-${index}`, // Key única
