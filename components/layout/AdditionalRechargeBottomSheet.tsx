@@ -271,13 +271,15 @@ const AdditionalRechargeBottomSheet: React.FC<
   const [additionalRecharge, { isLoading: isRecharging }] =
     useAdditionalRechargeMutation()
 
-  // Ordenar planos por gigas (menor para maior)
+  // Filtrar apenas planos com mostraApp: true e ordenar por gigas (menor para maior)
   // eslint-disable-next-line
-  const allPlans = (plansData?.personalizado || []).sort((a, b) => {
-    const gigasA = parseFloat(a.gigas) || 0
-    const gigasB = parseFloat(b.gigas) || 0
-    return gigasA - gigasB
-  })
+  const allPlans = (plansData?.personalizado || [])
+    .filter((plan) => plan.mostraApp === true)
+    .sort((a, b) => {
+      const gigasA = parseFloat(a.gigas) || 0
+      const gigasB = parseFloat(b.gigas) || 0
+      return gigasA - gigasB
+    })
 
   // Auto-selecionar primeiro plano quando os planos carregarem
   useEffect(() => {
