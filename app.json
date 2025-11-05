@@ -26,7 +26,7 @@
     },
     "android": {
       "package": "app.mobile.ios.infiniti",
-      "versionCode": 200,
+      "versionCode": 402,
       "adaptiveIcon": {
         "foregroundImage": "./assets/AssetsPartners/adaptive-icon.png",
         "backgroundColor": "#000624"
@@ -54,7 +54,7 @@
         "expo-splash-screen",
         {
           "image": "./assets/AssetsPartners/splash.png",
-          "imageWidth": 200,
+          "imageWidth": 600,
           "resizeMode": "contain",
           "backgroundColor": "#000624"
         }
@@ -71,7 +71,7 @@
         {
           "android": {
             "compileSdkVersion": 35,
-            "targetSdkVersion": 34,
+            "targetSdkVersion": 35,
             "buildToolsVersion": "35.0.0",
             "kotlinVersion": "1.9.25"
           }
