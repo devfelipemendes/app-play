@@ -26,7 +26,7 @@
     },
     "android": {
       "package": "app.mobile.ios.infiniti",
-      "versionCode": 85,
+      "versionCode": 200,
       "adaptiveIcon": {
         "foregroundImage": "./assets/AssetsPartners/adaptive-icon.png",
         "backgroundColor": "#000624"
