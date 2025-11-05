@@ -4,8 +4,8 @@
   "version": "1.0.0",
   "scripts": {
     "start": "expo start",
-    "android": "DARK_MODE=media expo start --android",
-    "androud-teste": "npx   eas build --platform android --profile preview ",
+    "android": "npx eas build --platform android --profile production-aab",
+    "android-teste": "npx   eas build --platform android --profile preview ",
     "ios": "DARK_MODE=media expo start --ios",
     "web": "DARK_MODE=media expo start --web",
     "test": "jest --watchAll",
