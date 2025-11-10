@@ -6,7 +6,9 @@
     "start": "expo start",
     "android": "npx eas build --platform android --profile production-aab",
     "android-teste": "npx   eas build --platform android --profile preview ",
-    "ios": "DARK_MODE=media expo start --ios",
+    "ios": "npx eas build --platform ios --profile production",
+    "ios-teste": "npx eas build --profile development --platform ios",
+    "ios-auto-submit": "npx eas build --platform ios --profile production --auto-submit",
     "web": "DARK_MODE=media expo start --web",
     "test": "jest --watchAll",
     "lint": "expo lint"

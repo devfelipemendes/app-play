@@ -108,7 +108,7 @@ const mockApps: AppBenefit[] = [
   },
   {
     name: 'Ligações Ilimitadas',
-    image: require('@/assets/images/ligaçõesIlimitadas.png'),
+    image: require('@/assets/images/ligacoesIlimitadas.png'),
   },
 ]
 
