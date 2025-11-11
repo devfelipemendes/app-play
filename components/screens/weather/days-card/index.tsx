@@ -12,7 +12,7 @@ import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
 interface IDaysCard {
   name: string // Tipo da fatura (ex: "Muda Plano", "Recarga")
   created: string // Data de criação (ex: "2024-08-15 15:55:08")
-  highest: string | number // Valor bruto (valuetopup)
+  highest: string | number | null // Valor bruto (valuetopup)
 
   paymentStatus: number // 1 = pago, 0 = pendente, 2 = estornado
   onPress?: () => void // Callback quando clicar no card
@@ -41,7 +41,12 @@ const DaysCard = ({
 }: IDaysCard) => {
   const formattedDateCreated = formatDate(created)
 
-  const valorBruto = typeof highest === 'string' ? parseFloat(highest) : highest
+  // Garantir que valorBruto seja sempre um número válido
+  const valorBruto = (() => {
+    if (highest === null || highest === undefined) return 0
+    const parsed = typeof highest === 'string' ? parseFloat(highest) : highest
+    return isNaN(parsed) ? 0 : parsed
+  })()
 
   const { colors } = useCompanyThemeSimple()
 
@@ -90,7 +95,7 @@ const DaysCard = ({
     >
       <VStack space="xs">
         <Text className="text-typography-900 font-dm-sans-medium text-base">
-          {name}
+          {name ? name : 'Fatura'}
         </Text>
         <Text className="text-typography-600 font-dm-sans-regular text-sm">
           Gerada em {formattedDateCreated}

@@ -90,20 +90,18 @@ export const useCompanyThemeSimple = () => {
   const themeContext = useContext(ThemeContext)
   const isDark = themeContext?.colorMode === 'dark'
 
-  // Buscar companyInfo do Redux
-  const companyInfo = useAppSelector((state) => state.auth.companyInfo)
+  // Buscar apenas o appTheme do Redux para otimizar re-renders
+  const appTheme = useAppSelector((state) => state.auth.companyInfo?.appTheme)
 
-  // Usar useMemo para cachear o parse e só recalcular quando companyInfo mudar
+  // Usar useMemo para cachear o parse e só recalcular quando appTheme mudar
   const { primaryColor, secondaryColor } = useMemo(() => {
     let primary = '#636363' // Fallback padrão
     let secondary = '#520258' // Fallback padrão
 
     try {
-      if (companyInfo?.appTheme) {
+      if (appTheme) {
         const parsedTheme =
-          typeof companyInfo.appTheme === 'string'
-            ? JSON.parse(companyInfo.appTheme)
-            : companyInfo.appTheme
+          typeof appTheme === 'string' ? JSON.parse(appTheme) : appTheme
 
         if (parsedTheme.colors?.primary) {
           primary = parsedTheme.colors.primary
@@ -111,23 +109,17 @@ export const useCompanyThemeSimple = () => {
         if (parsedTheme.colors?.secondary) {
           secondary = parsedTheme.colors.secondary
         }
-
-        console.log('🎨 Cores do tema:', { primary, secondary })
-      } else {
-        console.warn('⚠️ appTheme não encontrado, usando cores padrão')
       }
     } catch (error) {
       console.error('❌ Erro ao parsear appTheme:', error)
     }
 
     return { primaryColor: primary, secondaryColor: secondary }
-  }, [companyInfo])
+  }, [appTheme])
 
-  return {
-    isDark,
-
-    // Cores prontas para usar com suporte a dark mode
-    colors: {
+  // Memoizar objeto colors para evitar recriação desnecessária
+  const colors = useMemo(
+    () => ({
       primary: primaryColor,
       primaryLight80: lightenHexColor(primaryColor, 80),
       primaryLight60: lightenHexColor(primaryColor, 60),
@@ -176,6 +168,12 @@ export const useCompanyThemeSimple = () => {
       shadowHeavy: isDark
         ? '0px 4px 8px rgba(255, 255, 255, 0.12)'
         : '0px 4px 8px rgba(0, 0, 0, 0.24)',
-    },
+    }),
+    [primaryColor, secondaryColor, isDark],
+  )
+
+  return {
+    isDark,
+    colors,
   }
 }

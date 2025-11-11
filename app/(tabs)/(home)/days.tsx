@@ -78,6 +78,38 @@ const Days = () => {
     // eslint-disable-next-line
   }, [])
 
+  // 📊 LOG DETALHADO DA RESPOSTA DO ENDPOINT
+  useEffect(() => {
+    if (faturasData) {
+      console.log('📊 ===== RESPOSTA COMPLETA DO ENDPOINT /fatura/listar =====')
+      console.log('📊 JSON completo:', JSON.stringify(faturasData, null, 2))
+      console.log('📊 =========================================================')
+      console.log('📊 Dados detalhados:')
+      console.log('📊 success:', faturasData.success)
+      console.log('📊 message:', faturasData.message)
+      console.log('📊 msisdn:', faturasData.data?.msisdn)
+      console.log('📊 iccid:', faturasData.data?.iccid)
+      console.log('📊 rede:', faturasData.data?.rede)
+      console.log('📊 Total de faturas:', faturasData.data?.faturas?.length || 0)
+      console.log('📊 =========================================================')
+
+      // Log individual de cada fatura
+      if (faturasData.data?.faturas) {
+        faturasData.data.faturas.forEach((fatura, index) => {
+          console.log(`📊 ===== FATURA ${index + 1} =====`)
+          console.log('📊 paymentid:', fatura.paymentid)
+          console.log('📊 tipo:', fatura.tipo)
+          console.log('📊 valuetopup:', fatura.valuetopup, typeof fatura.valuetopup)
+          console.log('📊 paymentstatus:', fatura.paymentstatus)
+          console.log('📊 created:', fatura.created)
+          console.log('📊 invoicenumber:', fatura.invoicenumber)
+          console.log('📊 JSON completo da fatura:', JSON.stringify(fatura, null, 2))
+          console.log('📊 =============================')
+        })
+      }
+    }
+  }, [faturasData])
+
   // Registrar função de refresh no contexto (tab 1 = faturas)
   useEffect(() => {
     if (registerRefreshCallback) {
@@ -220,12 +252,11 @@ const Days = () => {
   }
 
   // Estado: Com faturas - Renderizar lista
-  // Ordenar faturas: pendentes (0) primeiro, depois estornadas (2), depois pagas (1)
+  // Ordenar faturas por data de criação: mais recente primeiro
   const faturasOrdenadas = [...faturasData.data.faturas].sort((a, b) => {
-    const prioridade = { 0: 0, 2: 1, 1: 2 }
-    const prioA = prioridade[a.paymentstatus as keyof typeof prioridade] ?? 3
-    const prioB = prioridade[b.paymentstatus as keyof typeof prioridade] ?? 3
-    return prioA - prioB
+    const dateA = new Date(a.created).getTime()
+    const dateB = new Date(b.created).getTime()
+    return dateB - dateA // Decrescente (mais recente primeiro)
   })
 
   return (
