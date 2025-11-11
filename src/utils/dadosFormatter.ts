@@ -109,19 +109,33 @@ export const useDadosFormatter = (): DataConverterResult => {
         }
       }
 
+      // IMPORTANTE: "dados" vem em MB, "dadosoriginal" vem em GB
+      // Precisamos converter dadosoriginal para MB antes de calcular
+      const dadosOriginalEmMB = parseFloat(consumoData.dadosoriginal || 0) * 1024
+
       const dadosCalc = calculateUsagePercentage(
         consumoData.dados || 0,
-        consumoData.dadosoriginal || 0,
+        dadosOriginalEmMB,
       )
+
+      console.log('🔍 [DADOS FORMATTER] ===== DEBUG CÁLCULO =====')
+      console.log('🔍 dados (API em MB):', consumoData.dados)
+      console.log('🔍 dadosoriginal (API em GB):', consumoData.dadosoriginal)
+      console.log('🔍 dadosoriginal convertido (MB):', dadosOriginalEmMB)
+      console.log('🔍 hasAccumulated:', dadosCalc.hasAccumulated)
+      console.log('🔍 accumulatedValue (MB):', dadosCalc.accumulatedValue)
+      console.log('🔍 accumulated (formatado):', dadosCalc.accumulatedValue ? convertMBtoGB(dadosCalc.accumulatedValue).formatted : undefined)
+      console.log('🔍 restante (formatado):', convertMBtoGB(consumoData.dados || 0).formatted)
+      console.log('🔍 ==========================================')
 
       return {
         dados: {
           restante: convertMBtoGB(consumoData.dados || 0).formatted,
-          original: convertMBtoGB(consumoData.dadosoriginal || 0).formatted,
+          original: `${parseFloat(consumoData.dadosoriginal || 0)} GB`, // Já vem em GB
           usado: formatDataUsage(
             consumoData.dados || 0,
             true,
-            consumoData.dadosoriginal || 0,
+            dadosOriginalEmMB, // Usar valor convertido
           ),
           percentage: dadosCalc.percentage,
           hasAccumulated: dadosCalc.hasAccumulated,
@@ -129,7 +143,7 @@ export const useDadosFormatter = (): DataConverterResult => {
             ? convertMBtoGB(dadosCalc.accumulatedValue).formatted
             : undefined,
           restanteMB: parseFloat(consumoData.dados || 0),
-          originalMB: parseFloat(consumoData.dadosoriginal || 0),
+          originalMB: dadosOriginalEmMB, // MB convertido
         },
         minutos: (() => {
           const minutosCalc = calculateUsagePercentage(

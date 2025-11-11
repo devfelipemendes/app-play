@@ -3,7 +3,7 @@
     "name": "Play Móvel",
     "slug": "PlayMovel",
     "owner": "playmovel",
-    "version": "5.0.0",
+    "version": "5.0.1",
     "orientation": "portrait",
     "icon": "./assets/AssetsPartners/icon.png",
     "scheme": "myapp",
@@ -26,7 +26,7 @@
     },
     "android": {
       "package": "app.mobile.ios.infiniti",
-      "versionCode": 403,
+      "versionCode": 404,
       "adaptiveIcon": {
         "foregroundImage": "./assets/AssetsPartners/adaptive-icon.png",
         "backgroundColor": "#000624"
@@ -54,7 +54,7 @@
         "expo-splash-screen",
         {
           "image": "./assets/AssetsPartners/splash.png",
-          "imageWidth": 600,
+          "imageWidth": 900,
           "resizeMode": "contain",
           "backgroundColor": "#000624"
         }

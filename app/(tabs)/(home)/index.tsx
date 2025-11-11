@@ -983,11 +983,11 @@ const Home = () => {
                 />
                 <HourlyCard
                   icon={Signal}
-                  text="Dados Restantes"
+                  text="Dados"
                   currentUpdate={consumptionData?.dados.restante || 'Sem dados'}
                   lastUpdate={
                     consumptionData?.dados.hasAccumulated
-                      ? `${consumptionData?.dados.accumulated} acumulados!`
+                      ? `${consumptionData?.dados.accumulated} Acumulados`
                       : `${consumptionData?.dados.percentage || 0}% usado`
                   }
                   arrowDownIcon={!consumptionData?.dados.hasAccumulated}

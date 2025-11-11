@@ -101,11 +101,11 @@ export default function LoginScreen() {
               source={
                 companyInfo?.logotipo
                   ? { uri: companyInfo?.logotipo }
-                  : require('@/assets/AssetsPartners/iconHome.png')
+                  : require('@/assets/AssetsPartners/IconWelcome.png')
               }
               style={{
                 // Tamanho menor do logo em telas pequenas
-                width: isIOS || isSmallScreen ? 80 : 120,
+                width: isIOS || isSmallScreen ? 180 : 180,
                 height: isIOS || isSmallScreen ? 80 : 120,
                 opacity: logoOpacity,
                 alignSelf: 'center',
