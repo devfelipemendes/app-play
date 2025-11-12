@@ -22,6 +22,7 @@ import {
   type PlanPersonalizado,
 } from '@/src/api/endpoints/plansApi'
 import { useAuth } from '@/hooks/useAuth'
+import { useDeviceSize } from '@/hooks/useDeviceSize'
 import { env } from '@/config/env'
 import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel'
 import {
@@ -145,6 +146,8 @@ const PlanCard: React.FC<PlanCardProps> = memo(
       }
     })
 
+    const { isMediumHeight } = useDeviceSize()
+
     return (
       <TouchableOpacity
         onPress={onSelect}
@@ -152,7 +155,7 @@ const PlanCard: React.FC<PlanCardProps> = memo(
         style={[
           {
             width: CARD_WIDTH,
-            height: CARD_HEIGHT,
+            height: isMediumHeight ? CARD_HEIGHT - 50 : CARD_HEIGHT,
             alignSelf: 'center',
           },
           animatedStyle,

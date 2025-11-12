@@ -19,6 +19,7 @@ import {
   useReactivateLineMutation,
 } from '@/src/api/endpoints/plansApi'
 import { useAuth } from '@/hooks/useAuth'
+import { useDeviceSize } from '@/hooks/useDeviceSize'
 import { env } from '@/config/env'
 import {
   BottomSheetModal,
@@ -138,12 +139,18 @@ const PlanCard: React.FC<PlanCardProps> = React.memo(
       return { transform: [{ scale }], opacity }
     })
 
+    const { isMediumHeight } = useDeviceSize()
+
     return (
       <TouchableOpacity
         onPress={onSelect}
         activeOpacity={0.9}
         style={[
-          { width: CARD_WIDTH, height: CARD_HEIGHT, alignSelf: 'center' },
+          {
+            width: CARD_WIDTH,
+            height: isMediumHeight ? CARD_HEIGHT - 50 : CARD_HEIGHT,
+            alignSelf: 'center',
+          },
           animatedStyle,
         ]}
       >

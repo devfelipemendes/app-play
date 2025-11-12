@@ -24,6 +24,7 @@ import {
 } from '@/src/api/endpoints/plansApi'
 import { RootState } from '@/src/store/index'
 import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
+import { useDeviceSize } from '@/hooks/useDeviceSize'
 import { env } from '@/config/env'
 import Toast from 'react-native-toast-message'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
@@ -33,10 +34,12 @@ import {
   useGetFaturaMutation,
 } from '@/src/api/endpoints/faturaApi'
 import { setMode } from '@/src/store/slices/screenFlowSlice'
+import { Platform } from 'react-native'
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window')
+const isIOS = Platform.OS === 'ios'
 const CARD_WIDTH = screenWidth * 0.9
-const CARD_HEIGHT = screenHeight * 0.64
+const CARD_HEIGHT = isIOS ? screenHeight * 0.54 : screenHeight * 0.64
 const RESPONSIVE = {
   fontSize: {
     gigasNumber: screenWidth * 0.12,
@@ -137,12 +140,14 @@ const PlanCard: React.FC<PlanCardProps> = React.memo(
       }
     })
 
+    const { isMediumHeight } = useDeviceSize()
+
     return (
       <Box
         style={[
           {
             width: CARD_WIDTH,
-            height: CARD_HEIGHT,
+            height: isMediumHeight ? CARD_HEIGHT - 50 : CARD_HEIGHT,
             alignSelf: 'center',
           },
           animatedStyle,

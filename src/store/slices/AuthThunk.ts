@@ -14,7 +14,6 @@ export const getCompanyInfo = createAsyncThunk(
       const result = await dispatch(
         apiPlay.endpoints.getCompanyInfo.initiate({
           companyid: env.COMPANY_ID,
-          token: env.ACCESS_TK,
           app: 'reqtk',
         }),
       )

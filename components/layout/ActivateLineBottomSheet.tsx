@@ -21,6 +21,7 @@ import {
   useActivateLineMutation,
 } from '@/src/api/endpoints/plansApi'
 import { useAuth } from '@/hooks/useAuth'
+import { useDeviceSize } from '@/hooks/useDeviceSize'
 import { env } from '@/config/env'
 import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel'
 import {
@@ -144,6 +145,8 @@ const PlanCard: React.FC<PlanCardProps> = React.memo(
       }
     })
 
+    const { isMediumHeight } = useDeviceSize()
+
     return (
       <TouchableOpacity
         onPress={onSelect}
@@ -151,7 +154,7 @@ const PlanCard: React.FC<PlanCardProps> = React.memo(
         style={[
           {
             width: CARD_WIDTH,
-            height: CARD_HEIGHT + 10,
+            height: isMediumHeight ? CARD_HEIGHT - 40 : CARD_HEIGHT + 10,
             alignSelf: 'center',
           },
           animatedStyle,
@@ -397,6 +400,9 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
   } = useGetPlansQuery({
     companyid: env.COMPANY_ID,
   })
+
+  // Tipagem explícita para o erro
+  const hasPlansError = Boolean(error)
 
   // Mutation para ativar linha
   const [activateLine, { isLoading: isActivating }] = useActivateLineMutation()
@@ -670,7 +676,7 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
                 Carregando planos...
               </Text>
             </VStack>
-          ) : error ? (
+          ) : hasPlansError ? (
             <VStack
               style={{
                 flex: 1,

@@ -17,6 +17,7 @@ import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
 import { useEffect, useRef, useState } from 'react'
 import { moderateScale } from '@/utils/responsive'
 import { TAB_BAR, SHADOW } from '@/config/responsiveDimensions'
+import { useDeviceSize } from '@/hooks/useDeviceSize'
 
 interface TabItem {
   name: string
@@ -68,6 +69,8 @@ function BottomTabBar() {
   )
   const underlineAnim = useRef(new Animated.Value(0)).current
   const widthAnim = useRef(new Animated.Value(0)).current
+
+  const { isSmallPhone } = useDeviceSize()
 
   // Mapeia o nome da rota para o índice visual da navbar
   const routeNameToIndex: Record<string, number> = {
@@ -174,7 +177,13 @@ function BottomTabBar() {
           <Animated.View
             style={{
               position: 'absolute',
-              top: Platform.OS === 'ios' ? TAB_BAR.heightIOS : TAB_BAR.height,
+              top: isSmallPhone
+                ? Platform.OS === 'ios'
+                  ? TAB_BAR.heightIOS
+                  : TAB_BAR.height + 12
+                : Platform.OS === 'ios'
+                ? TAB_BAR.heightIOS
+                : TAB_BAR.height,
               left: underlineAnim,
               width: widthAnim,
               height: TAB_BAR.indicatorHeight,

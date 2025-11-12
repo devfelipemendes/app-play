@@ -9,6 +9,27 @@ import { useColorScheme } from 'nativewind'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
 import * as SplashScreen from 'expo-splash-screen'
+import { LogBox } from 'react-native'
+
+// Silenciar avisos conhecidos do Reanimated durante desenvolvimento
+LogBox.ignoreLogs([
+  '[Reanimated] Reading from `value` during component render',
+  'Reading from `value` during component render',
+])
+
+// Também ignorar completamente se aparecerem no console
+if (__DEV__) {
+  const originalWarn = console.warn
+  console.warn = (...args) => {
+    if (
+      args[0]?.includes?.('[Reanimated]') &&
+      args[0]?.includes?.('Reading from `value`')
+    ) {
+      return
+    }
+    originalWarn(...args)
+  }
+}
 
 import { ThemeContext, ThemeProvider } from '@/contexts/theme-context'
 import {

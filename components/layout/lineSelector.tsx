@@ -105,7 +105,7 @@ const LineSelector = ({
           <HStack
             style={{ justifyContent: 'space-between', alignItems: 'center' }}
           >
-            <VStack style={{ flex: 1 }}>
+            <VStack style={{ flex: 1, gap: 2 }}>
               <HStack
                 style={{
                   display: 'flex',
@@ -122,20 +122,6 @@ const LineSelector = ({
                 >
                   {formatPhoneNumber(selectedLine.msisdn) || 'Sem MSISDN Ativo'}
                 </Text>
-                {allLines.length > 1 && (
-                  <Text
-                    style={{
-                      fontSize: 10,
-                      color: colors.primary,
-                      backgroundColor: colors.primary + '20',
-                      paddingHorizontal: 6,
-                      paddingVertical: 2,
-                      borderRadius: 8,
-                    }}
-                  >
-                    Clique aqui e veja as suas {allLines.length} linhas
-                  </Text>
-                )}
               </HStack>
               <Text
                 style={{
@@ -148,6 +134,22 @@ const LineSelector = ({
                   ? selectedLine.plandescription
                   : 'Ainda não temos um plano ativo') || selectedLine.iccid}
               </Text>
+
+              {allLines.length > 1 && (
+                <Text
+                  style={{
+                    fontSize: 10,
+                    color: colors.primary,
+                    backgroundColor: colors.primary + '20',
+                    textAlign: 'center',
+                    paddingHorizontal: 6,
+                    paddingVertical: 2,
+                    borderRadius: 8,
+                  }}
+                >
+                  Clique aqui e veja as suas {allLines.length} linhas
+                </Text>
+              )}
             </VStack>
 
             <HStack style={{ alignItems: 'center', gap: 8 }}>

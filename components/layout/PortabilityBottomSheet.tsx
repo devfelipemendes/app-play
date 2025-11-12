@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   Keyboard,
   Linking,
+  Pressable,
 } from 'react-native'
 import { VStack } from '@/components/ui/vstack'
 import { HStack } from '@/components/ui/hstack'
@@ -318,7 +319,8 @@ const PortabilityBottomSheet: React.FC<PortabilityBottomSheetProps> = ({
 
     return (
       <BottomSheetScrollView style={{ flex: 1 }}>
-        <VStack space="lg" style={{ paddingBottom: 20 }}>
+        <Pressable onPress={Keyboard.dismiss}>
+          <VStack space="lg" style={{ paddingBottom: 20 }}>
           {/* Alert de portabilidade em andamento */}
           <View
             style={{
@@ -425,7 +427,8 @@ const PortabilityBottomSheet: React.FC<PortabilityBottomSheetProps> = ({
               suporte.
             </Text>
           </TouchableOpacity>
-        </VStack>
+          </VStack>
+        </Pressable>
       </BottomSheetScrollView>
     )
   }
@@ -435,7 +438,8 @@ const PortabilityBottomSheet: React.FC<PortabilityBottomSheetProps> = ({
 
     return (
       <BottomSheetScrollView style={{ flex: 1 }}>
-        <VStack space="lg" style={{ paddingBottom: 20 }}>
+        <Pressable onPress={Keyboard.dismiss}>
+          <VStack space="lg" style={{ paddingBottom: 20 }}>
           <Text style={{ fontSize: 16, color: colors.text, fontWeight: '500' }}>
             Número atual: {maskCelular(currentPhone)}
           </Text>
@@ -552,7 +556,8 @@ const PortabilityBottomSheet: React.FC<PortabilityBottomSheetProps> = ({
               suporte.
             </Text>
           </TouchableOpacity>
-        </VStack>
+          </VStack>
+        </Pressable>
       </BottomSheetScrollView>
     )
   }

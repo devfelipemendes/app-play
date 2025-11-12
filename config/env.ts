@@ -1,5 +1,5 @@
 // config/env.ts - Configuração fixa para Play Móvel (Partner 46)
-import { Platform } from 'react-native';
+import { Platform } from 'react-native'
 
 /**
  * Configurações de ambiente - Play Móvel
@@ -12,9 +12,6 @@ export const env = {
   // Company Configuration
   COMPANY_ID: 46,
   PARCEIRO: 'PLAY MÓVEL',
-
-  // Access Token
-  ACCESS_TK: '30684d5f2e7cfdd198e58f6a1efedf6f8da743c85ef0ef6558',
 
   // App Version
   APP_VERSION: '5.0.0',
@@ -44,7 +41,7 @@ export const env = {
   IS_ANDROID: Platform.OS === 'android',
   IS_WEB: Platform.OS === 'web',
   IS_DEV: __DEV__,
-};
+}
 
 // Log de debug (apenas em desenvolvimento)
 if (__DEV__) {
@@ -53,5 +50,5 @@ if (__DEV__) {
     PARCEIRO: env.PARCEIRO,
     API_URL: env.API_URL,
     FEATURES: env.FEATURES,
-  });
+  })
 }

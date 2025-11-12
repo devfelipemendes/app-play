@@ -59,7 +59,6 @@ interface LoginResponse {
 
 interface CompanyInfoRequest {
   companyid: number
-  token: string
   app: string
 }
 

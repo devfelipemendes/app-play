@@ -8,6 +8,7 @@ import { Box } from '@/components/ui/box'
 import { Icon } from '@/components/ui/icon'
 import { CheckCircle, Clock, XCircle } from 'lucide-react-native'
 import { useCompanyThemeSimple } from '@/hooks/theme/useThemeLoader'
+import { useDeviceSize } from '@/hooks/useDeviceSize'
 
 interface IDaysCard {
   name: string // Tipo da fatura (ex: "Muda Plano", "Recarga")
@@ -18,13 +19,14 @@ interface IDaysCard {
   onPress?: () => void // Callback quando clicar no card
 }
 
-// Função para formatar data
+// Função para formatar data no formato dd/MM/yyyy
 const formatDate = (dateString: string): string => {
   try {
     const date = new Date(dateString)
     return date.toLocaleDateString('pt-BR', {
       day: '2-digit',
-      month: 'long',
+      month: '2-digit',
+      year: 'numeric',
     })
   } catch {
     return dateString
@@ -76,6 +78,7 @@ const DaysCard = ({
 
   const statusConfig = getStatusConfig(paymentStatus)
   const StatusIcon = statusConfig.icon
+  const { isSmallPhone } = useDeviceSize()
 
   const CardContent = (
     <HStack
@@ -83,8 +86,8 @@ const DaysCard = ({
         backgroundColor: colors.background,
         borderRadius: 16,
         padding: 16,
-        width: '100%',
         display: 'flex',
+        flexDirection: `${isSmallPhone ? 'row' : 'row'}`,
         justifyContent: 'space-between',
         elevation: 8,
         shadowColor: '#000',
@@ -93,25 +96,42 @@ const DaysCard = ({
         shadowRadius: 8,
       }}
     >
-      <VStack space="xs">
-        <Text className="text-typography-900 font-dm-sans-medium text-base">
-          {name ? name : 'Fatura'}
-        </Text>
-        <Text className="text-typography-600 font-dm-sans-regular text-sm">
-          Gerada em {formattedDateCreated}
-        </Text>
-      </VStack>
-
-      <HStack space="sm" className="items-center">
+      <VStack className="w-3/4">
         <VStack space="xs">
-          <Text className="text-typography-700 text-right font-dm-sans-regular text-sm">
-            Valor
+          <Text
+            className={`${
+              isSmallPhone
+                ? 'text-typography-900 font-dm-sans-medium text-base'
+                : 'text-typography-900 font-dm-sans-medium text-base'
+            }`}
+          >
+            {name ? name : 'Fatura'}
           </Text>
-          <Text className="text-typography-900 text-right font-dm-sans-bold text-base">
-            R$ {valorBruto.toFixed(2)}
+          <Text className="text-typography-600 font-dm-sans-regular text-sm">
+            Gerada em {formattedDateCreated}
           </Text>
         </VStack>
-        <Divider orientation="vertical" className="bg-outline-200" />
+
+        <HStack space="sm" className={'items-center'}>
+          <VStack
+            space="xs"
+            className={`${isSmallPhone ? 'flex flex-row' : 'flex  flex-row'}`}
+          >
+            <Text
+              className={
+                'text-typography-700 text-start font-dm-sans-regular text-sm'
+              }
+            >
+              Valor:
+            </Text>
+            <Text className="text-typography-900 text-right font-dm-sans-bold text-base">
+              R$ {valorBruto.toFixed(2)}''
+            </Text>
+          </VStack>
+        </HStack>
+      </VStack>
+
+      <VStack className="items-center justify-center">
         <Box
           style={{
             width: 48,
@@ -126,7 +146,7 @@ const DaysCard = ({
             style={{ color: statusConfig.color }}
           />
         </Box>
-      </HStack>
+      </VStack>
     </HStack>
   )
 

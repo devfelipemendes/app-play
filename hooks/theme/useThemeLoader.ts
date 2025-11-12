@@ -47,7 +47,6 @@ export const useCompanyTheme = ({
 
     try {
       const result = await getCompanyInfo({
-        token: finalToken ?? finalToken,
         companyid: finalCompanyId ?? finalCompanyId,
         app: 'reqtk',
       }).unwrap()
@@ -96,7 +95,7 @@ export const useCompanyThemeSimple = () => {
   // Usar useMemo para cachear o parse e só recalcular quando appTheme mudar
   const { primaryColor, secondaryColor } = useMemo(() => {
     let primary = '#636363' // Fallback padrão
-    let secondary = '#520258' // Fallback padrão
+    let secondary = '#000000' // Fallback padrão
 
     try {
       if (appTheme) {

@@ -81,7 +81,6 @@ export function useAuth() {
 
       const result = await getCompanyInfoQuery({
         companyid: env.COMPANY_ID,
-        token: env.ACCESS_TK,
         app: 'reqtk',
       })
 
