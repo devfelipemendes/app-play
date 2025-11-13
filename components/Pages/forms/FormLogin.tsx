@@ -118,7 +118,7 @@ export default function FormLogin() {
       }
 
       // Executa o login
-      await signIn(
+      const loginSuccess = await signIn(
         UnMaskData,
         data.password,
         data.rememberMe,
@@ -127,6 +127,12 @@ export default function FormLogin() {
         'login',
         'app',
       )
+
+      // ✅ Só salva credenciais se o login foi bem-sucedido
+      if (!loginSuccess) {
+        console.log('❌ Login falhou, não salvando credenciais biométricas')
+        return
+      }
 
       // Se o checkbox de biometria estiver marcado, salva as credenciais
       if (saveBiometric && isBiometricSupported) {
@@ -182,7 +188,7 @@ export default function FormLogin() {
       setValue('password', credentials.password)
 
       // Executa o login automaticamente
-      signIn(
+      const loginSuccess = await signIn(
         credentials.cpf,
         credentials.password,
         false,
@@ -191,6 +197,17 @@ export default function FormLogin() {
         'login',
         'app',
       )
+
+      // Se o login falhar, remove as credenciais salvas (podem estar incorretas)
+      if (!loginSuccess) {
+        console.log('❌ Login biométrico falhou, removendo credenciais salvas')
+        await removeCredentials()
+        await checkStoredCredentials()
+        Alert.alert(
+          'Acesso Rápido Removido',
+          'As credenciais salvas estavam incorretas e foram removidas. Por favor, faça login novamente.',
+        )
+      }
     } else {
       Alert.alert(
         'Autenticação Falhou',

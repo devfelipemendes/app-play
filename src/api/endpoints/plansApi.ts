@@ -125,11 +125,6 @@ interface PayloadChangePlan {
   msisdn: string
 }
 
-interface ResponseChangePlan {
-  fatura?: string
-  msg: string
-}
-
 interface PayloadReactivateLine {
   token: string
   userInfo: string // JSON string: {cpf, name, parceiro}
@@ -199,7 +194,7 @@ const plansAPI = apiPlay.injectEndpoints({
     }),
 
     // Endpoint para alterar plano
-    changePlan: builder.mutation<ResponseChangePlan, PayloadChangePlan>({
+    changePlan: builder.mutation<any, PayloadChangePlan>({
       query: (payload) => ({
         url: '/api/mudaplano',
         method: 'POST',

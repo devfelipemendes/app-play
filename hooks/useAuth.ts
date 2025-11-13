@@ -132,7 +132,7 @@ export function useAuth() {
     longitude: string = '0',
     acao_realizada: string = 'login',
     tipo_login: string = 'app',
-  ) => {
+  ): Promise<boolean> => {
     dispatch(setLoadingAuth(true))
 
     try {
@@ -153,12 +153,15 @@ export function useAuth() {
         dispatch(setLoadingAuth(false))
 
         if (error.status === 550) {
-          return showToast('Senha incorreta!', 'error')
+          showToast('Senha incorreta!', 'error')
+          return false
         }
         if (error.status === 551) {
-          return showToast('CPF/CNPJ não encontrado!', 'error')
+          showToast('CPF/CNPJ não encontrado!', 'error')
+          return false
         }
-        return showToast('Erro ao fazer login!', 'error')
+        showToast('Erro ao fazer login!', 'error')
+        return false
       }
 
       const userData = result.data || ''
@@ -166,7 +169,8 @@ export function useAuth() {
       // Verificar se usuário está inativo
       if (userData.profileid === 5) {
         dispatch(setLoadingAuth(false))
-        return showToast('Usuário inativo!', 'error')
+        showToast('Usuário inativo!', 'error')
+        return false
       }
 
       // Verificar se o parceiro está bloqueado/inadimplente
@@ -188,7 +192,7 @@ export function useAuth() {
 
         // Redirecionar para tela de bloqueio
         router.replace('/(auth)/partner-blocked' as any)
-        return
+        return false
       }
 
       // Salvar token de forma segura
@@ -218,10 +222,13 @@ export function useAuth() {
       } else {
         router.replace('/(tabs)/(home)' as any)
       }
+
+      return true
     } catch (error: any) {
       console.error('❌ Erro no login:', error)
       dispatch(setLoadingAuth(false))
       showToast('Erro ao fazer login!', 'error')
+      return false
     }
   }
 

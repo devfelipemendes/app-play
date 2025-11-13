@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { VStack } from '@/components/ui/vstack'
 import RedirectCard from '@/components/screens/settings/redirect-card'
 import { RefreshCcw, Plus, Smartphone, Repeat } from 'lucide-react-native'
@@ -11,6 +11,10 @@ import PortabilityBottomSheet from '@/components/layout/PortabilityBottomSheet'
 import { useAppSelector } from '@/src/store/hooks'
 import type { RootState } from '@/src/store'
 import { StatusBar } from 'expo-status-bar'
+import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { FaturaBottomSheet } from '@/src/components/screens/FaturaBottomSheet'
+import { useGetFaturaMutation } from '@/src/api/endpoints/faturaApi'
+import { Alert } from 'react-native'
 
 import { selectDet2Data, selectDet2Error } from '@/src/store/slices/det2Slice'
 
@@ -21,6 +25,10 @@ const Plans = () => {
   const [showRechargeModal, setShowRechargeModal] = useState(false)
   const [showActivateLineModal, setShowActivateLineModal] = useState(false)
   const [showPortabilityModal, setShowPortabilityModal] = useState(false)
+
+  // Modal de Fatura
+  const faturaBottomSheetRef = useRef<BottomSheetModal>(null)
+  const [getFatura, { data: faturaData }] = useGetFaturaMutation()
 
   // Pegar dados do usuário e da linha selecionada
   const user = useAppSelector((state: RootState) => state.auth.user)
@@ -84,22 +92,40 @@ const Plans = () => {
     // Atualizar lista de linhas ou recarregar dados
   }
 
-  const handleChangePlanSuccess = (fatura?: string) => {
+  const handleChangePlanSuccess = async (paymentId?: string) => {
     console.log('Plano alterado com sucesso!')
-    // Se tiver fatura, navegar para a tela de fatura
-    if (fatura) {
-      // TODO: Implementar navegação para tela de fatura
-      console.log('Navegar para fatura:', fatura)
+    // Se tiver payment ID, buscar e abrir modal de fatura
+    if (paymentId) {
+      await openFaturaModal(paymentId)
     }
   }
 
-  const handleRechargeSuccess = (payid?: string) => {
+  const handleRechargeSuccess = async (paymentId?: string) => {
     console.log('Recarga realizada com sucesso!')
-    // Se tiver payid, navegar para a tela de fatura
-    if (payid) {
-      // TODO: Implementar navegação para tela de fatura
-      console.log('Navegar para fatura:', payid)
+    // Se tiver payment ID, buscar e abrir modal de fatura
+    if (paymentId) {
+      await openFaturaModal(paymentId)
     }
+  }
+
+  const openFaturaModal = async (paymentId: string) => {
+    try {
+      console.log('📄 Buscando fatura:', paymentId)
+      const result = await getFatura({ payid: paymentId }).unwrap()
+      if (result) {
+        faturaBottomSheetRef.current?.present()
+      }
+    } catch (error: any) {
+      Alert.alert(
+        'Erro',
+        error?.data?.message ||
+          'Não foi possível carregar a fatura. Tente novamente.',
+      )
+    }
+  }
+
+  const handleCloseFaturaModal = () => {
+    faturaBottomSheetRef.current?.dismiss()
   }
 
   return (
@@ -193,6 +219,13 @@ const Plans = () => {
         onClose={handleActivateLineModalClose}
         colors={colors}
         onSuccess={handleActivationSuccess}
+      />
+
+      {/* Modal de Fatura */}
+      <FaturaBottomSheet
+        ref={faturaBottomSheetRef}
+        fatura={faturaData || null}
+        onClose={handleCloseFaturaModal}
       />
     </VStack>
   )

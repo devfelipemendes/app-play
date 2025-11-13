@@ -25,16 +25,15 @@ export const useDadosFormatter = (): DataConverterResult => {
       const mb =
         typeof mbValue === 'string' ? parseFloat(mbValue) || 0 : mbValue
 
-      // Converter MB para GB
-      const gb = mb / 1024
+      // Converter MB para GB (usando 1000, não 1024 - conversão decimal)
+      const gb = mb / 1000
 
       // Formatar baseado no valor
       let formatted: string
       if (gb >= 1) {
-        // Se >= 1GB, mostrar em GB
-        // Usar parseFloat para remover zeros desnecessários
-        const gbFormatted =
-          gb >= 10 ? gb.toFixed(0) : parseFloat(gb.toFixed(1)).toString()
+        // Se >= 1GB, mostrar em GB com uma casa decimal
+        // Usar parseFloat para remover zeros desnecessários (ex: 10.0 vira 10)
+        const gbFormatted = parseFloat(gb.toFixed(1)).toString()
         formatted = `${gbFormatted} GB`
       } else {
         // Se < 1GB, mostrar em MB
@@ -110,8 +109,8 @@ export const useDadosFormatter = (): DataConverterResult => {
       }
 
       // IMPORTANTE: "dados" vem em MB, "dadosoriginal" vem em GB
-      // Precisamos converter dadosoriginal para MB antes de calcular
-      const dadosOriginalEmMB = parseFloat(consumoData.dadosoriginal || 0) * 1024
+      // Precisamos converter dadosoriginal para MB antes de calcular (usando 1000, não 1024)
+      const dadosOriginalEmMB = parseFloat(consumoData.dadosoriginal || 0) * 1000
 
       const dadosCalc = calculateUsagePercentage(
         consumoData.dados || 0,

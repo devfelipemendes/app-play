@@ -531,7 +531,7 @@ const ChangePlanBottomSheet: React.FC<ChangePlanBottomSheetProps> = ({
                 token: user?.token || '',
                 planid: selectedPlan.planid,
                 planid_personalizado: selectedPlan.id?.toString() || '',
-                msisdn: selectedLineMsisdn.replace(/\D/g, '').slice(2), // Remove formatação e DDD (55)
+                msisdn: selectedLineMsisdn.replace(/\D/g, ''), // Remove formatação e DDD (55)
               }
 
               console.log('📞 [ALTERAR PLANO] Payload enviado:', payload)
@@ -546,16 +546,43 @@ const ChangePlanBottomSheet: React.FC<ChangePlanBottomSheetProps> = ({
 
               const result = await changePlan(payload).unwrap()
 
+              // result é diretamente o payment ID (ex: "pay_een1412blvv5cb64")
+              console.log('✅ [ALTERAR PLANO] Payment ID recebido:', result)
+
               Toast.show({
                 type: 'success',
                 text1: 'Plano alterado!',
-                text2: 'Aguarde alguns minutos para a conclusão da alteração.',
+                text2: 'Visualizando fatura...',
               })
 
               onClose()
-              onSuccess?.(result.fatura)
+              onSuccess?.(result) // Passar o payment ID diretamente
             } catch (error: any) {
               console.error('Erro ao alterar plano:', error)
+
+              // Verificar se é erro de fatura em aberto
+              const errorData = error?.data
+              if (
+                errorData &&
+                errorData.success === false &&
+                errorData.message?.includes(
+                  'Já existe uma FaturaPJ em aberto',
+                ) &&
+                errorData.data
+              ) {
+                console.log('📄 [FATURA EM ABERTO] Payment ID:', errorData.data)
+
+                Toast.show({
+                  type: 'info',
+                  text1: 'Fatura em Aberto',
+                  text2: 'Você possui uma fatura pendente.',
+                  position: 'top',
+                })
+
+                onClose()
+                onSuccess?.(errorData.data) // Passar o payment ID (ex: "pay_xxx")
+                return
+              }
 
               if (error.status === 590) {
                 Toast.show({

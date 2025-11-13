@@ -8,6 +8,7 @@ import {
   TextInput as RNTextInput,
   Keyboard,
   Image,
+  TouchableWithoutFeedback,
 } from 'react-native'
 import { VStack } from '@/components/ui/vstack'
 import { HStack } from '@/components/ui/hstack'
@@ -876,17 +877,23 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
     switch (currentStep) {
       case ActivationStep.ICCID_INPUT:
         return (
-          <VStack space="lg" style={{ flex: 1 }}>
-            <VStack space="sm">
-              <Text
-                style={{ fontSize: 18, fontWeight: '600', color: colors.text }}
-              >
-                Digite o ICCID do chip
-              </Text>
-              <Text style={{ fontSize: 14, color: colors.subTitle }}>
-                O ICCID é o número de 19-20 dígitos do chip
-              </Text>
-            </VStack>
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={{ flex: 1 }}>
+              <VStack space="lg" style={{ flex: 1 }}>
+                <VStack space="sm">
+                  <Text
+                    style={{
+                      fontSize: 18,
+                      fontWeight: '600',
+                      color: colors.text,
+                    }}
+                  >
+                    Digite o ICCID do chip
+                  </Text>
+                  <Text style={{ fontSize: 14, color: colors.subTitle }}>
+                    O ICCID é o número de 19-20 dígitos do chip
+                  </Text>
+                </VStack>
 
             {/* Scanner de código */}
             {showScanner ? (
@@ -1055,7 +1062,9 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
                 )}
               </VStack>
             )}
-          </VStack>
+              </VStack>
+            </View>
+          </TouchableWithoutFeedback>
         )
 
       case ActivationStep.DDD_SELECT:
@@ -1064,6 +1073,7 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
             style={{ flex: 1 }}
             contentContainerStyle={{ paddingBottom: 20 }}
             showsVerticalScrollIndicator={true}
+            keyboardShouldPersistTaps="handled"
           >
             <VStack space="lg">
               <VStack space="sm">
@@ -1198,7 +1208,10 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
 
       case ActivationStep.CONFIRMATION:
         return (
-          <BottomSheetScrollView style={{ flex: 1 }}>
+          <BottomSheetScrollView
+            style={{ flex: 1 }}
+            keyboardShouldPersistTaps="handled"
+          >
             <VStack space="lg">
               <VStack space="sm">
                 <Text

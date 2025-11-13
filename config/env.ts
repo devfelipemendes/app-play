@@ -8,6 +8,7 @@ import { Platform } from 'react-native'
 export const env = {
   // API Configuration
   API_URL: 'https://sistema.playmovel.com.br',
+  // API_URL: 'https://twoglobal.operadora.app.br',
 
   // Company Configuration
   COMPANY_ID: 46,
@@ -24,8 +25,8 @@ export const env = {
   ENABLE_CRASH_REPORTING: false,
 
   // External URLs
-  SUPPORT_CHAT_URL: 'https://wa.me/5511999999999',
-  CHIP_PURCHASE_URL: 'https://playmovel.com.br/comprar-chip',
+  SUPPORT_CHAT_URL: '',
+  CHIP_PURCHASE_URL: '',
 
   // Feature toggles
   FEATURES: {
