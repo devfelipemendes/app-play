@@ -170,7 +170,7 @@ export default function FormCadastro() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [activeTab, setActiveTab] = useState<string>('tab1')
   const [activeTypeChipsTabs] = useState<string>('simCard')
-  const [step, setStep] = useState(1)
+  const [step, setStep] = useState(5)
 
   const [showTextInfo1, setShowTextInfo1] = useState(false)
 

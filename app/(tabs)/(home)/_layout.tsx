@@ -25,6 +25,7 @@ const WeatherLayout = () => {
   const { scrollViewRef, selectedTabIndex, refreshCurrentTab }: any =
     useContext(WeatherTabContext)
   const { handleScroll } = useChildVisibility()
+
   const scrollY = useSharedValue(0)
   const [height, setHeight] = useState(340)
   const animatedHeight = useSharedValue(340)

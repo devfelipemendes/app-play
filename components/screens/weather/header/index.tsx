@@ -211,26 +211,7 @@ const Header = ({ height }: { height: number }) => {
               },
               weatherContainerStyle,
             ]}
-          >
-            {/* <Animated.View style={imageStyle}>
-              <Image
-                source={require('@/assets/images/thunderstorm.png')}
-                alt="thunderstorm"
-                size="full"
-              />
-            </Animated.View> */}
-            {/* <Animated.Text
-              style={[
-                {
-                  fontFamily: 'dm-sans-regular',
-                  color: colorMode === 'dark' ? '#F2EDFF' : '#FEFEFF',
-                },
-                weatherTextStyle,
-              ]}
-            >
-              Play Móvel
-            </Animated.Text> */}
-          </Animated.View>
+          ></Animated.View>
         </Animated.View>
       </ImageBackground>
     </Box>

@@ -70,7 +70,7 @@ function BottomTabBar() {
   const underlineAnim = useRef(new Animated.Value(0)).current
   const widthAnim = useRef(new Animated.Value(0)).current
 
-  const { isSmallPhone } = useDeviceSize()
+  const { isMediumHeight } = useDeviceSize()
 
   // Mapeia o nome da rota para o índice visual da navbar
   const routeNameToIndex: Record<string, number> = {
@@ -177,7 +177,7 @@ function BottomTabBar() {
           <Animated.View
             style={{
               position: 'absolute',
-              top: isSmallPhone
+              top: isMediumHeight
                 ? Platform.OS === 'ios'
                   ? TAB_BAR.heightIOS
                   : TAB_BAR.height + 12

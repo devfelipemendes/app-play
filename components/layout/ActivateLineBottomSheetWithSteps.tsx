@@ -22,6 +22,7 @@ import {
 import { useChecaICCIDMutation } from '@/src/api/endpoints/checkIccid'
 import { useAuth } from '@/hooks/useAuth'
 import { env } from '@/config/env'
+import { useDeviceSize } from '@/hooks/useDeviceSize'
 import {
   BottomSheetModal,
   BottomSheetBackdrop,
@@ -122,6 +123,7 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
   onSuccess,
 }) => {
   const { user } = useAuth()
+  const { isMediumHeight, isSmallHeight } = useDeviceSize()
   const bottomSheetRef = useRef<BottomSheetModal>(null)
   const faturaBottomSheetRef = useRef<BottomSheetModal>(null)
   const carouselRef = useRef<ICarouselInstance>(null)
@@ -539,7 +541,11 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
         <View
           style={{
             width: screenWidth - 40,
-            height: CARD_HEIGHT,
+            height: isSmallHeight
+              ? CARD_HEIGHT - 55
+              : isMediumHeight
+              ? CARD_HEIGHT - 45
+              : CARD_HEIGHT,
             justifyContent: 'center',
             alignItems: 'center',
           }}
@@ -547,7 +553,14 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
           <TouchableOpacity
             onPress={handleSelect}
             activeOpacity={0.9}
-            style={{ width: CARD_WIDTH, height: CARD_HEIGHT }}
+            style={{
+              width: CARD_WIDTH,
+              height: isSmallHeight
+                ? CARD_HEIGHT - 55
+                : isMediumHeight
+                ? CARD_HEIGHT - 45
+                : CARD_HEIGHT,
+            }}
           >
             <Box
               style={{
@@ -637,71 +650,116 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
                     flexDirection: 'row',
                     flexWrap: 'wrap',
                     justifyContent: 'center',
-                    gap: 6,
+                    gap: isMediumHeight ? 0 : 6,
                   }}
                 >
-                  {mockApps.map((app, index) => (
+                  {!isMediumHeight &&
+                    mockApps.map((app, index) => (
+                      <View
+                        key={index}
+                        style={{
+                          alignItems: 'center',
+                          width: RESPONSIVE.appIcon.size,
+                          marginBottom: 4,
+                        }}
+                      >
+                        {/* Card com imagem */}
+                        <View
+                          style={{
+                            width: RESPONSIVE.appIcon.size - 20,
+                            aspectRatio: 1,
+                            borderRadius: 12,
+                            backgroundColor: '#F8F9FA',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            shadowColor: '#000',
+                            shadowOffset: { width: 0, height: 1 },
+                            shadowOpacity: 0.08,
+                            shadowRadius: 2,
+                            elevation: 2,
+                            marginBottom: 6,
+                            overflow: 'hidden', // Para respeitar o borderRadius
+                          }}
+                        >
+                          {app.image ? (
+                            <Image
+                              source={app.image}
+                              style={{
+                                width: '100%',
+                                height: '100%',
+                                borderRadius: 12,
+                              }}
+                              resizeMode="cover"
+                            />
+                          ) : (
+                            <Text
+                              style={{
+                                fontSize: RESPONSIVE.fontSize.benefits * 0.8,
+                                color: colors.text,
+                              }}
+                            >
+                              {app.name.charAt(0)}
+                            </Text>
+                          )}
+                        </View>
+                        {/* Texto abaixo do card */}
+                        <Text
+                          style={{
+                            fontSize: RESPONSIVE.fontSize.benefits * 0.55,
+                            color: colors.text,
+                            textAlign: 'center',
+                            lineHeight: RESPONSIVE.fontSize.benefits * 0.65,
+                          }}
+                          numberOfLines={2}
+                        >
+                          {app.name}
+                        </Text>
+                      </View>
+                    ))}
+                  {isMediumHeight && (
                     <View
-                      key={index}
                       style={{
+                        flexDirection: 'row',
+                        flexWrap: 'wrap',
+                        justifyContent: 'center',
                         alignItems: 'center',
-                        width: RESPONSIVE.appIcon.size,
-                        marginBottom: 4,
+                        paddingHorizontal: 8,
                       }}
                     >
-                      {/* Card com imagem */}
-                      <View
-                        style={{
-                          width: RESPONSIVE.appIcon.size - 20,
-                          aspectRatio: 1,
-                          borderRadius: 12,
-                          backgroundColor: '#F8F9FA',
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                          shadowColor: '#000',
-                          shadowOffset: { width: 0, height: 1 },
-                          shadowOpacity: 0.08,
-                          shadowRadius: 2,
-                          elevation: 2,
-                          marginBottom: 6,
-                          overflow: 'hidden', // Para respeitar o borderRadius
-                        }}
-                      >
-                        {app.image ? (
-                          <Image
-                            source={app.image}
-                            style={{
-                              width: '100%',
-                              height: '100%',
-                              borderRadius: 12,
-                            }}
-                            resizeMode="cover"
-                          />
-                        ) : (
+                      {mockApps.map((app, index) => (
+                        <View
+                          key={index}
+                          style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                          }}
+                        >
                           <Text
                             style={{
-                              fontSize: RESPONSIVE.fontSize.benefits * 0.8,
+                              fontSize: RESPONSIVE.fontSize.benefits * 0.75,
                               color: colors.text,
+                              textAlign: 'center',
+                              fontWeight: '500',
                             }}
                           >
-                            {app.name.charAt(0)}
+                            {app.name}
                           </Text>
-                        )}
-                      </View>
-                      {/* Texto abaixo do card */}
-                      <Text
-                        style={{
-                          fontSize: RESPONSIVE.fontSize.benefits * 0.55,
-                          color: colors.text,
-                          textAlign: 'center',
-                          lineHeight: RESPONSIVE.fontSize.benefits * 0.65,
-                        }}
-                        numberOfLines={2}
-                      >
-                        {app.name}
-                      </Text>
+                          {index < mockApps.length - 1 && (
+                            <Text
+                              style={{
+                                fontSize: RESPONSIVE.fontSize.benefits * 0.75,
+                                color: colors.subTitle,
+                                marginHorizontal: 6,
+                                fontWeight: '600',
+                              }}
+                            >
+                              •
+                            </Text>
+                          )}
+                        </View>
+                      ))}
                     </View>
-                  ))}
+                  )}
                 </View>
               </VStack>
 
@@ -751,6 +809,7 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
         </View>
       )
     },
+
     [selectedPlan?.planid, colors],
   )
 
@@ -1119,7 +1178,13 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
                 ref={carouselRef}
                 loop={false}
                 width={screenWidth - 40}
-                height={CARD_HEIGHT + 40}
+                height={
+                  isSmallHeight
+                    ? CARD_HEIGHT - 55
+                    : isMediumHeight
+                    ? CARD_HEIGHT - 40
+                    : CARD_HEIGHT + 10
+                }
                 data={allPlans}
                 renderItem={renderPlanCard}
                 onSnapToItem={onSnapToItem}
@@ -1405,7 +1470,7 @@ const ActivateLineBottomSheet: React.FC<ActivateLineBottomSheetProps> = ({
             <VStack
               space="sm"
               style={{
-                paddingTop: 16,
+                paddingTop: isSmallHeight ? 8 : 16,
                 paddingBottom: 16,
                 borderTopWidth: 1,
                 borderTopColor: colors.border,

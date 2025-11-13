@@ -155,7 +155,7 @@ const PlanCard: React.FC<PlanCardProps> = memo(
         style={[
           {
             width: CARD_WIDTH,
-            height: isMediumHeight ? CARD_HEIGHT - 50 : CARD_HEIGHT,
+            height: isMediumHeight ? CARD_HEIGHT - 60 : CARD_HEIGHT,
             alignSelf: 'center',
           },
           animatedStyle,
@@ -248,49 +248,94 @@ const PlanCard: React.FC<PlanCardProps> = memo(
                 flexWrap: 'wrap',
                 justifyContent: 'center',
                 alignItems: 'center',
-                gap: 6,
+                gap: isMediumHeight ? 0 : 6,
               }}
             >
-              {mockApps.slice(0, 6).map((app, index) => (
+              {!isMediumHeight &&
+                mockApps.slice(0, 6).map((app, index) => (
+                  <View
+                    key={index}
+                    style={{
+                      width: RESPONSIVE.appIcon.size,
+                      aspectRatio: 1,
+                      borderRadius: 12,
+                      backgroundColor: '#F8F9FA',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      shadowColor: '#000',
+                      shadowOffset: { width: 0, height: 1 },
+                      shadowOpacity: 0.08,
+                      shadowRadius: 2,
+                      elevation: 2,
+                    }}
+                  >
+                    <Image
+                      source={{ uri: app.icon }}
+                      style={{
+                        width: '60%',
+                        height: '60%',
+                        borderRadius: 6,
+                      }}
+                      resizeMode="cover"
+                    />
+                    <Text
+                      style={{
+                        fontSize: RESPONSIVE.fontSize.benefits * 0.65,
+                        color: colors.text,
+                        fontWeight: '500',
+                        marginTop: 2,
+                        textAlign: 'center',
+                      }}
+                      numberOfLines={1}
+                    >
+                      {app.name}
+                    </Text>
+                  </View>
+                ))}
+              {isMediumHeight && (
                 <View
-                  key={index}
                   style={{
-                    width: RESPONSIVE.appIcon.size,
-                    aspectRatio: 1,
-                    borderRadius: 12,
-                    backgroundColor: '#F8F9FA',
+                    flexDirection: 'row',
+                    flexWrap: 'wrap',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 1 },
-                    shadowOpacity: 0.08,
-                    shadowRadius: 2,
-                    elevation: 2,
+                    paddingHorizontal: 8,
                   }}
                 >
-                  <Image
-                    source={{ uri: app.icon }}
-                    style={{
-                      width: '60%',
-                      height: '60%',
-                      borderRadius: 6,
-                    }}
-                    resizeMode="cover"
-                  />
-                  <Text
-                    style={{
-                      fontSize: RESPONSIVE.fontSize.benefits * 0.65,
-                      color: colors.text,
-                      fontWeight: '500',
-                      marginTop: 2,
-                      textAlign: 'center',
-                    }}
-                    numberOfLines={1}
-                  >
-                    {app.name}
-                  </Text>
+                  {mockApps.slice(0, 6).map((app, index) => (
+                    <View
+                      key={index}
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: RESPONSIVE.fontSize.benefits * 0.75,
+                          color: colors.text,
+                          textAlign: 'center',
+                          fontWeight: '500',
+                        }}
+                      >
+                        {app.name}
+                      </Text>
+                      {index < mockApps.slice(0, 6).length - 1 && (
+                        <Text
+                          style={{
+                            fontSize: RESPONSIVE.fontSize.benefits * 0.75,
+                            color: colors.subTitle,
+                            marginHorizontal: 6,
+                            fontWeight: '600',
+                          }}
+                        >
+                          •
+                        </Text>
+                      )}
+                    </View>
+                  ))}
                 </View>
-              ))}
+              )}
             </View>
           </VStack>
 
