@@ -12,7 +12,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "app.mobile.ios.infiniti",
-      "buildNumber": "7",
+      "buildNumber": "8",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSCameraUsageDescription": "Precisamos acessar sua câmera para escanear o código de barras do seu chip SIM Card durante o cadastro.",
@@ -26,7 +26,7 @@
     },
     "android": {
       "package": "app.mobile.ios.infiniti",
-      "versionCode": 406,
+      "versionCode": 408,
       "adaptiveIcon": {
         "foregroundImage": "./assets/AssetsPartners/adaptive-icon.png",
         "backgroundColor": "#000624"
@@ -73,8 +73,15 @@
             "compileSdkVersion": 35,
             "targetSdkVersion": 35,
             "buildToolsVersion": "35.0.0",
-            "kotlinVersion": "1.9.25"
-          }
+            "kotlinVersion": "1.9.25",
+            "ndkVersion": "27.2.12479018",
+            "packagingOptions": {
+              "jniLibs": {
+                "useLegacyPackaging": false
+              }
+            }
+          },
+          "ios": {}
         }
       ]
     ],
